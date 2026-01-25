@@ -1,4 +1,5 @@
 package com.example.e_commerce.Entities;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.Date;
 
