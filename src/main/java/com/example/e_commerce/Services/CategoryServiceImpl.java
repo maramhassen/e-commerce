@@ -43,7 +43,15 @@ public class CategoryServiceImpl implements ICategoryService {
 
     @Override
     public void deleteCategory(Long id) {
-        categoryRepository.deleteById(id);
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        if (category.getProducts() != null && !category.getProducts().isEmpty()) {
+            throw new RuntimeException("Impossible de supprimer une catégorie contenant des produits");
+        }
+
+        categoryRepository.delete(category);
     }
+
 
 }

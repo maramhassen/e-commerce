@@ -15,7 +15,9 @@ public class Order {
     private Long id;
 
     private double total;
-    private String statut; // CREATED, PAID, SHIPPED
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private statut status;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateCommande = new Date();
@@ -42,12 +44,12 @@ public class Order {
         this.total = total;
     }
 
-    public String getStatut() {
-        return statut;
+    public statut getStatus() {
+        return status;
     }
 
-    public void setStatut(String statut) {
-        this.statut = statut;
+    public void setStatus(statut status) {
+        this.status = status;
     }
 
     public Date getDateCommande() {
