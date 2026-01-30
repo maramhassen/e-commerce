@@ -1,0 +1,61 @@
+<h2>Inscription</h2>
+
+<form (ngSubmit)="register()" #registerForm="ngForm" novalidate>
+  <div>
+    <label for="nom">Nom</label>
+    <input
+      id="nom"
+      name="nom"
+      type="text"
+      placeholder="Nom"
+      [(ngModel)]="nom"
+      required
+    />
+  </div>
+
+  <div>
+    <label for="prenom">Prénom</label>
+    <input
+      id="prenom"
+      name="prenom"
+      type="text"
+      placeholder="Prénom"
+      [(ngModel)]="prenom"
+      required
+    />
+  </div>
+
+  <div>
+    <label for="email">Email</label>
+    <input
+      id="email"
+      name="email"
+      type="email"
+      placeholder="Email"
+      [(ngModel)]="email"
+      required
+    />
+  </div>
+
+  <div>
+    <label for="motDePasse">Mot de passe</label>
+    <input
+      id="motDePasse"
+      name="motDePasse"
+      type="password"
+      placeholder="Mot de passe"
+      [(ngModel)]="motDePasse"
+      required
+      minlength="6"
+    />
+  </div>
+
+  <button type="submit" [disabled]="!registerForm.form.valid">
+    S'inscrire
+  </button>
+</form>
+
+<p>
+  Déjà un compte ?
+  <a routerLink="/login">Se connecter</a>
+</p>

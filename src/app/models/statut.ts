@@ -1,0 +1,7 @@
+export enum Statut {
+  PENDING = 'PENDING',
+  PAID = 'PAID',
+  SHIPPED = 'SHIPPED',
+  DELIVERED = 'DELIVERED',
+  CANCELLED = 'CANCELLED'
+}
