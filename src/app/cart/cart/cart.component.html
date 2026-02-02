@@ -1,1 +1,44 @@
-<p>cart works!</p>
+<div class="container mt-4" *ngIf="cart">
+  <h2 class="mb-4">🛒 Mon Panier</h2>
+
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Produit</th>
+        <th>Prix</th>
+        <th>Quantité</th>
+        <th>Total</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let item of cart.items">
+        <td>{{ item.product.nom }}</td>
+        <td>{{ item.prixUnitaire }} DT</td>
+
+        <td style="width:120px">
+          <input
+            type="number"
+            class="form-control"
+            min="1"
+            [value]="item.quantite"
+            (input)="updateQuantity(item, $any($event.target).value)"
+          />
+        </td>
+
+        <td>{{ item.quantite * item.prixUnitaire }} DT</td>
+
+        <td>
+          <button class="btn btn-danger btn-sm" (click)="removeItem(item)">
+            Supprimer
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="text-end">
+    <h4>Total : {{ cart.total }} DT</h4>
+  </div>
+</div>

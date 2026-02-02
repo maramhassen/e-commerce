@@ -1,1 +1,207 @@
-<p>product-form works!</p>
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+      <div class="card">
+        <!-- En-tête -->
+        <div class="card-header" [ngClass]="{'bg-primary': !isEditMode, 'bg-warning': isEditMode}">
+          <h4 class="mb-0 text-white">
+            <i class="bi" [ngClass]="{'bi-plus-circle': !isEditMode, 'bi-pencil': isEditMode}"></i>
+            {{ isEditMode ? 'Modifier le produit' : 'Nouveau produit' }}
+          </h4>
+        </div>
+        
+        <div class="card-body">
+          <!-- Messages -->
+          <div *ngIf="successMessage" class="alert alert-success">
+            <i class="bi bi-check-circle"></i> {{ successMessage }}
+          </div>
+          
+          <div *ngIf="errorMessage" class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle"></i> {{ errorMessage }}
+          </div>
+
+          <!-- Loading -->
+          <div *ngIf="loading && !isEditMode" class="text-center">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Chargement...</span>
+            </div>
+            <p class="mt-2">Chargement...</p>
+          </div>
+
+          <!-- Formulaire -->
+          <form *ngIf="!loading || isEditMode" [formGroup]="productForm" (ngSubmit)="onSubmit()">
+            
+            <!-- Nom -->
+            <div class="mb-3">
+              <label for="nom" class="form-label">
+                <i class="bi bi-tag"></i> Nom du produit <span class="text-danger">*</span>
+              </label>
+              <input type="text" 
+                     id="nom"
+                     class="form-control"
+                     formControlName="nom"
+                     placeholder="Ex: iPhone 13, T-shirt en coton..."
+                     [class.is-invalid]="nom?.invalid && (nom?.dirty || nom?.touched)">
+              
+              <div class="invalid-feedback">
+                <div *ngIf="nom?.errors?.['required']">Le nom est obligatoire</div>
+                <div *ngIf="nom?.errors?.['minlength']">Minimum 2 caractères</div>
+                <div *ngIf="nom?.errors?.['maxlength']">Maximum 100 caractères</div>
+              </div>
+            </div>
+
+            <!-- Catégorie -->
+            <div class="mb-3">
+              <label for="categoryId" class="form-label">
+                <i class="bi bi-tags"></i> Catégorie <span class="text-danger">*</span>
+              </label>
+              <select id="categoryId"
+                      class="form-select"
+                      formControlName="categoryId"
+                      [class.is-invalid]="categoryId?.invalid && (categoryId?.dirty || categoryId?.touched)">
+                <option value="" disabled>Sélectionnez une catégorie</option>
+                <option *ngFor="let cat of categories" [value]="cat.id">
+                  {{ cat.nom }}
+                </option>
+              </select>
+              
+              <div class="invalid-feedback" *ngIf="categoryId?.errors?.['required']">
+                La catégorie est obligatoire
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-3">
+              <label for="description" class="form-label">
+                <i class="bi bi-card-text"></i> Description <span class="text-danger">*</span>
+              </label>
+              <textarea id="description"
+                        class="form-control"
+                        formControlName="description"
+                        rows="4"
+                        placeholder="Décrivez votre produit (caractéristiques, avantages, etc.)..."
+                        [class.is-invalid]="description?.invalid && (description?.dirty || description?.touched)">
+              </textarea>
+              
+              <div class="invalid-feedback">
+                <div *ngIf="description?.errors?.['required']">La description est obligatoire</div>
+                <div *ngIf="description?.errors?.['maxlength']">Maximum 500 caractères</div>
+              </div>
+              <div class="form-text text-end">
+                {{ description?.value?.length || 0 }}/500 caractères
+              </div>
+            </div>
+
+            <div class="row">
+              <!-- Prix -->
+              <div class="col-md-6 mb-3">
+                <label for="prix" class="form-label">
+                  <i class="bi bi-currency-euro"></i> Prix (€) <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text">€</span>
+                  <input type="number" 
+                         id="prix"
+                         class="form-control"
+                         formControlName="prix"
+                         min="0.01"
+                         step="0.01"
+                         placeholder="0.00"
+                         [class.is-invalid]="prix?.invalid && (prix?.dirty || prix?.touched)">
+                </div>
+                
+                <div class="invalid-feedback">
+                  <div *ngIf="prix?.errors?.['required']">Le prix est obligatoire</div>
+                  <div *ngIf="prix?.errors?.['min']">Le prix doit être supérieur à 0</div>
+                </div>
+              </div>
+
+              <!-- Stock -->
+              <div class="col-md-6 mb-3">
+                <label for="stock" class="form-label">
+                  <i class="bi bi-box"></i> Quantité en stock <span class="text-danger">*</span>
+                </label>
+                <input type="number" 
+                       id="stock"
+                       class="form-control"
+                       formControlName="stock"
+                       min="0"
+                       placeholder="0"
+                       [class.is-invalid]="stock?.invalid && (stock?.dirty || stock?.touched)">
+                
+                <div class="invalid-feedback">
+                  <div *ngIf="stock?.errors?.['required']">Le stock est obligatoire</div>
+                  <div *ngIf="stock?.errors?.['min']">Le stock doit être positif</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Image URL -->
+            <div class="mb-4">
+              <label for="imageUrl" class="form-label">
+                <i class="bi bi-image"></i> URL de l'image
+              </label>
+              <input type="url" 
+                     id="imageUrl"
+                     class="form-control"
+                     formControlName="imageUrl"
+                     placeholder="https://exemple.com/image.jpg">
+              <div class="form-text">
+                Laissez vide pour utiliser l'image par défaut. Formats supportés: JPG, PNG, GIF
+              </div>
+              
+              <!-- Aperçu image -->
+              <div *ngIf="imageUrl?.value" class="mt-3">
+                <p class="small text-muted mb-2">Aperçu de l'image :</p>
+                <div class="text-center">
+                  <img [src]="imageUrl?.value" 
+                       alt="Aperçu du produit" 
+                       class="img-thumbnail preview-image"
+                       onerror="this.src='https://placehold.co/400x300?text=Image+non+disponible'">
+                  <div class="mt-1 small text-muted">
+                    {{ imageUrl?.value }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Statut -->
+            <div class="mb-4">
+              <div class="form-check">
+                <input class="form-check-input" 
+                       type="checkbox" 
+                       id="actif"
+                       formControlName="actif">
+                <label class="form-check-label" for="actif">
+                  <i class="bi bi-check-circle"></i> Produit actif
+                </label>
+                <div class="form-text">
+                  Décochez pour masquer le produit sans le supprimer
+                </div>
+              </div>
+            </div>
+
+            <!-- Boutons -->
+            <div class="d-flex justify-content-between">
+              <button type="button" 
+                      class="btn btn-secondary"
+                      (click)="onCancel()"
+                      [disabled]="loading">
+                <i class="bi bi-x-circle"></i> Annuler
+              </button>
+              
+              <button type="submit" 
+                      class="btn"
+                      [ngClass]="{'btn-primary': !isEditMode, 'btn-warning': isEditMode}"
+                      [disabled]="productForm.invalid || loading">
+                <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"></span>
+                <i class="bi" [ngClass]="{'bi-plus-circle': !isEditMode, 'bi-check-circle': isEditMode}"></i>
+                {{ isEditMode ? 'Modifier' : 'Créer' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

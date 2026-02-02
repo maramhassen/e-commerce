@@ -1,1 +1,262 @@
-<p>product-list works!</p>
+<div class="container mt-4">
+  <!-- En-tête -->
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <h1>Nos Produits</h1>
+      <p class="text-muted">Découvrez notre sélection exclusive</p>
+    </div>
+    <div class="col-md-4">
+      <div class="input-group">
+        <input type="text" 
+               class="form-control" 
+               placeholder="Rechercher un produit..."
+               [(ngModel)]="searchKeyword"
+               (keyup)="applyFilters()">
+        <button class="btn btn-outline-primary" type="button" (click)="applyFilters()">
+          🔍
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-3 mb-3">
+          <label class="form-label">Catégorie</label>
+          <select class="form-select" [(ngModel)]="selectedCategoryId" (change)="applyFilters()">
+            <option [value]="null">Toutes les catégories</option>
+            <option *ngFor="let cat of categories" [value]="cat.id">
+              {{ cat.nom }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-md-2 mb-3">
+          <label class="form-label">Prix min</label>
+          <input type="number" 
+                 class="form-control" 
+                 [(ngModel)]="minPrice" 
+                 (change)="applyFilters()"
+                 min="0">
+        </div>
+
+        <div class="col-md-2 mb-3">
+          <label class="form-label">Prix max</label>
+          <input type="number" 
+                 class="form-control" 
+                 [(ngModel)]="maxPrice" 
+                 (change)="applyFilters()"
+                 min="0">
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <div class="form-check mt-4">
+            <input class="form-check-input" 
+                   type="checkbox" 
+                   id="inStockOnly"
+                   [(ngModel)]="inStockOnly"
+                   (change)="applyFilters()">
+            <label class="form-check-label" for="inStockOnly">
+              En stock seulement
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-2 mb-3 d-flex align-items-end">
+          <button class="btn btn-outline-secondary w-100" (click)="clearFilters()">
+            Réinitialiser
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+    <p class="mt-2 text-muted">Chargement des produits...</p>
+  </div>
+
+  <!-- Liste des produits -->
+  <div *ngIf="!loading" class="row">
+    <div class="col-md-4 col-lg-3 mb-4" *ngFor="let product of getPaginatedProducts()">
+      <div class="card h-100">
+        <!-- Image -->
+        <div style="position: relative; height: 200px; overflow: hidden;">
+          <img [src]="product.imageUrl || 'assets/default-product.jpg'" 
+               [alt]="product.nom"
+               style="width: 100%; height: 100%; object-fit: cover;">
+          
+          <!-- Badge stock -->
+          <span [style.background-color]="product.stock > 10 ? '#28a745' : (product.stock > 0 ? '#ffc107' : '#dc3545')"
+                style="position: absolute; top: 10px; right: 10px; color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.8rem;">
+            {{ product.stock > 0 ? (product.stock + ' en stock') : 'Rupture' }}
+          </span>
+        </div>
+
+        <!-- Contenu -->
+        <div class="card-body">
+          <!-- Catégorie -->
+          <div class="mb-2">
+            <span class="badge bg-light text-dark">
+              {{ product.category?.nom || 'Non catégorisé' }}
+            </span>
+          </div>
+
+          <!-- Nom -->
+          <h5 class="card-title">{{ product.nom }}</h5>
+          
+          <!-- Description -->
+          <p class="card-text text-muted small">
+            {{ product.description | slice:0:80 }}{{ product.description.length > 80 ? '...' : '' }}
+          </p>
+
+          <!-- Prix -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="h4 text-primary mb-0">
+              {{ product.prix }} €
+            </span>
+          </div>
+
+          <!-- Boutons -->
+          <div class="d-grid gap-2">
+            <!-- Ajouter au panier -->
+            <button class="btn btn-primary" 
+                    (click)="addToCart(product)"
+                    [disabled]="product.stock === 0">
+              🛒 Ajouter au panier
+            </button>
+
+            <!-- Voir détails -->
+            <button class="btn btn-outline-secondary"
+                    (click)="goToProductDetail(product.id!)">
+              👁️ Voir détails
+            </button>
+
+            <!-- Boutons admin -->
+            <div *ngIf="isAdmin" class="d-flex gap-2 mt-2">
+              <button class="btn btn-warning btn-sm flex-fill"
+                      (click)="goToEditProduct(product.id!)">
+                ✏️ Modifier
+              </button>
+              <button class="btn btn-danger btn-sm flex-fill"
+                      (click)="deleteProduct(product.id!)">
+                🗑️ Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="card-footer text-muted small">
+          <div class="d-flex justify-content-between">
+            <span *ngIf="product.dateAjout">
+              {{ product.dateAjout | date:'dd/MM/yy' }}
+            </span>
+            <span *ngIf="!product.actif" class="text-danger">
+              ⚠️ Inactif
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message aucun produit -->
+  <div *ngIf="!loading && filteredProducts.length === 0" class="text-center py-5">
+    <div class="alert alert-info">
+      ℹ️ Aucun produit trouvé avec ces critères.
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading && totalPages > 1" class="mt-4">
+    <nav>
+      <ul class="pagination justify-content-center">
+        <!-- Précédent -->
+        <li class="page-item" [class.disabled]="currentPage === 1">
+          <a class="page-link" (click)="changePage(currentPage - 1)" style="cursor: pointer;">
+            &laquo;
+          </a>
+        </li>
+
+        <!-- Pages -->
+        <li *ngFor="let page of getPageNumbers()" 
+            class="page-item" 
+            [class.active]="page === currentPage">
+          <a class="page-link" (click)="changePage(page)" style="cursor: pointer;">
+            {{ page }}
+          </a>
+        </li>
+
+        <!-- Suivant -->
+        <li class="page-item" [class.disabled]="currentPage === totalPages">
+          <a class="page-link" (click)="changePage(currentPage + 1)" style="cursor: pointer;">
+            &raquo;
+          </a>
+        </li>
+      </ul>
+    </nav>
+    
+    <p class="text-center text-muted mt-2">
+      Page {{ currentPage }} sur {{ totalPages }} • 
+      {{ totalItems }} produit(s) au total
+    </p>
+  </div>
+
+  <!-- Bouton ajout admin -->
+  <div *ngIf="isAdmin" class="mt-4 text-end">
+    <button class="btn btn-success" routerLink="/admin/products/new">
+      ➕ Ajouter un produit
+    </button>
+  </div>
+</div>
+
+<style>
+.card {
+  transition: transform 0.2s;
+  border: 1px solid #eaeaea;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card-img-top {
+  height: 200px;
+  object-fit: cover;
+}
+
+.btn {
+  transition: all 0.2s;
+}
+
+.badge {
+  font-size: 0.75rem;
+}
+
+.page-link {
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .col-md-4, .col-lg-3 {
+    margin-bottom: 1rem;
+  }
+  
+  .btn {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+}
+</style>

@@ -1,1 +1,137 @@
-<p>product-detail works!</p>
+<div class="container mt-4" *ngIf="!loading && product; else loadingTpl">
+
+  <!-- Bouton retour -->
+  <button class="btn btn-link mb-3" (click)="goBack()">
+    ← Retour aux produits
+  </button>
+
+  <div class="row">
+    <!-- Image produit -->
+    <div class="col-md-6 text-center">
+      <img
+        [src]="productImage"
+        [alt]="product.nom"
+        class="img-fluid rounded shadow"
+        style="max-height: 400px"
+      />
+    </div>
+
+    <!-- Détails produit -->
+    <div class="col-md-6">
+
+      <h2 class="fw-bold">{{ product.nom }}</h2>
+
+      <p class="text-muted">
+        Catégorie : {{ product.category?.nom || '—' }}
+      </p>
+
+      <h4 class="text-primary mt-3">
+        {{ product.prix | number:'1.2-2' }} DT
+      </h4>
+
+      <!-- Stock -->
+      <p class="mt-2">
+        <span
+          class="badge"
+          [ngClass]="'bg-' + getStockStatus().color"
+        >
+          {{ getStockStatus().text }}
+        </span>
+      </p>
+
+      <p class="mt-3">
+        {{ product.description }}
+      </p>
+
+      <!-- Quantité -->
+      <div class="d-flex align-items-center mt-3">
+        <button
+          class="btn btn-outline-secondary"
+          (click)="decreaseQuantity()"
+          [disabled]="quantity === 1"
+        >−</button>
+
+        <span class="mx-3 fw-bold">
+          {{ quantity }}
+        </span>
+
+        <button
+          class="btn btn-outline-secondary"
+          (click)="increaseQuantity()"
+          [disabled]="quantity === maxQuantity"
+        >+</button>
+      </div>
+
+      <!-- Bouton panier -->
+      <div class="mt-4">
+        <button
+          class="btn btn-success w-100"
+          (click)="addToCart()"
+          [disabled]="product.stock === 0"
+        >
+          🛒 Ajouter au panier
+        </button>
+      </div>
+
+      <!-- Actions admin -->
+      <div *ngIf="isAdmin" class="mt-4 d-flex gap-2">
+        <button class="btn btn-warning" (click)="editProduct()">
+          ✏️ Modifier
+        </button>
+        <button class="btn btn-danger" (click)="deleteProduct()">
+          🗑️ Supprimer
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Suggestions -->
+  <div *ngIf="suggestedProducts.length > 0" class="mt-5">
+    <h4 class="mb-3">Produits similaires</h4>
+
+    <div class="row">
+      <div
+        class="col-md-3"
+        *ngFor="let p of suggestedProducts"
+      >
+        <div class="card h-100 shadow-sm">
+
+          <img
+            [src]="p.imageUrl || 'https://placehold.co/300x200'"
+            class="card-img-top"
+            style="height: 180px; object-fit: cover"
+          />
+
+          <div class="card-body">
+            <h6 class="card-title">{{ p.nom }}</h6>
+            <p class="text-primary fw-bold">
+              {{ p.prix | number:'1.2-2' }} DT
+            </p>
+            <a
+              [routerLink]="['/products', p.id]"
+              class="btn btn-sm btn-outline-primary w-100"
+            >
+              Voir détail
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Loading -->
+<ng-template #loadingTpl>
+  <div class="text-center my-5">
+    <div class="spinner-border text-primary"></div>
+    <p class="mt-2">Chargement du produit...</p>
+  </div>
+</ng-template>
+
+<!-- Erreur -->
+<div *ngIf="errorMessage" class="alert alert-danger mt-4">
+  {{ errorMessage }}
+</div>

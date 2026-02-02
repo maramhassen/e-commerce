@@ -1,1 +1,63 @@
-<p>category-form works!</p>
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="mb-0">{{ isEditMode ? 'Modifier la catégorie' : 'Nouvelle catégorie' }}</h4>
+        </div>
+        
+        <div class="card-body">
+          <!-- Message d'erreur -->
+          <div *ngIf="errorMessage" class="alert alert-danger">
+            {{ errorMessage }}
+          </div>
+
+          <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()">
+            <!-- Nom -->
+            <div class="mb-3">
+              <label for="nom" class="form-label">Nom *</label>
+              <input type="text" 
+                     class="form-control" 
+                     id="nom"
+                     formControlName="nom"
+                     placeholder="Entrez le nom de la catégorie"
+                     [class.is-invalid]="nom?.invalid && nom?.touched">
+              
+              <div *ngIf="nom?.invalid && nom?.touched" class="invalid-feedback">
+                <div *ngIf="nom?.errors?.['required']">Le nom est obligatoire</div>
+                <div *ngIf="nom?.errors?.['minlength']">Minimum 2 caractères</div>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-4">
+              <label for="description" class="form-label">Description</label>
+              <textarea class="form-control" 
+                        id="description"
+                        formControlName="description"
+                        rows="3"
+                        placeholder="Description de la catégorie (optionnel)"></textarea>
+            </div>
+
+            <!-- Boutons -->
+            <div class="d-flex justify-content-between">
+              <button type="button" 
+                      class="btn btn-secondary"
+                      (click)="onCancel()"
+                      [disabled]="loading">
+                Annuler
+              </button>
+              
+              <button type="submit" 
+                      class="btn btn-primary"
+                      [disabled]="categoryForm.invalid || loading">
+                <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"></span>
+                {{ isEditMode ? 'Modifier' : 'Créer' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
