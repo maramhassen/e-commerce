@@ -8,7 +8,6 @@ import { ProductListComponent } from './products/product-list/product-list.compo
 import { ProductDetailComponent } from './products/product-detail/product-detail.component';
 import { ProductFormComponent } from './products/product-form/product-form.component';
 import { AuthGuard } from './core/guards/auth.guard';
-import { AdminGuard } from './core/guards/admin.guard';
 import { CartComponent } from './cart/cart/cart.component';
 
 const routes: Routes = [
@@ -16,21 +15,19 @@ const routes: Routes = [
   { path: 'auth/login', component: LoginComponent },
   { path: 'auth/register', component: RegisterComponent },
 
-
-
-  // ================= Categories =================
-  { path: 'categories', component: CategoryListComponent },
-  { path: 'categories/new', component: CategoryFormComponent },
-  { path: 'categories/edit/:id', component: CategoryFormComponent },
+  // ================= Categories (Admin) =================
+  { path: 'categories', component: CategoryListComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
+  { path: 'categories/new', component: CategoryFormComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
+  { path: 'categories/edit/:id', component: CategoryFormComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
 
   // ================= Produits =================
-  { path: 'products', component: ProductListComponent },
-  { path: 'products/new', component: ProductFormComponent, canActivate: [AuthGuard, AdminGuard] },
-  { path: 'products/edit/:id', component: ProductFormComponent, canActivate: [AuthGuard, AdminGuard] },
+  { path: 'products', component: ProductListComponent, canActivate: [AuthGuard], data: { role: 'CLIENT' } },
+  { path: 'products/new', component: ProductFormComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
+  { path: 'products/edit/:id', component: ProductFormComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
   { path: 'products/:id', component: ProductDetailComponent }, // Détail produit public
 
-  // ================= Panier =================
-  { path: 'cart', component: CartComponent, canActivate: [AuthGuard] }, 
+  // ================= Panier (Client) =================
+  { path: 'cart', component: CartComponent, canActivate: [AuthGuard], data: { role: 'CLIENT' } },
 
   // ================= Redirection par défaut =================
   { path: '', redirectTo: '/products', pathMatch: 'full' },

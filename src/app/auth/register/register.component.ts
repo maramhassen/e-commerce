@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/core/services/auth.service';
+import { User } from 'src/app/models/user';
 
 @Component({
   selector: 'app-register',
@@ -39,17 +40,27 @@ export class RegisterComponent {
       return;
     }
 
+    // Validation email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.email)) {
+      this.errorMessage = 'Format d\'email invalide';
+      return;
+    }
+
     this.loading = true;
     this.errorMessage = '';
     this.successMessage = '';
 
-    const userData = {
+    // Création de l'objet User conforme à l'interface
+    const userData: User = {
       nom: this.nom,
       prenom: this.prenom,
       email: this.email,
       motDePasse: this.motDePasse,
       role: 'CLIENT' // Par défaut
     };
+
+    console.log('Données d\'inscription envoyées:', userData);
 
     this.authService.register(userData).subscribe({
       next: (response: any) => {
@@ -61,15 +72,19 @@ export class RegisterComponent {
           this.authService.setCurrentUser(response.user);
           this.successMessage = 'Inscription réussie ! Redirection...';
           
-          // Redirection après 2 secondes
+          // Redirection selon le rôle
           setTimeout(() => {
-            this.router.navigate(['/']);
+            if (response.user.role === 'ADMIN') {
+              this.router.navigate(['/categories']);
+            } else {
+              this.router.navigate(['/products']);
+            }
           }, 2000);
         } else {
           // Si pas d'auto-login, rediriger vers login
           this.successMessage = 'Inscription réussie ! Vous pouvez maintenant vous connecter.';
           setTimeout(() => {
-            this.router.navigate(['/login']);
+            this.router.navigate(['/auth/login']);
           }, 2000);
         }
         
@@ -78,15 +93,35 @@ export class RegisterComponent {
       error: (err) => {
         console.error('Erreur lors de l\'inscription:', err);
         
-        if (err.status === 400) {
+        if (err.status === 400 || err.status === 409) {
           this.errorMessage = 'Email déjà utilisé';
         } else if (err.status === 0) {
-          this.errorMessage = 'Impossible de se connecter au serveur';
+          this.errorMessage = 'Impossible de se connecter au serveur. Vérifiez que le backend est démarré.';
+        } else if (err.status === 404) {
+          this.errorMessage = 'Endpoint non trouvé. URL backend incorrecte.';
+        } else if (err.status === 422) {
+          this.errorMessage = 'Données invalides. Vérifiez les informations saisies.';
         } else {
-          this.errorMessage = err.error?.message || 'Erreur lors de l\'inscription';
+          this.errorMessage = err.error?.message || err.message || 'Erreur lors de l\'inscription';
         }
         
         this.loading = false;
+      }
+    });
+  }
+
+  // Test de connexion au backend
+  testBackend() {
+    this.errorMessage = '';
+    this.authService.testBackendConnection().subscribe({
+      next: (result) => {
+        console.log('Test backend réussi:', result);
+        this.successMessage = '✓ Backend accessible';
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: (error) => {
+        console.error('Test backend échoué:', error);
+        this.errorMessage = '✗ Backend inaccessible: ' + error.message;
       }
     });
   }
@@ -99,5 +134,19 @@ export class RegisterComponent {
     this.confirmPassword = '';
     this.errorMessage = '';
     this.successMessage = '';
+  }
+
+  // Remplir avec des données de test
+  fillTestData() {
+    this.nom = 'Dupont';
+    this.prenom = 'Jean';
+    this.email = 'jean.dupont@example.com';
+    this.motDePasse = 'password123';
+    this.confirmPassword = 'password123';
+  }
+
+  // Retour à la page de login
+  goToLogin() {
+    this.router.navigate(['/auth/login']);
   }
 }
