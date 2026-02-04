@@ -9,6 +9,8 @@ import { ProductDetailComponent } from './products/product-detail/product-detail
 import { ProductFormComponent } from './products/product-form/product-form.component';
 import { AuthGuard } from './core/guards/auth.guard';
 import { CartComponent } from './cart/cart/cart.component';
+import { OrderDetailComponent } from './orders/order-detail/order-detail.component';
+import { OrderListComponent } from './orders/order-list/order-list.component';
 
 const routes: Routes = [
   // ================= Auth =================
@@ -28,6 +30,9 @@ const routes: Routes = [
 
   // ================= Panier (Client) =================
   { path: 'cart', component: CartComponent, canActivate: [AuthGuard], data: { role: 'CLIENT' } },
+
+  { path: 'orders', component: OrderListComponent, canActivate: [AuthGuard] },
+  { path: 'orders/:id', component: OrderDetailComponent, canActivate: [AuthGuard] },
 
   // ================= Redirection par défaut =================
   { path: '', redirectTo: '/products', pathMatch: 'full' },

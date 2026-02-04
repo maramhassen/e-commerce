@@ -1,9 +1,9 @@
-import { Product } from "./product";
+import { Product } from './product';
 
 export interface OrderItem {
-    id?: number;
-    product: Product;
-    quantity: number;
-    price: number;
-  
+  id?: number;
+  quantite: number;
+  prix: number;
+  product: Product;
+  order?: any;
 }

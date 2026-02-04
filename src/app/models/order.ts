@@ -1,11 +1,12 @@
-import { OrderItem } from "./order-item";
-import { User } from "./user";
+import { Statut } from './statut';
+import { User } from './user';
+import { OrderItem } from './order-item';
 
 export interface Order {
-     id?: number;
-  user: User;                
-  items: OrderItem[];        
-  totalPrice?: number;       
-  status?: 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
-  createdAt?: string;       
+  id?: number;
+  total: number;
+  status: Statut;
+  dateCommande: Date | string;
+  user: User;
+  items: OrderItem[];
 }
