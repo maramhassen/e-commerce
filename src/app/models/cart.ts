@@ -7,4 +7,5 @@ export interface Cart {
   dateCreation?: Date;
   user?: User;
   items: CartItem[];
+
 }

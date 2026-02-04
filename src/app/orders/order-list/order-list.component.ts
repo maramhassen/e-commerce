@@ -20,11 +20,12 @@ interface StoredUser {
 })
 export class OrderListComponent implements OnInit {
   orders: Order[] = [];
+  filteredOrders: Order[] = [];
   loading = false;
   errorMessage = '';
-  currentUser: StoredUser | null = null; // CHANGEZ ICI: User -> StoredUser
+  currentUser: StoredUser | null = null;
   isAdmin = false;
-  filterStatus: string = '';
+  filterStatut: string = '';
   userId: number | null = null;
 
   constructor(
@@ -39,7 +40,6 @@ export class OrderListComponent implements OnInit {
 
   loadCurrentUser(): void {
     try {
-      // Récupérer l'utilisateur (retourne StoredUser)
       const user = this.authService.getCurrentUser();
       
       console.log('User from authService:', user);
@@ -51,7 +51,6 @@ export class OrderListComponent implements OnInit {
         return;
       }
       
-      // Valider la structure
       if (!user.email || !user.role) {
         console.error('Invalid user structure:', user);
         this.errorMessage = 'Données utilisateur invalides';
@@ -59,7 +58,6 @@ export class OrderListComponent implements OnInit {
         return;
       }
       
-      // Assigner les valeurs
       this.currentUser = user;
       this.isAdmin = user.role === 'ADMIN';
       this.userId = user.id ? user.id : null;
@@ -71,7 +69,6 @@ export class OrderListComponent implements OnInit {
         isAdmin: this.isAdmin
       });
       
-      // Charger les commandes
       this.loadOrders();
       
     } catch (error) {
@@ -85,11 +82,15 @@ export class OrderListComponent implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
+    if (this.orders.length > 0) {
+      this.applyFilter();
+      this.loading = false;
+      return;
+    }
+
     if (this.isAdmin) {
-      // Admin: voir toutes les commandes
       this.loadAllOrders();
     } else if (this.userId) {
-      // Client: voir ses propres commandes
       this.loadUserOrders();
     } else {
       this.errorMessage = 'Impossible de charger les commandes : utilisateur non identifié';
@@ -101,6 +102,7 @@ export class OrderListComponent implements OnInit {
     this.orderService.getAllOrders().subscribe({
       next: (orders) => {
         this.orders = orders;
+        this.applyFilter();
         this.loading = false;
         console.log(`Admin: ${orders.length} commandes chargées`);
       },
@@ -122,6 +124,7 @@ export class OrderListComponent implements OnInit {
     this.orderService.getOrdersByUser(this.userId).subscribe({
       next: (orders) => {
         this.orders = orders;
+        this.applyFilter();
         this.loading = false;
         console.log(`User ${this.userId}: ${orders.length} commandes chargées`);
       },
@@ -134,11 +137,11 @@ export class OrderListComponent implements OnInit {
   }
 
   private getErrorMessage(error: any): string {
-    if (error.status === 0) {
+    if (error.statut === 0) {
       return 'Impossible de se connecter au serveur';
-    } else if (error.status === 401) {
+    } else if (error.statut === 401) {
       return 'Non autorisé';
-    } else if (error.status === 404) {
+    } else if (error.statut === 404) {
       return 'Aucune commande trouvée';
     } else {
       return error.message || 'Erreur lors du chargement des commandes';
@@ -161,7 +164,7 @@ export class OrderListComponent implements OnInit {
       this.orderService.createOrderFromCart(this.userId).subscribe({
         next: (order) => {
           alert('Commande créée avec succès !');
-          this.loadOrders(); // Recharger la liste
+          this.loadOrders();
           if (order.id) {
             this.router.navigate(['/orders', order.id]);
           }
@@ -182,94 +185,158 @@ export class OrderListComponent implements OnInit {
       this.errorMessage = 'ID commande invalide';
     }
   }
-  // Ajoutez ces méthodes à votre classe
 
-// 1. Méthodes pour les statuts
-getStatusList(): string[] {
-  return ['EN_ATTENTE', 'CONFIRMEE', 'EXPEDIEE', 'LIVREE', 'ANNULEE'];
-}
-
-getStatusText(status: string): string {
-  switch(status) {
-    case 'EN_ATTENTE': return 'En attente';
-    case 'CONFIRMEE': return 'Confirmée';
-    case 'EXPEDIEE': return 'Expédiée';
-    case 'LIVREE': return 'Livrée';
-    case 'ANNULEE': return 'Annulée';
-    default: return status;
+  // 1. Méthodes pour les statuts
+  getStatutList(): string[] {
+    return ['EN_ATTENTE', 'CONFIRMEE', 'EXPEDIEE', 'LIVREE', 'ANNULEE'];
   }
-}
 
-getStatusClass(status: string): string {
-  switch(status.toLowerCase()) {
-    case 'en_attente': return 'status-en-attente';
-    case 'confirmee': return 'status-confirmee';
-    case 'expediee': return 'status-expediee';
-    case 'livree': return 'status-livree';
-    case 'annulee': return 'status-annulee';
-    default: return 'status-default';
+  getStatutText(statut: string): string {
+    switch(statut) {
+      case 'EN_ATTENTE': return 'En attente';
+      case 'CONFIRMEE': return 'Confirmée';
+      case 'EXPEDIEE': return 'Expédiée';
+      case 'LIVREE': return 'Livrée';
+      case 'ANNULEE': return 'Annulée';
+      default: return statut;
+    }
   }
-}
 
-getStatusIconClass(status: string): string {
-  switch(status.toLowerCase()) {
-    case 'en_attente': return 'text-warning';
-    case 'confirmee': return 'text-info';
-    case 'expediee': return 'text-primary';
-    case 'livree': return 'text-success';
-    case 'annulee': return 'text-danger';
-    default: return 'text-secondary';
-  }
-}
+  getStatutClass(statut?: string): string {
+    if (!statut) {
+      return 'statut-default';
+    }
 
-// 2. Méthode pour formater la date
-formatDate(date: Date | string): string {
-  if (!date) return 'N/A';
-  
-  try {
-    const dateObj = new Date(date);
-    return dateObj.toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  } catch (error) {
-    console.error('Error formatting date:', error);
-    return 'Date invalide';
+    switch (statut.toLowerCase()) {
+      case 'en_attente': return 'statut-en-attente';
+      case 'confirmee': return 'statut-confirmee';
+      case 'expediee': return 'statut-expediee';
+      case 'livree': return 'statut-livree';
+      case 'annulee': return 'statut-annulee';
+      default: return 'statut-default';
+    }
   }
-}
 
-// 3. Méthode pour calculer le total
-getTotalAmount(): string {
-  const total = this.orders.reduce((sum, order) => sum + (order.total || 0), 0);
-  return total.toFixed(2);
-}
+  getStatutIconClass(statut: string): string {
+    switch(statut.toLowerCase()) {
+      case 'en_attente': return 'text-warning';
+      case 'confirmee': return 'text-info';
+      case 'expediee': return 'text-primary';
+      case 'livree': return 'text-success';
+      case 'annulee': return 'text-danger';
+      default: return 'text-secondary';
+    }
+  }
 
-// 4. Méthodes pour les actions
-updateOrderStatus(orderId: number | undefined, status: string): void {
-  if (!orderId) {
-    console.error('Order ID is undefined');
-    return;
+  // 2. Méthode pour formater la date
+  formatDate(date: Date | string): string {
+    if (!date) return 'N/A';
+    
+    try {
+      const dateObj = new Date(date);
+      return dateObj.toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Date invalide';
+    }
   }
-  
-  if (confirm(`Voulez-vous vraiment changer le statut de la commande #${orderId} en "${this.getStatusText(status)}" ?`)) {
-    console.log(`Mise à jour statut commande ${orderId} -> ${status}`);
-    // À implémenter: this.orderService.updateOrderStatus(orderId, status).subscribe(...)
-  }
-}
 
-deleteOrder(orderId: number | undefined): void {
-  if (!orderId) {
-    console.error('Order ID is undefined');
-    return;
+  // 3. Méthode pour calculer le total (TOUTES les commandes)
+  getTotalAmount(): string {
+    if (!this.orders || this.orders.length === 0) {
+      return '0.00';
+    }
+    const total = this.orders.reduce(
+      (sum, order) => sum + (order.total || 0), 
+      0
+    );
+    return total.toFixed(2);
   }
-  
-  if (confirm(`Voulez-vous vraiment supprimer la commande #${orderId} ? Cette action est irréversible.`)) {
-    console.log(`Suppression commande ${orderId}`);
-    // À implémenter: this.orderService.deleteOrder(orderId).subscribe(...)
-  }
-}
 
+  // 4. Méthode pour calculer le total des commandes FILTRÉES
+  getFilteredTotalAmount(): string {
+    if (!this.filteredOrders || this.filteredOrders.length === 0) {
+      return '0.00';
+    }
+    const total = this.filteredOrders.reduce(
+      (sum, order) => sum + (order.total || 0), 
+      0
+    );
+    return total.toFixed(2);
+  }
+
+  // 5. Méthode de fallback pour le total filtré
+  getFilteredTotal(): string {
+    try {
+      return this.getFilteredTotalAmount();
+    } catch (error) {
+      console.error('Error in getFilteredTotalAmount:', error);
+      return '0.00';
+    }
+  }
+
+  // 6. Méthodes pour les actions
+  updateOrderStatut(orderId: number | undefined, statut: string): void {
+    if (!orderId) {
+      console.error('Order ID is undefined');
+      return;
+    }
+    
+    if (confirm(`Voulez-vous vraiment changer le statut de la commande #${orderId} en "${this.getStatutText(statut)}" ?`)) {
+      console.log(`Mise à jour statut commande ${orderId} -> ${statut}`);
+      // À implémenter: this.orderService.updateOrderStatus(orderId, statut).subscribe(...)
+    }
+  }
+
+  deleteOrder(orderId: number | undefined): void {
+    if (!orderId) {
+      console.error('Order ID is undefined');
+      return;
+    }
+    
+    if (confirm(`Voulez-vous vraiment supprimer la commande #${orderId} ? Cette action est irréversible.`)) {
+      console.log(`Suppression commande ${orderId}`);
+      // À implémenter: this.orderService.deleteOrder(orderId).subscribe(...)
+    }
+  }
+
+  // 7. Méthodes pour le filtre
+  applyFilter(): void {
+    if (!this.filterStatut || this.filterStatut.trim() === '') {
+      this.filteredOrders = [...this.orders];
+    } else {
+      const filterValue = this.filterStatut.trim().toUpperCase();
+      this.filteredOrders = this.orders.filter(order => {
+        const orderStatut = order.statut ? order.statut.toUpperCase() : '';
+        return orderStatut === filterValue;
+      });
+    }
+    console.log(`Filtre: "${this.filterStatut}" -> ${this.filteredOrders.length}/${this.orders.length} commandes`);
+  }
+
+  onFilterChange(): void {
+    console.log('Filtre changé:', this.filterStatut);
+    this.applyFilter();
+  }
+
+  // 8. Efface le filtre
+  clearFilter(): void {
+    this.filterStatut = '';
+    this.onFilterChange();
+  }
+
+  // 9. Compte les commandes par statut (pour les badges)
+  getOrderCountByStatut(statut: string): number {
+    if (!this.orders || this.orders.length === 0) return 0;
+    const statutUpper = statut.toUpperCase();
+    return this.orders.filter(order => 
+      order.statut && order.statut.toUpperCase() === statutUpper
+    ).length;
+  }
 }

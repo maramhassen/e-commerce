@@ -1,1 +1,80 @@
-<p>order-detail works!</p>
+<div class="container mt-4">
+
+  <button class="btn btn-outline-secondary mb-3" (click)="goBack()">
+    <i class="fas fa-arrow-left me-2"></i> Retour
+  </button>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center">
+    <div class="spinner-border text-primary"></div>
+    <p class="mt-2">Chargement...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Order details -->
+  <div *ngIf="order && !loading" class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h4 class="mb-0">
+        Commande #{{ order.id }}
+      </h4>
+      <span [ngClass]="getStatutClass(order.statut)">
+        {{ getStatutText(order.statut) }}
+      </span>
+    </div>
+
+    <div class="card-body">
+
+      <!-- Infos -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <strong>Date :</strong> {{ formatDate(order.dateCommande) }}
+        </div>
+        <div class="col-md-6 text-md-end">
+          <strong>Total :</strong> {{ order.total }} DT
+        </div>
+      </div>
+
+      <!-- Client -->
+      <div *ngIf="isAdmin" class="mb-3">
+        <h6>Client</h6>
+        <p class="mb-0">
+          {{ order.user?.prenom }} {{ order.user?.nom }}<br>
+          <small class="text-muted">{{ order.user?.email }}</small>
+        </p>
+      </div>
+
+      <hr>
+
+      <!-- Items -->
+      <h5>Articles</h5>
+
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Produit</th>
+              <th>Prix</th>
+              <th>Quantité</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of order.items">
+              <td>{{ item.product?.nom }}</td>
+              <td>{{ item.prix }} DT</td>
+              <td>{{ item.quantite }}</td>
+              <td>
+                {{ item.prix * item.quantite | number:'1.2-2' }} DT
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>

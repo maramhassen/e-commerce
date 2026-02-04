@@ -31,9 +31,11 @@ const routes: Routes = [
   // ================= Panier (Client) =================
   { path: 'cart', component: CartComponent, canActivate: [AuthGuard], data: { role: 'CLIENT' } },
 
+  /* ================= ORDERS ================= */
   { path: 'orders', component: OrderListComponent, canActivate: [AuthGuard] },
   { path: 'orders/:id', component: OrderDetailComponent, canActivate: [AuthGuard] },
 
+  
   // ================= Redirection par défaut =================
   { path: '', redirectTo: '/products', pathMatch: 'full' },
   { path: '**', redirectTo: '/products' },

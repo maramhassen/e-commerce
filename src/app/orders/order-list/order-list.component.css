@@ -113,41 +113,48 @@
   font-weight: bold;
 }
 
-/* Classes pour les statuts */
+/* Classes pour les statuts – toutes nuances de rouge */
 .status-en-attente {
-  background-color: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffeaa7;
+  background-color: #fff5f5 !important;
+  color: #c53030 !important;
+  border: 1px solid #fed7d7 !important;
 }
 
 .status-confirmee {
-  background-color: #d1ecf1;
-  color: #0c5460;
-  border: 1px solid #bee5eb;
+  background-color: #fed7d7 !important;
+  color: #c53030 !important;
+  border: 1px solid #feb2b2 !important;
 }
 
 .status-expediee {
-  background-color: #cce5ff;
-  color: #004085;
-  border: 1px solid #b8daff;
+  background-color: #fc8181 !important;
+  color: white !important;
+  border: 1px solid #f56565 !important;
 }
 
 .status-livree {
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
+  background-color: #f56565 !important;
+  color: white !important;
+  border: 1px solid #e53e3e !important;
 }
 
 .status-annulee {
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
+  background-color: #e53e3e !important;
+  color: white !important;
+  border: 1px solid #c53030 !important;
 }
 
 .status-default {
-  background-color: #e9ecef;
-  color: #495057;
-  border: 1px solid #dee2e6;
+  background-color: #f8d7da !important;
+  color: #721c24 !important;
+  border: 1px solid #f5c6cb !important;
+}
+
+/* Pour les badges spécifiquement */
+.statut-badge {
+  background-color: #dc3545 !important; /* Rouge Bootstrap */
+  color: white !important;
+  border: none !important;
 }
 
 /* Tableau */
@@ -211,16 +218,6 @@
   font-weight: 700;
   color: #28a745;
   font-size: 1.1rem;
-}
-
-/* Badges de statut */
-.status-badge {
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 /* Boutons d'action */
