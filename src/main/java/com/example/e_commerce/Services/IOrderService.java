@@ -1,7 +1,7 @@
 package com.example.e_commerce.Services;
 
 import com.example.e_commerce.Entities.Order;
-import com.example.e_commerce.Entities.statut;
+import com.example.e_commerce.Entities.OrderStatut;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ public interface IOrderService {
 
     List<Order> getAllOrders();
 
-    Order updateOrderStatus(Long orderId, statut statut);
+    Order updateOrderStatus(Long orderId, OrderStatut OrderStatut);
 
     void deleteOrder(Long id);
 }

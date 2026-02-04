@@ -1,7 +1,7 @@
 package com.example.e_commerce.Controllers;
 
 import com.example.e_commerce.Entities.Order;
-import com.example.e_commerce.Entities.statut;
+import com.example.e_commerce.Entities.OrderStatut;
 import com.example.e_commerce.Services.IOrderService;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,9 +42,9 @@ public class OrderController {
     @PutMapping("/{orderId}/status")
     public Order updateOrderStatus(
             @PathVariable Long orderId,
-            @RequestParam statut statut
+            @RequestParam OrderStatut OrderStatut
     ) {
-        return orderService.updateOrderStatus(orderId, statut);
+        return orderService.updateOrderStatus(orderId, OrderStatut);
     }
 
     @DeleteMapping("/{id}")

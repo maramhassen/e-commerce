@@ -35,7 +35,7 @@ public class OrderServiceImpl implements IOrderService {
 
         Order order = new Order();
         order.setUser(user);
-        order.setStatus(statut.CREATED);
+        order.setStatut(OrderStatut.EN_ATTENTE);
         order.setDateCommande(new java.util.Date());
 
         List<OrderItem> orderItems = new ArrayList<>();
@@ -76,9 +76,9 @@ public class OrderServiceImpl implements IOrderService {
 
 
     @Override
-    public Order updateOrderStatus(Long orderId, statut statut) {
+    public Order updateOrderStatus(Long orderId, OrderStatut OrderStatut) {
         Order order = getOrderById(orderId);
-        order.setStatus(statut);
+        order.setStatut(OrderStatut);
         return orderRepository.save(order);
     }
 

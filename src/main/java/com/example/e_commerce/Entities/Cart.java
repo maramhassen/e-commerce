@@ -1,4 +1,5 @@
 package com.example.e_commerce.Entities;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.Date;
 import java.util.List;
@@ -16,6 +17,7 @@ public class Cart {
     private Date dateCreation = new Date();
 
     @OneToOne
+    @JsonIgnore
     private User user;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)

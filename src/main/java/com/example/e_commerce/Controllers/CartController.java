@@ -1,6 +1,7 @@
 package com.example.e_commerce.Controllers;
 
 import com.example.e_commerce.Entities.Cart;
+import com.example.e_commerce.Entities.CartItem;
 import com.example.e_commerce.Services.ICartService;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,4 +46,10 @@ public class CartController {
     public void deleteCart(@PathVariable Long id) {
         cartService.deleteCart(id);
     }
+
+    @PostMapping("/{cartId}/add-item")
+    public CartItem addItemToCart(@PathVariable Long cartId, @RequestBody CartItem cartItem) {
+        return cartService.addItemToCart(cartId, cartItem);
+    }
+
 }

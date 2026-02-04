@@ -15,9 +15,11 @@ public class Order {
     private Long id;
 
     private double total;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private statut status;
+    private OrderStatut statut = OrderStatut.EN_ATTENTE;
+
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateCommande = new Date();
@@ -27,6 +29,7 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> items;
+
 
     public Long getId() {
         return id;
@@ -44,12 +47,12 @@ public class Order {
         this.total = total;
     }
 
-    public statut getStatus() {
-        return status;
+    public OrderStatut getStatut() {
+        return statut;
     }
 
-    public void setStatus(statut status) {
-        this.status = status;
+    public void setStatut(OrderStatut OrderStatut) {
+        this.statut = OrderStatut;
     }
 
     public Date getDateCommande() {
