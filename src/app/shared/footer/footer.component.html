@@ -1,1 +1,201 @@
-<p>footer works!</p>
+<footer class="footer bg-dark text-white mt-auto">
+  <div class="container pt-5">
+    <div class="row g-4">
+      <!-- Logo et description -->
+      <div class="col-lg-4 col-md-6">
+        <div class="footer-brand mb-4">
+          <div class="d-flex align-items-center mb-3">
+            <i class="fas fa-store fa-2x text-primary me-2"></i>
+            <h4 class="mb-0 fw-bold">MaBoutique</h4>
+          </div>
+          <p class="text-light mb-3">
+            Votre boutique en ligne préférée pour des produits de qualité à des prix compétitifs.
+          </p>
+          <div class="social-links">
+            <a href="#" class="btn btn-outline-light btn-sm me-2" (click)="openExternalUrl('https://facebook.com')">
+              <i class="fab fa-facebook-f"></i>
+            </a>
+            <a href="#" class="btn btn-outline-light btn-sm me-2" (click)="openExternalUrl('https://twitter.com')">
+              <i class="fab fa-twitter"></i>
+            </a>
+            <a href="#" class="btn btn-outline-light btn-sm me-2" (click)="openExternalUrl('https://instagram.com')">
+              <i class="fab fa-instagram"></i>
+            </a>
+            <a href="#" class="btn btn-outline-light btn-sm" (click)="openExternalUrl('https://linkedin.com')">
+              <i class="fab fa-linkedin-in"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Liens rapides -->
+      <div class="col-lg-2 col-md-6">
+        <h5 class="footer-title mb-4">Navigation</h5>
+        <ul class="list-unstyled">
+          <li class="mb-2">
+            <a (click)="navigateTo('/')" class="text-light text-decoration-none footer-link" style="cursor: pointer;">
+              <i class="fas fa-chevron-right me-2"></i>Accueil
+            </a>
+          </li>
+          <li class="mb-2">
+            <a (click)="navigateTo('/products')" class="text-light text-decoration-none footer-link" style="cursor: pointer;">
+              <i class="fas fa-chevron-right me-2"></i>Produits
+            </a>
+          </li>
+          <li class="mb-2">
+            <a (click)="navigateTo('/categories')" class="text-light text-decoration-none footer-link" style="cursor: pointer;">
+              <i class="fas fa-chevron-right me-2"></i>Catégories
+            </a>
+          </li>
+          <li class="mb-2">
+            <a (click)="navigateTo('/contact')" class="text-light text-decoration-none footer-link" style="cursor: pointer;">
+              <i class="fas fa-chevron-right me-2"></i>Contact
+            </a>
+          </li>
+          <li class="mb-2">
+            <a (click)="navigateTo('/about')" class="text-light text-decoration-none footer-link" style="cursor: pointer;">
+              <i class="fas fa-chevron-right me-2"></i>À propos
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Informations -->
+      <div class="col-lg-3 col-md-6">
+        <h5 class="footer-title mb-4">Informations</h5>
+        <ul class="list-unstyled">
+          <li class="mb-2">
+            <a (click)="navigateTo('/faq')" class="text-light text-decoration-none footer-link" style="cursor: pointer;">
+              <i class="fas fa-chevron-right me-2"></i>FAQ
+            </a>
+          </li>
+          <li class="mb-2">
+            <a (click)="navigateTo('/shipping')" class="text-light text-decoration-none footer-link" style="cursor: pointer;">
+              <i class="fas fa-chevron-right me-2"></i>Livraison
+            </a>
+          </li>
+          <li class="mb-2">
+            <a (click)="navigateTo('/returns')" class="text-light text-decoration-none footer-link" style="cursor: pointer;">
+              <i class="fas fa-chevron-right me-2"></i>Retours
+            </a>
+          </li>
+          <li class="mb-2">
+            <a (click)="navigateTo('/privacy')" class="text-light text-decoration-none footer-link" style="cursor: pointer;">
+              <i class="fas fa-chevron-right me-2"></i>Confidentialité
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Contact -->
+      <div class="col-lg-3 col-md-6">
+        <h5 class="footer-title mb-4">Contactez-nous</h5>
+        <ul class="list-unstyled">
+          <li class="mb-3">
+            <div class="d-flex">
+              <i class="fas fa-map-marker-alt text-primary me-3 mt-1"></i>
+              <div>
+                <strong>Adresse</strong>
+                <p class="mb-0 small">123 Rue du Commerce, 75000 Paris</p>
+              </div>
+            </div>
+          </li>
+          <li class="mb-3">
+            <div class="d-flex">
+              <i class="fas fa-phone text-primary me-3 mt-1"></i>
+              <div>
+                <strong>Téléphone</strong>
+                <p class="mb-0 small">+33 1 23 45 67 89</p>
+              </div>
+            </div>
+          </li>
+          <li class="mb-3">
+            <div class="d-flex">
+              <i class="fas fa-envelope text-primary me-3 mt-1"></i>
+              <div>
+                <strong>Email</strong>
+                <p class="mb-0 small">contact@maboutique.fr</p>
+              </div>
+            </div>
+          </li>
+          <li>
+            <div class="d-flex">
+              <i class="fas fa-clock text-primary me-3 mt-1"></i>
+              <div>
+                <strong>Horaires</strong>
+                <p class="mb-0 small">Lun-Ven: 9h-18h<br>Sam: 10h-16h</p>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <hr class="my-4 bg-light">
+
+    <!-- Copyright et paiement -->
+    <div class="row align-items-center py-3">
+      <div class="col-md-6">
+        <p class="mb-0 text-light small">
+          &copy; {{ currentYear }} MaBoutique. Tous droits réservés.
+        </p>
+      </div>
+      <div class="col-md-6 text-md-end">
+        <div class="payment-methods">
+          <span class="text-light small me-2">Paiement sécurisé:</span>
+          <i class="fab fa-cc-visa fa-lg text-light me-2"></i>
+          <i class="fab fa-cc-mastercard fa-lg text-light me-2"></i>
+          <i class="fab fa-cc-paypal fa-lg text-light me-2"></i>
+          <i class="fab fa-cc-apple-pay fa-lg text-light"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+.footer {
+  background: linear-gradient(135deg, #343a40 0%, #212529 100%);
+}
+
+.footer-title {
+  position: relative;
+  padding-bottom: 10px;
+  font-weight: 600;
+}
+
+.footer-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background-color: #007bff;
+}
+
+.footer-link {
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.footer-link:hover {
+  color: #007bff !important;
+  transform: translateX(5px);
+}
+
+.social-links .btn {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.social-links .btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+</style>

@@ -11,38 +11,82 @@ import { AuthGuard } from './core/guards/auth.guard';
 import { CartComponent } from './cart/cart/cart.component';
 import { OrderDetailComponent } from './orders/order-detail/order-detail.component';
 import { OrderListComponent } from './orders/order-list/order-list.component';
+import { HomeComponent } from './shared/home/home.component';
 
 const routes: Routes = [
-  // ================= Auth =================
+  // ================= Pages publiques =================
+  { path: '', component: HomeComponent },
   { path: 'auth/login', component: LoginComponent },
   { path: 'auth/register', component: RegisterComponent },
+  { path: 'products/:id', component: ProductDetailComponent },
 
-  // ================= Categories (Admin) =================
-  { path: 'categories', component: CategoryListComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
-  { path: 'categories/new', component: CategoryFormComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
-  { path: 'categories/edit/:id', component: CategoryFormComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
-
-  // ================= Produits =================
-  { path: 'products', component: ProductListComponent, canActivate: [AuthGuard], data: { role: 'CLIENT' } },
-  { path: 'products/new', component: ProductFormComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
-  { path: 'products/edit/:id', component: ProductFormComponent, canActivate: [AuthGuard], data: { role: 'ADMIN' } },
-  { path: 'products/:id', component: ProductDetailComponent }, // Détail produit public
-
-  // ================= Panier (Client) =================
-  { path: 'cart', component: CartComponent, canActivate: [AuthGuard], data: { role: 'CLIENT' } },
-
-  /* ================= ORDERS ================= */
-  { path: 'orders', component: OrderListComponent, canActivate: [AuthGuard] },
-  { path: 'orders/:id', component: OrderDetailComponent, canActivate: [AuthGuard] },
-
+  // ================= Routes protégées =================
   
-  // ================= Redirection par défaut =================
-  { path: '', redirectTo: '/products', pathMatch: 'full' },
-  { path: '**', redirectTo: '/products' },
+  // Client uniquement
+  { 
+    path: 'cart', 
+    component: CartComponent, 
+    canActivate: [AuthGuard], 
+    data: { role: 'CLIENT' } 
+  },
+  { 
+    path: 'orders', 
+    component: OrderListComponent, 
+    canActivate: [AuthGuard], 
+    data: { role: 'CLIENT' } 
+  },
+  { 
+    path: 'orders/:id', 
+    component: OrderDetailComponent, 
+    canActivate: [AuthGuard], 
+    data: { role: 'CLIENT' } 
+  },
+
+  // Admin uniquement
+  { 
+    path: 'categories', 
+    component: CategoryListComponent, 
+    canActivate: [AuthGuard], 
+    data: { role: 'ADMIN' } 
+  },
+  { 
+    path: 'categories/new', 
+    component: CategoryFormComponent, 
+    canActivate: [AuthGuard], 
+    data: { role: 'ADMIN' } 
+  },
+  { 
+    path: 'categories/edit/:id', 
+    component: CategoryFormComponent, 
+    canActivate: [AuthGuard], 
+    data: { role: 'ADMIN' } 
+  },
+  { 
+    path: 'products/new', 
+    component: ProductFormComponent, 
+    canActivate: [AuthGuard], 
+    data: { role: 'ADMIN' } 
+  },
+  { 
+    path: 'products/edit/:id', 
+    component: ProductFormComponent, 
+    canActivate: [AuthGuard], 
+    data: { role: 'ADMIN' } 
+  },
+
+  // Routes accessibles aux deux rôles (authentification requise)
+  { 
+    path: 'products', 
+    component: ProductListComponent, 
+    canActivate: [AuthGuard] 
+  },
+
+  // ================= Redirections =================
+  { path: '**', redirectTo: '' }
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, { enableTracing: false })],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }

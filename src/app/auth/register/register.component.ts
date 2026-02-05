@@ -1,13 +1,14 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { User } from 'src/app/models/user';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html'
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
   nom = '';
   prenom = '';
   email = '';
@@ -18,10 +19,24 @@ export class RegisterComponent {
   errorMessage = '';
   successMessage = '';
 
+  // Nouvelle propriété pour la redirection
+  private returnUrl: string = '';
+
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private route: ActivatedRoute // Ajouté pour récupérer les queryParams
   ) {}
+
+  ngOnInit(): void {
+    // Récupère l'URL de redirection
+    this.route.queryParams.subscribe(params => {
+      this.returnUrl = params['returnUrl'] || '';
+    });
+
+    // Auto-remplissage pour le développement
+    this.autoFillForDevelopment();
+  }
 
   register() {
     // Validation
@@ -65,33 +80,23 @@ export class RegisterComponent {
     this.authService.register(userData).subscribe({
       next: (response: any) => {
         console.log('Inscription réussie:', response);
+        this.loading = false;
         
-        // Auto-login après inscription
-        if (response.token && response.user) {
-          this.authService.setToken(response.token);
-          this.authService.setCurrentUser(response.user);
+        // Redirection après inscription
+        if (this.returnUrl) {
+          this.router.navigateByUrl(this.returnUrl);
+        } else {
+          // Auto-redirection après inscription réussie
           this.successMessage = 'Inscription réussie ! Redirection...';
           
-          // Redirection selon le rôle
           setTimeout(() => {
-            if (response.user.role === 'ADMIN') {
-              this.router.navigate(['/categories']);
-            } else {
-              this.router.navigate(['/products']);
-            }
-          }, 2000);
-        } else {
-          // Si pas d'auto-login, rediriger vers login
-          this.successMessage = 'Inscription réussie ! Vous pouvez maintenant vous connecter.';
-          setTimeout(() => {
-            this.router.navigate(['/auth/login']);
-          }, 2000);
+            this.authService.redirectBasedOnRole();
+          }, 1500);
         }
-        
-        this.loading = false;
       },
       error: (err) => {
         console.error('Erreur lors de l\'inscription:', err);
+        this.loading = false;
         
         if (err.status === 400 || err.status === 409) {
           this.errorMessage = 'Email déjà utilisé';
@@ -101,11 +106,11 @@ export class RegisterComponent {
           this.errorMessage = 'Endpoint non trouvé. URL backend incorrecte.';
         } else if (err.status === 422) {
           this.errorMessage = 'Données invalides. Vérifiez les informations saisies.';
+        } else if (err.status === 500) {
+          this.errorMessage = 'Erreur interne du serveur. Veuillez réessayer plus tard.';
         } else {
           this.errorMessage = err.error?.message || err.message || 'Erreur lors de l\'inscription';
         }
-        
-        this.loading = false;
       }
     });
   }
@@ -145,8 +150,27 @@ export class RegisterComponent {
     this.confirmPassword = 'password123';
   }
 
+  // Méthode d'auto-remplissage pour le développement
+  private autoFillForDevelopment(): void {
+    // Auto-remplissage en mode développement
+    if (!environment.production) {
+      // Vous pouvez activer/désactiver cette fonctionnalité
+      const autoFillEnabled = true;
+      
+      if (autoFillEnabled) {
+        this.nom = 'Dupont';
+        this.prenom = 'Jean';
+        this.email = 'jean.dupont@example.com';
+        this.motDePasse = 'password123';
+        this.confirmPassword = 'password123';
+      }
+    }
+  }
+
   // Retour à la page de login
   goToLogin() {
-    this.router.navigate(['/auth/login']);
+    // Préserver l'URL de retour si elle existe
+    const queryParams = this.returnUrl ? { returnUrl: this.returnUrl } : {};
+    this.router.navigate(['/auth/login'], { queryParams });
   }
 }

@@ -1,10 +1,48 @@
+<!-- header.component.html -->
 <header class="header">
   <div class="header-content">
     <div class="logo">
-      <h1>Restaurant Réveillon</h1>
+      <h1>Bienvenue sur notre site</h1>
     </div>
     <div class="header-info">
-      <p>Votre expérience culinaire exceptionnelle</p>
+      <p>Faites vos achats en ligne</p>
     </div>
   </div>
 </header>
+
+<style>
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1rem 0;
+  text-align: center;
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.logo h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.header-info p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .logo h1 {
+    font-size: 1.8rem;
+  }
+  
+  .header-info p {
+    font-size: 1rem;
+  }
+}
+</style>

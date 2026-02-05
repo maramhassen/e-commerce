@@ -1,23 +1,43 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from 'src/app/core/services/auth.service';
-
+import { environment } from 'src/environments/environment';
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   email = '';
   motDePasse = '';
   errorMessage = '';
   loading = false;
   debugInfo = '';
-  usersList: any[] = []; // Pour afficher les utilisateurs disponibles
+  usersList: any[] = [];
+  
+  // Nouvelle propriété pour la redirection
+  private returnUrl: string = '';
+  showExpiredMessage = false;
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private route: ActivatedRoute // Ajouté pour récupérer les queryParams
   ) {}
+
+  ngOnInit(): void {
+    // Vérifie si la session a expiré
+    this.route.queryParams.subscribe(params => {
+      this.returnUrl = params['returnUrl'] || '';
+      this.showExpiredMessage = params['sessionExpired'] === 'true';
+      
+      if (this.showExpiredMessage) {
+        this.errorMessage = 'Votre session a expiré. Veuillez vous reconnecter.';
+      }
+    });
+
+    // Auto-remplissage pour le développement
+    this.autoFillForDevelopment();
+  }
 
   // Test de connexion au backend
   testBackendConnection() {
@@ -65,26 +85,19 @@ export class LoginComponent {
     this.authService.login(this.email, this.motDePasse).subscribe({
       next: (response: any) => {
         console.log('Login réussi:', response);
+        this.loading = false;
 
-        // Stocker le token
-        if (response.token) {
-          this.authService.setToken(response.token);
-        }
-
-        // Stocker l'utilisateur
-        if (response.user) {
-          this.authService.setCurrentUser(response.user);
-
-          // Redirection selon le rôle
-          if (response.user.role === 'CLIENT') {
-            this.router.navigate(['/products']);
-          } else {
-            this.router.navigate(['/categories']);
-          }
+        // Redirection après login réussi
+        if (this.returnUrl) {
+          this.router.navigateByUrl(this.returnUrl);
+        } else {
+          // Utilisez la méthode du service pour la redirection
+          this.authService.redirectBasedOnRole();
         }
       },
       error: (err) => {
         console.error('Erreur lors du login:', err);
+        this.loading = false;
         
         // Gestion des erreurs spécifiques
         if (err.message === 'Identifiants incorrects') {
@@ -94,14 +107,11 @@ export class LoginComponent {
         } else if (err.status === 404) {
           this.errorMessage = 'Endpoint non trouvé. Vérifiez l\'URL du backend.';
           this.debugInfo = `URL utilisée: http://localhost:8080/api/users`;
+        } else if (err.status === 401) {
+          this.errorMessage = 'Identifiants invalides';
         } else {
           this.errorMessage = err.message || 'Erreur lors de la connexion';
         }
-        
-        this.loading = false;
-      },
-      complete: () => {
-        this.loading = false;
       }
     });
   }
@@ -139,5 +149,34 @@ export class LoginComponent {
     this.email = user.email;
     this.motDePasse = user.motDePasse;
     this.login();
+  }
+
+  // Méthode d'auto-remplissage pour le développement
+  private autoFillForDevelopment(): void {
+    // Auto-remplissage en mode développement
+    if (!environment.production) {
+      // Vous pouvez activer/désactiver cette fonctionnalité
+      const autoFillEnabled = true;
+      
+      if (autoFillEnabled) {
+        this.email = 'admin@example.com';
+        this.motDePasse = 'admin123';
+        // this.email = 'client@example.com';
+        // this.motDePasse = 'client123';
+      }
+    }
+  }
+
+  // Navigation vers l'inscription
+  goToRegister(): void {
+    this.router.navigate(['/auth/register']);
+  }
+
+  // Réinitialiser le formulaire
+  resetForm(): void {
+    this.email = '';
+    this.motDePasse = '';
+    this.errorMessage = '';
+    this.debugInfo = '';
   }
 }

@@ -1,23 +1,33 @@
+// src/app/core/services/cart.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { Cart } from '../../models/cart';
 import { CartItem } from '../../models/cart-item';
 import { Product } from '../../models/product';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CartService {
-
-  private cartUrl = 'http://localhost:8080/api/carts';
-  private cartItemUrl = 'http://localhost:8080/api/cart-items';
+  private cartUrl = `${environment.apiUrl}/carts`;
+  private cartItemUrl = `${environment.apiUrl}/cart-items`;
+  
+  // BehaviorSubject pour notifier les changements
+  private cartUpdatedSource = new BehaviorSubject<void>(undefined);
+  cartUpdated$ = this.cartUpdatedSource.asObservable();
 
   constructor(private http: HttpClient) {}
 
   // ================= CART =================
   getCart(cartId: number): Observable<Cart> {
     return this.http.get<Cart>(`${this.cartUrl}/${cartId}`);
+  }
+
+  // Nouvelle méthode pour obtenir le panier par utilisateur
+  getCartByUser(userId: number): Observable<Cart> {
+    return this.http.get<Cart>(`${this.cartUrl}/user/${userId}`);
   }
 
   createCart(cart: Cart): Observable<Cart> {
@@ -45,45 +55,48 @@ export class CartService {
     return this.http.delete<void>(`${this.cartItemUrl}/${itemId}`);
   }
 
-  // ================= AJOUTER PRODUIT AU PANIER =================
-  // OPTION 1: Avec Product complet
-  addToCart(product: Product, quantity: number, cartId: number): Observable<CartItem> {
-    // Créer un CartItem complet pour l'envoi
+  // ================= AJOUTER PRODUIT AU PANIER (MÉTHODE SIMPLIFIÉE) =================
+  addToCart(productId: number, quantity: number): Observable<CartItem> {
+    // Pour l'instant, on crée un panier temporaire
+    // Dans une vraie app, vous auriez besoin de l'ID du panier utilisateur
+    const cartItem: CartItem = {
+      quantite: quantity,
+      prixUnitaire: 0, // Le backend mettra à jour
+      product: { id: productId } as Product
+    };
+    
+    return this.http.post<CartItem>(this.cartItemUrl, cartItem);
+  }
+
+  // Méthode pour ajouter avec produit complet (optionnel)
+  addProductToCart(product: Product, quantity: number): Observable<CartItem> {
     const cartItem: CartItem = {
       quantite: quantity,
       prixUnitaire: product.prix,
-      product: product  // Produit complet
-      // Note: Le champ 'cart' sera ajouté par le backend
+      product: product
     };
 
-    // Option A: Utiliser l'endpoint cart-items (si votre backend l'accepte)
-    return this.http.post<CartItem>(this.cartItemUrl, cartItem);
-    
-    // OU Option B: Si vous avez créé l'endpoint dans CartController
-    // return this.http.post<CartItem>(`${this.cartUrl}/${cartId}/add-item`, cartItem);
-  }
-
-  // OPTION 2: Avec seulement les IDs (plus simple)
-  addToCartSimple(productId: number, quantity: number, cartId: number): Observable<CartItem> {
-    const cartItem = {
-      quantite: quantity,
-      prixUnitaire: 0,  // Le backend le mettra à jour
-      product: {
-        id: productId
-        // Pas besoin des autres champs
-      }
-    };
-    
     return this.http.post<CartItem>(this.cartItemUrl, cartItem);
   }
 
-  // OPTION 3: Si vous avez l'endpoint addProductToCart dans le backend
-  addProductToCart(cartId: number, productId: number, quantity: number): Observable<CartItem> {
-    const request = {
-      productId: productId,
-      quantity: quantity
-    };
+  // Notifier que le panier a été mis à jour
+  notifyCartUpdate(): void {
+    this.cartUpdatedSource.next();
+  }
+
+  // Méthode pour calculer le total des items
+  calculateTotal(items: CartItem[]): number {
+    if (!items || items.length === 0) return 0;
     
-    return this.http.post<CartItem>(`${this.cartUrl}/${cartId}/add-item`, request);
+    return items.reduce((total, item) => {
+      return total + (item.quantite * item.prixUnitaire);
+    }, 0);
+  }
+
+  // Méthode pour calculer le nombre total d'articles
+  calculateTotalItems(items: CartItem[]): number {
+    if (!items || items.length === 0) return 0;
+    
+    return items.reduce((total, item) => total + item.quantite, 0);
   }
 }

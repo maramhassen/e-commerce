@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, map, catchError, throwError } from 'rxjs';
+import { Observable, map, catchError, throwError, BehaviorSubject } from 'rxjs';
 import { User } from '../../models/user';
 
 // Interface pour l'utilisateur stocké (sans motDePasse)
@@ -19,11 +19,16 @@ interface StoredUser {
 export class AuthService {
   private apiUrl = 'http://localhost:8080/api/users';
   
+  private authState = new BehaviorSubject<boolean>(this.isAuthenticated());
+  public authState$ = this.authState.asObservable();
+  
   constructor(
     private http: HttpClient,
     private router: Router
   ) {
     console.log('AuthService initialisé avec URL:', this.apiUrl);
+    // Vérifie l'état d'authentification au démarrage
+    this.checkInitialAuth();
   }
 
   // ================ MÉTHODES D'AUTHENTIFICATION ================
@@ -53,10 +58,15 @@ export class AuthService {
           role: user.role
         };
         
-        return {
+        const response = {
           token: this.generateMockToken(user),
           user: userWithoutPassword
         };
+        
+        // Stocker les données et mettre à jour l'état
+        this.setAuthData(response.token, response.user);
+        
+        return response;
       }),
       catchError(error => {
         console.error('Erreur lors du login:', error);
@@ -86,10 +96,15 @@ export class AuthService {
           role: user.role
         };
         
-        return {
+        const response = {
           token: this.generateMockToken(user),
           user: userWithoutPassword
         };
+        
+        // Stocker les données et mettre à jour l'état
+        this.setAuthData(response.token, response.user);
+        
+        return response;
       }),
       catchError(error => {
         console.error('Erreur lors de l\'inscription:', error);
@@ -123,27 +138,21 @@ export class AuthService {
     this.router.navigate(['/auth/login']);
   }
 
-  setToken(token: string): void {
+  private setAuthData(token: string, user: StoredUser): void {
     localStorage.setItem('token', token);
-    console.log('Token stocké');
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    console.log('Données d\'authentification stockées');
+    this.authState.next(true); // Émet l'état "connecté"
+  }
+
+  private checkInitialAuth(): void {
+    const isAuth = this.isAuthenticated();
+    console.log('État initial d\'authentification:', isAuth);
+    this.authState.next(isAuth);
   }
 
   getToken(): string | null {
     return localStorage.getItem('token');
-  }
-
-  setCurrentUser(user: User | StoredUser): void {
-    // S'assurer qu'on ne stocke pas le motDePasse
-    const userToStore: StoredUser = {
-      id: user.id,
-      nom: user.nom,
-      prenom: user.prenom,
-      email: user.email,
-      role: user.role
-    };
-    
-    localStorage.setItem('currentUser', JSON.stringify(userToStore));
-    console.log('Utilisateur stocké:', userToStore);
   }
 
   getCurrentUser(): StoredUser | null {
@@ -197,6 +206,12 @@ export class AuthService {
     localStorage.removeItem('token');
     localStorage.removeItem('currentUser');
     console.log('Données d\'authentification effacées');
+    this.authState.next(false); // Émet l'état "déconnecté"
+  }
+
+  // Méthode pour forcer une mise à jour de l'état d'authentification
+  updateAuthState(): void {
+    this.authState.next(this.isAuthenticated());
   }
 
   // ================ MÉTHODES DE DIAGNOSTIC ================

@@ -15,6 +15,7 @@ import { ProductFormComponent } from './products/product-form/product-form.compo
 import { CartComponent } from './cart/cart/cart.component';
 import { OrderListComponent } from './orders/order-list/order-list.component';
 import { OrderDetailComponent } from './orders/order-detail/order-detail.component';
+import { SharedModule } from './shared/shared.module';
 
 @NgModule({
   declarations: [
@@ -36,7 +37,8 @@ import { OrderDetailComponent } from './orders/order-detail/order-detail.compone
     FormsModule,
     HttpClientModule,
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    SharedModule
   ],
   providers: [],
   bootstrap: [AppComponent]
