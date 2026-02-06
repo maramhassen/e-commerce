@@ -9,5 +9,6 @@ export interface Product {
   imageUrl?: string;
   actif?: boolean;
   dateAjout?: Date;
+  categoryId?: number;
   category?: Category;
 }

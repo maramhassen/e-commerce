@@ -1,119 +1,158 @@
-<div class="container mt-4" *ngIf="!loading && product; else loadingTpl">
-
+<div class="container mt-4" *ngIf="!loading && product; else loadingTemplate">
+  
   <!-- Bouton retour -->
-  <button class="btn btn-link mb-3" (click)="goBack()">
-    ← Retour aux produits
-  </button>
-
-  <div class="row">
-    <!-- Image produit -->
-    <div class="col-md-6 text-center">
-      <img
-        [src]="productImage"
-        [alt]="product.nom"
-        class="img-fluid rounded shadow"
-        style="max-height: 400px"
-      />
-    </div>
-
-    <!-- Détails produit -->
-    <div class="col-md-6">
-
-      <h2 class="fw-bold">{{ product.nom }}</h2>
-
-      <p class="text-muted">
-        Catégorie : {{ product.category?.nom || '—' }}
-      </p>
-
-      <h4 class="text-primary mt-3">
-        {{ product.prix | number:'1.2-2' }} DT
-      </h4>
-
-      <!-- Stock -->
-      <p class="mt-2">
-        <span
-          class="badge"
-          [ngClass]="'bg-' + getStockStatus().color"
-        >
-          {{ getStockStatus().text }}
-        </span>
-      </p>
-
-      <p class="mt-3">
-        {{ product.description }}
-      </p>
-
-      <!-- Quantité -->
-      <div class="d-flex align-items-center mt-3">
-        <button
-          class="btn btn-outline-secondary"
-          (click)="decreaseQuantity()"
-          [disabled]="quantity === 1"
-        >−</button>
-
-        <span class="mx-3 fw-bold">
-          {{ quantity }}
-        </span>
-
-        <button
-          class="btn btn-outline-secondary"
-          (click)="increaseQuantity()"
-          [disabled]="quantity === maxQuantity"
-        >+</button>
-      </div>
-
-      <!-- Bouton panier -->
-      <div class="mt-4">
-        <button
-          class="btn btn-success w-100"
-          (click)="addToCart()"
-          [disabled]="product.stock === 0"
-        >
-          🛒 Ajouter au panier
-        </button>
-      </div>
-
-      <!-- Actions admin -->
-      <div *ngIf="isAdmin" class="mt-4 d-flex gap-2">
-        <button class="btn btn-warning" (click)="editProduct()">
-          ✏️ Modifier
-        </button>
-        <button class="btn btn-danger" (click)="deleteProduct()">
-          🗑️ Supprimer
-        </button>
-      </div>
-
-    </div>
+  <div class="mb-3">
+    <button class="btn btn-outline-secondary" (click)="goBack()">
+      <i class="fas fa-arrow-left me-2"></i>Retour aux produits
+    </button>
   </div>
 
-  <!-- Suggestions -->
-  <div *ngIf="suggestedProducts.length > 0" class="mt-5">
-    <h4 class="mb-3">Produits similaires</h4>
+  <!-- Messages d'erreur -->
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    <i class="fas fa-exclamation-triangle me-2"></i>{{ errorMessage }}
+  </div>
 
-    <div class="row">
-      <div
-        class="col-md-3"
-        *ngFor="let p of suggestedProducts"
-      >
-        <div class="card h-100 shadow-sm">
-
-          <img
-            [src]="p.imageUrl || 'https://placehold.co/300x200'"
-            class="card-img-top"
-            style="height: 180px; object-fit: cover"
+  <div class="row">
+    <!-- Colonne image -->
+    <div class="col-md-6 mb-4">
+      <div class="card shadow">
+        <div class="card-body text-center p-4">
+          <!-- BALISE IMG CORRIGÉE - AJOUT DU / DE FERMETURE -->
+          <img 
+            [src]="productImage" 
+            [alt]="product.nom"
+            class="img-fluid rounded"
+            style="max-height: 400px; object-fit: contain;"
+            (error)="onImageError($event)"
           />
+        </div>
+      </div>
+    </div>
 
-          <div class="card-body">
-            <h6 class="card-title">{{ p.nom }}</h6>
-            <p class="text-primary fw-bold">
-              {{ p.prix | number:'1.2-2' }} DT
-            </p>
-            <a
-              [routerLink]="['/products', p.id]"
-              class="btn btn-sm btn-outline-primary w-100"
-            >
-              Voir détail
-            </a>
+    <!-- Colonne informations -->
+    <div class="col-md-6">
+      <div class="card shadow">
+        <div class="card-body">
+          
+          <!-- En-tête avec nom et catégorie -->
+          <div class="mb-3">
+            <h2 class="card-title text-primary">{{ product.nom }}</h2>
+            <div class="d-flex align-items-center">
+              <span class="badge bg-secondary me-2">
+                {{ product.category?.nom || 'Non catégorisé' }}
+              </span>
+              <span *ngIf="!product.actif" class="badge bg-warning">
+                <i class="fas fa-eye-slash me-1"></i>Désactivé
+              </span>
+            </div>
+          </div>
+
+          <!-- Prix -->
+          <div class="mb-4">
+            <h3 class="text-success">{{ product.prix }} €</h3>
+          </div>
+
+          <!-- Statut stock -->
+          <div class="mb-4">
+            <span class="badge" [class]="'bg-' + stockStatusColor">
+              {{ stockStatus }}
+            </span>
+            <small class="text-muted ms-2">
+              <i class="fas fa-info-circle"></i> 
+              Référence: #{{ product.id }}
+            </small>
+          </div>
+
+          <!-- Description -->
+          <div class="mb-4">
+            <h5>Description</h5>
+            <p class="card-text">{{ product.description }}</p>
+          </div>
+
+          <!-- Quantité (pour clients seulement) -->
+          <div *ngIf="!isAdmin && isInStock" class="mb-4">
+            <label class="form-label">Quantité</label>
+            <div class="d-flex align-items-center">
+              <button class="btn btn-outline-secondary" 
+                      (click)="decreaseQuantity()"
+                      [disabled]="quantity <= 1">
+                <i class="fas fa-minus"></i>
+              </button>
+              <span class="mx-3 fs-5">{{ quantity }}</span>
+              <button class="btn btn-outline-secondary" 
+                      (click)="increaseQuantity()"
+                      [disabled]="quantity >= product.stock">
+                <i class="fas fa-plus"></i>
+              </button>
+              <span class="ms-3 text-muted">
+                Max: {{ product.stock }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Boutons actions principales -->
+          <div class="d-grid gap-2 mb-4">
+            <!-- Bouton panier (clients seulement) -->
+            <button *ngIf="!isAdmin && isInStock" 
+                    class="btn btn-primary btn-lg"
+                    (click)="addToCart()"
+                    [disabled]="!canAddToCart">
+              <i class="fas fa-shopping-cart me-2"></i>
+              Ajouter au panier
+            </button>
+
+            <!-- Bouton rupture de stock -->
+            <button *ngIf="!isAdmin && !isInStock" 
+                    class="btn btn-secondary btn-lg"
+                    disabled>
+              <i class="fas fa-times-circle me-2"></i>
+              Rupture de stock
+            </button>
+          </div>
+
+          <!-- ========== SECTION ADMINISTRATEUR ========== -->
+          <div *ngIf="isAdmin" class="mt-4 pt-4 border-top">
+            
+            
+
+            <!-- Actions admin -->
+            <div class="row g-2">
+              <!-- Bouton modifier -->
+              <div class="col-md-6">
+                <button class="btn btn-warning w-100" 
+                        (click)="editProduct()">
+                  <i class="fas fa-edit me-2"></i>
+                  Modifier
+                </button>
+              </div>
+
+              <!-- Bouton suppression principale -->
+              <div class="col-md-6">
+                <button class="btn btn-danger w-100" 
+                        (click)="deleteProduct()">
+                  <i class="fas fa-trash-alt me-2"></i>
+                  Supprimer/Désactiver
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+          <!-- ========== FIN SECTION ADMIN ========== -->
+
+          <!-- Informations supplémentaires -->
+          <div class="mt-4 pt-3 border-top">
+            <div class="row">
+              <div class="col-6">
+                <small class="text-muted">
+                  <i class="fas fa-calendar me-1"></i>
+                  Ajouté le {{ product.dateAjout | date:'dd/MM/yyyy' }}
+                </small>
+              </div>
+              <div class="col-6 text-end">
+               
+              </div>
+            </div>
           </div>
 
         </div>
@@ -123,15 +162,17 @@
 
 </div>
 
-<!-- Loading -->
-<ng-template #loadingTpl>
-  <div class="text-center my-5">
-    <div class="spinner-border text-primary"></div>
-    <p class="mt-2">Chargement du produit...</p>
+<!-- Template de chargement -->
+<ng-template #loadingTemplate>
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8 text-center">
+        <div class="spinner-border text-primary" style="width: 4rem; height: 4rem;" role="status">
+          <span class="visually-hidden">Chargement...</span>
+        </div>
+        <h4 class="mt-4 text-primary">Chargement du produit...</h4>
+        <p class="text-muted">Veuillez patienter pendant la récupération des informations.</p>
+      </div>
+    </div>
   </div>
 </ng-template>
-
-<!-- Erreur -->
-<div *ngIf="errorMessage" class="alert alert-danger mt-4">
-  {{ errorMessage }}
-</div>

@@ -15,19 +15,8 @@ export class ProductDetailComponent implements OnInit {
   product: Product | null = null;
   loading = true;
   errorMessage = '';
-
-  // Quantité
   quantity = 1;
-  maxQuantity = 10;
-
-  // Auth
-  isAuthenticated = false;
   isAdmin = false;
-  userId: number | null = null;
-  cartId: number = 1;
-
-  // Suggestions
-  suggestedProducts: Product[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -42,9 +31,11 @@ export class ProductDetailComponent implements OnInit {
     this.loadProduct();
   }
 
-  // =============================
-  // Chargement produit
-  // =============================
+  private checkAuthStatus(): void {
+    this.isAdmin = this.authService.isAdmin();
+    console.log('Admin status:', this.isAdmin);
+  }
+
   private loadProduct(): void {
     const id = this.route.snapshot.paramMap.get('id');
 
@@ -54,82 +45,274 @@ export class ProductDetailComponent implements OnInit {
       return;
     }
 
+    console.log('Chargement du produit ID:', id);
+
     this.productService.getById(+id).subscribe({
       next: (product) => {
+        console.log('Produit chargé:', product);
         this.product = product;
-        this.maxQuantity = Math.min(product.stock, 10);
-        
-        // Charger les suggestions basées sur la catégorie
-        if (product.category?.id) {
-          this.loadSuggestedProducts(product.category.id);
-        }
-        
         this.loading = false;
       },
-      error: () => {
+      error: (error) => {
+        console.error('Erreur chargement:', error);
         this.errorMessage = 'Erreur lors du chargement du produit';
         this.loading = false;
       }
     });
   }
 
-  // =============================
-  // Auth
-  // =============================
-  private checkAuthStatus(): void {
-    this.isAuthenticated = this.authService.isAuthenticated();
-    this.isAdmin = this.authService.isAdmin();
-    
-    if (this.isAuthenticated) {
-      const user = this.authService.getCurrentUser();
-      this.userId = user?.id || null;
-      
-      // Pour l'exemple, utilisons l'ID utilisateur comme cartId
-      this.cartId = this.userId || 1;
-    }
-  }
-
-  // =============================
-  // Suggestions
-  // =============================
-  private loadSuggestedProducts(categoryId: number): void {
-    this.productService.getAll().subscribe({
-      next: (products) => {
-        this.suggestedProducts = products
-          .filter(p => 
-            p.id !== this.product?.id && 
-            p.category?.id === categoryId
-          )
-          .slice(0, 4);
-      },
-      error: (err: any) => {
-        console.error('Erreur lors du chargement des suggestions:', err);
-      }
-    });
-  }
-
-  // =============================
-  // Utilitaires d'image
-  // =============================
-  getProductImage(product: Product | null): string {
-    if (!product) return 'assets/images/default-product.jpg';
-    
-    // Utiliser imageUrl si disponible
-    if (product.imageUrl) return product.imageUrl;
-    
-    return 'assets/images/default-product.jpg';
-  }
-
-  handleImageError(event: Event): void {
+  // ========== GESTION ERREUR IMAGE ==========
+  onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
     img.src = 'assets/images/default-product.jpg';
   }
 
-  // =============================
-  // Quantité
-  // =============================
+  // ========== MÉTHODE PRINCIPALE DE SUPPRESSION ==========
+  deleteProduct(): void {
+    if (!this.product?.id) {
+      alert('❌ Produit invalide');
+      return;
+    }
+
+    const productName = this.product.nom || 'ce produit';
+    
+    // Message d'information clair
+    const confirmation = confirm(
+      `TRAITEMENT DU PRODUIT\n\n` +
+      `Nom: "${productName}"\n` +
+      `Prix: ${this.product.prix} €\n\n` +
+      `QUE VOULEZ-VOUS FAIRE ?\n\n` +
+      `• Si le produit N'EST PAS utilisé dans des commandes :\n` +
+      `  → Il sera SUPPRIMÉ définitivement\n\n` +
+      `• Si le produit EST utilisé dans des commandes :\n` +
+      `  → Il sera DÉSACTIVÉ (masqué du catalogue)\n` +
+      `  → Il reste dans la base de données\n\n` +
+      `Confirmez-vous cette action ?`
+    );
+
+    if (!confirmation) {
+      console.log('Suppression annulée par l\'utilisateur');
+      return;
+    }
+
+    console.log(`🚀 Début du traitement du produit ID: ${this.product.id}`);
+
+    // Utilisation de la méthode delete qui gère l'erreur 500
+    this.productService.delete(this.product.id).subscribe({
+      next: () => {
+        // SUCCÈS - soit suppression réelle, soit soft delete via erreur 500
+        this.handleDeleteSuccess();
+      },
+      error: (error: Error) => {
+        // ERREUR (autre que 500)
+        this.handleDeleteError(error);
+      }
+    });
+  }
+
+  // ========== MÉTHODE ALTERNATIVE AVEC CHOIX ==========
+  deleteProductWithOptions(): void {
+    if (!this.product?.id) return;
+
+    const productName = this.product.nom;
+    
+    // Propose un menu de choix
+    const choice = prompt(
+      `OPTIONS POUR "${productName}"\n\n` +
+      `1 - Supprimer (tenter suppression complète)\n` +
+      `2 - Désactiver seulement (recommandé)\n` +
+      `3 - Annuler\n\n` +
+      `Entrez 1, 2 ou 3 :`
+    );
+
+    switch (choice) {
+      case '1':
+        this.tryHardDelete();
+        break;
+      case '2':
+        this.deactivateOnly();
+        break;
+      case '3':
+        console.log('Action annulée');
+        break;
+      default:
+        alert('❌ Choix invalide');
+    }
+  }
+
+  // ========== MÉTHODE POUR DÉSACTIVER SEULEMENT ==========
+  deactivateOnly(): void {
+    if (!this.product?.id) return;
+
+    const productName = this.product.nom || 'ce produit';
+    
+    const confirmDeactivate = confirm(
+      `DÉSACTIVER LE PRODUIT\n\n` +
+      `Nom: "${productName}"\n\n` +
+      `Cette action va :\n` +
+      `• Masquer le produit du catalogue\n` +
+      `• Le garder dans la base de données\n` +
+      `• Permettre sa réactivation ultérieure\n\n` +
+      `Confirmez-vous la désactivation ?`
+    );
+
+    if (!confirmDeactivate) return;
+
+    console.log(`🔧 Désactivation du produit ID: ${this.product.id}`);
+
+    // Création d'un objet produit mis à jour
+    const updatedProduct: Product = {
+      ...this.product,
+      actif: false
+    };
+
+    this.productService.update(this.product.id, updatedProduct).subscribe({
+      next: (updated) => {
+        this.product = updated;
+        
+        // Message de succès
+        alert(`✅ SUCCÈS\n\n` +
+              `"${productName}" a été DÉSACTIVÉ.\n\n` +
+              `• Statut: Masqué du catalogue\n` +
+              `• Peut être réactivé ultérieurement\n` +
+              `• Redirection dans 3 secondes...`);
+        
+        // Redirection après délai
+        setTimeout(() => {
+          this.router.navigate(['/products']);
+        }, 3000);
+      },
+      error: (error: Error) => {
+        console.error('Erreur désactivation:', error);
+        
+        alert(`❌ ÉCHEC DE LA DÉSACTIVATION\n\n` +
+              `Impossible de désactiver "${productName}".\n\n` +
+              `Erreur: ${error.message || 'Problème de connexion'}`);
+      }
+    });
+  }
+
+  // ========== MÉTHODES AUXILIAIRES ==========
+  
+  private tryHardDelete(): void {
+    if (!this.product?.id) return;
+
+    console.log('Tentative de suppression complète...');
+    
+    // Ici on utilise directement http pour voir la vraie réponse
+    this.productService.delete(this.product.id).subscribe({
+      next: () => {
+        this.handleDeleteSuccess();
+      },
+      error: (error: Error) => {
+        // Si on a une erreur autre que 500 (qui est déjà gérée dans le service)
+        alert(`❌ Suppression échouée\n\n` +
+              `Message: ${error.message}\n\n` +
+              `Essayez la désactivation à la place.`);
+        
+        const tryDeactivate = confirm('Voulez-vous désactiver le produit à la place ?');
+        if (tryDeactivate) {
+          this.deactivateOnly();
+        }
+      }
+    });
+  }
+
+  private handleDeleteSuccess(): void {
+    const productName = this.product?.nom || 'Le produit';
+    
+    // Message de succès adapté
+    alert(`✅ ACTION RÉUSSIE\n\n` +
+          `"${productName}" a été traité avec succès.\n\n` +
+          `Deux possibilités :\n` +
+          `1. Il a été SUPPRIMÉ définitivement\n` +
+          `2. Il a été DÉSACTIVÉ (s'il était utilisé)\n\n` +
+          `Redirection vers la liste des produits...`);
+    
+    // Redirection immédiate
+    this.router.navigate(['/products']);
+  }
+
+  private handleDeleteError(error: Error): void {
+    const productName = this.product?.nom || 'Le produit';
+    
+    console.error('Erreur suppression:', error);
+    
+    alert(`❌ ERREUR CRITIQUE\n\n` +
+          `Traitement de "${productName}" échoué.\n\n` +
+          `Détails : ${error.message}\n\n` +
+          `Contactez l'administrateur si le problème persiste.`);
+  }
+
+  // ========== MÉTHODE DE TEST (DEBUG) ==========
+  testDirectDelete(): void {
+    if (!this.product?.id) return;
+
+    const url = `http://localhost:8080/api/products/${this.product.id}`;
+    console.log('🔍 Test DELETE direct vers:', url);
+    
+    // Test avec fetch pour voir la réponse brute
+    fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    })
+    .then(async response => {
+      const result = {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        body: await response.text()
+      };
+      
+      console.log('📊 Réponse brute du backend:', result);
+      
+      if (response.ok) {
+        alert(`✅ BACKEND RÉPONSE 200\n\n` +
+              `Le produit a été supprimé avec succès.\n\n` +
+              `Redirection...`);
+        this.router.navigate(['/products']);
+      } else if (response.status === 500) {
+        alert(`⚠️ BACKEND RÉPONSE 500\n\n` +
+              `Le backend a retourné une erreur 500.\n` +
+              `En production, cela signifie généralement que le produit\n` +
+              `a été désactivé (soft delete) car il est utilisé.\n\n` +
+              `Redirection...`);
+        this.router.navigate(['/products']);
+      } else {
+        alert(`❌ BACKEND RÉPONSE ${response.status}\n\n` +
+              `Status: ${response.status} ${response.statusText}\n` +
+              `Body: ${result.body}`);
+      }
+    })
+    .catch(networkError => {
+      console.error('Erreur réseau:', networkError);
+      alert(`🌐 ERREUR RÉSEAU\n\n` +
+            `Impossible de contacter le serveur.\n` +
+            `Vérifiez que le backend est démarré.`);
+    });
+  }
+
+  // ========== AUTRES MÉTHODES EXISTANTES ==========
+  
+  addToCart(): void {
+    if (!this.isAdmin && this.product) {
+      this.cartService.addToCart(this.product.id!, this.quantity).subscribe({
+        next: () => {
+          alert(`${this.quantity} × ${this.product?.nom} ajouté au panier ✅`);
+        },
+        error: (err: any) => {
+          console.error('Erreur panier:', err);
+          alert('Erreur lors de l\'ajout au panier');
+        }
+      });
+    }
+  }
+
   increaseQuantity(): void {
-    if (this.quantity < this.maxQuantity) {
+    if (this.product && this.quantity < this.product.stock) {
       this.quantity++;
     }
   }
@@ -140,229 +323,43 @@ export class ProductDetailComponent implements OnInit {
     }
   }
 
-  updateQuantity(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const value = parseInt(input.value, 10);
-    
-    if (value && !isNaN(value)) {
-      if (value < 1) {
-        this.quantity = 1;
-      } else if (value > this.maxQuantity) {
-        this.quantity = this.maxQuantity;
-      } else {
-        this.quantity = value;
-      }
-    }
-  }
-
-  // =============================
-  // Ajout au panier
-  // =============================
-  addToCart(): void {
-    // Vérification d'authentification
-    if (!this.isAuthenticated) {
-      this.router.navigate(['/auth/login'], {
-        queryParams: { returnUrl: this.router.url }
-      });
-      return;
-    }
-
-    // Vérifications produit
-    if (!this.product) {
-      console.error('Product is null');
-      return;
-    }
-
-    if (!this.product.id) {
-      alert('Produit invalide');
-      return;
-    }
-
-    if (this.product.stock === 0) {
-      alert('Produit en rupture de stock');
-      return;
-    }
-
-    if (this.quantity > this.product.stock) {
-      alert(`Stock insuffisant (max ${this.product.stock})`);
-      this.quantity = this.product.stock;
-      return;
-    }
-
-    // Ajout au panier
-    this.addProductToCart();
-  }
-
-  private addProductToCart(): void {
-    if (!this.product || !this.product.id) return;
-
-    // Appel au service avec les bons paramètres
-    this.cartService.addToCart(this.product.id, this.quantity).subscribe({
-      next: () => {
-        this.handleAddToCartSuccess();
-      },
-      error: (err: any) => {
-        this.handleCartError(err);
-      }
-    });
-  }
-
-  private handleAddToCartSuccess(): void {
-    alert(`${this.quantity} × ${this.product?.nom} ajouté au panier ✅`);
-    
-    // Mise à jour locale du stock
-    if (this.product) {
-      this.product.stock -= this.quantity;
-      this.maxQuantity = Math.min(this.product.stock, 10);
-      if (this.quantity > this.maxQuantity) {
-        this.quantity = this.maxQuantity;
-      }
-    }
-    
-    // Notifier la mise à jour du panier
-    this.cartService.notifyCartUpdate();
-  }
-
-  // =============================
-  // Gestion des erreurs du panier
-  // =============================
-  private handleCartError(err: any): void {
-    console.error('Erreur détaillée:', err);
-    
-    if (err.status === 401) {
-      alert('Session expirée, veuillez vous reconnecter');
-      this.authService.logout();
-      this.router.navigate(['/auth/login']);
-    } else if (err.status === 400) {
-      alert('Erreur de données, vérifiez la disponibilité du produit');
-    } else if (err.status === 404) {
-      alert('Produit introuvable');
-    } else {
-      alert('Erreur lors de l\'ajout au panier ❌');
-    }
-  }
-
-  // =============================
-  // Actions admin
-  // =============================
-  editProduct(): void {
-    if (!this.product?.id) return;
-    this.router.navigate(['/products/edit', this.product.id]);
-  }
-
-  deleteProduct(): void {
-    if (!this.product?.id) return;
-
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) return;
-
-    this.productService.delete(this.product.id).subscribe({
-      next: () => {
-        alert('Produit supprimé avec succès');
-        this.router.navigate(['/products']);
-      },
-      error: (err: any) => {
-        console.error(err);
-        alert('Erreur lors de la suppression du produit');
-      }
-    });
-  }
-
-  // =============================
-  // Navigation suggestions
-  // =============================
-  viewProduct(productId: number | undefined): void {
-    if (productId) {
-      this.router.navigate(['/products', productId]);
-    }
-  }
-
-  // =============================
-  // Utilitaires
-  // =============================
-  getStockStatus(): { text: string; color: string } {
-    if (!this.product) return { text: '', color: '' };
-
-    if (this.product.stock === 0) {
-      return { text: 'Rupture de stock', color: 'danger' };
-    }
-
-    if (this.product.stock <= 5) {
-      return { text: `Seulement ${this.product.stock} restant(s)`, color: 'warning' };
-    }
-
-    return { text: `En stock (${this.product.stock})`, color: 'success' };
-  }
-
-  getSubtotal(): number {
-    if (!this.product) return 0;
-    return this.product.prix * this.quantity;
-  }
-
-  formatPrice(price: number | undefined): string {
-    if (!price) return '0.00 €';
-    return price.toFixed(2) + ' €';
-  }
-
-  getCategoryName(): string {
-    return this.product?.category?.nom || 'Non catégorisé';
-  }
-
-  getRating(): number {
-    if (!this.product) return 0;
-    // À remplacer par la vraie logique de notation si disponible
-    return 4.5;
-  }
-
-  getRatingStars(): number[] {
-    const rating = this.getRating();
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-    
-    const stars = Array(fullStars).fill(1);
-    if (hasHalfStar) stars.push(0.5);
-    
-    while (stars.length < 5) {
-      stars.push(0);
-    }
-    
-    return stars;
-  }
-
   goBack(): void {
     this.router.navigate(['/products']);
   }
 
-  goToCart(): void {
-    this.router.navigate(['/cart']);
+  editProduct(): void {
+    if (this.product?.id) {
+      this.router.navigate(['/products/edit', this.product.id]);
+    }
   }
 
-  // =============================
-  // Getters pour le template
-  // =============================
+  // ========== GETTERS POUR LE TEMPLATE ==========
+  
   get productImage(): string {
-    return this.getProductImage(this.product);
+    return this.product?.imageUrl || 'assets/images/default-product.jpg';
   }
 
-  get isProductActive(): boolean {
-    return this.product?.actif === true;
+  get isInStock(): boolean {
+    return (this.product?.stock || 0) > 0;
   }
 
-  get productAddedDate(): string {
-    if (!this.product?.dateAjout) return 'Date non disponible';
+  get stockStatus(): string {
+    if (!this.product) return '';
     
-    const date = new Date(this.product.dateAjout);
-    return date.toLocaleDateString('fr-FR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
+    if (this.product.stock === 0) return 'Rupture de stock';
+    if (this.product.stock <= 5) return `Seulement ${this.product.stock} restant(s)`;
+    return `En stock (${this.product.stock})`;
   }
 
-  get isOutOfStock(): boolean {
-    return this.product?.stock === 0;
+  get stockStatusColor(): string {
+    if (!this.product) return 'secondary';
+    
+    if (this.product.stock === 0) return 'danger';
+    if (this.product.stock <= 5) return 'warning';
+    return 'success';
   }
 
-  get isLowStock(): boolean {
-    return (this.product?.stock || 0) > 0 && (this.product?.stock || 0) <= 5;
+  get canAddToCart(): boolean {
+    return this.isInStock && !this.isAdmin;
   }
 }

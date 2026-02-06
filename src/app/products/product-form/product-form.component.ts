@@ -42,7 +42,7 @@ export class ProductFormComponent implements OnInit {
       prix: ['', [Validators.required, Validators.min(0.01)]],
       stock: ['', [Validators.required, Validators.min(0)]],
       imageUrl: [''],
-      categoryId: ['', Validators.required],
+      categoryId: ['', Validators.required], // NOTE: On utilise categoryId au lieu de category
       actif: [true]
     });
   }
@@ -51,11 +51,21 @@ export class ProductFormComponent implements OnInit {
     this.loading = true;
     this.categoryService.getAll().subscribe({
       next: (categories) => {
+        console.log('✅ Catégories chargées:', categories);
         this.categories = categories;
+        
+        // Vérification
+        if (categories.length > 0) {
+          console.log('📋 Liste des catégories:');
+          categories.forEach(cat => {
+            console.log(`   ID: ${cat.id} - Nom: ${cat.nom}`);
+          });
+        }
+        
         this.loading = false;
       },
       error: (err) => {
-        console.error('Erreur chargement catégories:', err);
+        console.error('❌ Erreur chargement catégories:', err);
         this.errorMessage = 'Erreur lors du chargement des catégories';
         this.loading = false;
       }
@@ -79,21 +89,36 @@ export class ProductFormComponent implements OnInit {
     
     this.productService.getById(this.productId).subscribe({
       next: (product) => {
-        console.log('Produit chargé:', product);
+        console.log('📦 Produit chargé:', product);
         
+        // Récupère l'ID de la catégorie
+        let categoryIdValue = '';
+        
+        if (product.category && product.category.id) {
+          categoryIdValue = product.category.id.toString();
+          console.log(`🎯 Catégorie trouvée: ID=${categoryIdValue}, Nom=${product.category.nom}`);
+        } else if (product.categoryId) {
+          categoryIdValue = product.categoryId.toString();
+          console.log(`🎯 CategoryId trouvé: ${categoryIdValue}`);
+        } else {
+          console.warn('⚠️ Le produit n\'a pas de catégorie associée');
+        }
+        
+        // Patch du formulaire
         this.productForm.patchValue({
           nom: product.nom,
           description: product.description,
           prix: product.prix,
           stock: product.stock,
           imageUrl: product.imageUrl || '',
-          actif: product.actif !== false
+          actif: product.actif !== false,
+          categoryId: categoryIdValue
         });
         
         this.loading = false;
       },
       error: (err) => {
-        console.error('Erreur:', err);
+        console.error('❌ Erreur:', err);
         this.errorMessage = 'Erreur lors du chargement du produit';
         this.loading = false;
       }
@@ -102,6 +127,7 @@ export class ProductFormComponent implements OnInit {
 
   onSubmit(): void {
     if (this.productForm.invalid) {
+      console.log('❌ Formulaire invalide');
       this.markAllAsTouched();
       return;
     }
@@ -110,45 +136,74 @@ export class ProductFormComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    const productData: Product = this.productForm.value;
-    console.log('Données envoyées:', productData);
+    // Récupère les valeurs du formulaire
+    const formValues = this.productForm.value;
+    console.log('📋 Valeurs du formulaire:', formValues);
+
+    // Construit l'objet product AVEC categoryId
+    const productData: any = {
+      nom: formValues.nom,
+      description: formValues.description,
+      prix: formValues.prix,
+      stock: formValues.stock,
+      imageUrl: formValues.imageUrl || null,
+      actif: formValues.actif,
+      categoryId: Number(formValues.categoryId) // CONVERTIR EN NUMBER
+    };
+
+    console.log('🚀 === DONNÉES À ENVOYER ===');
+    console.log('📦 ProductData:', productData);
+    console.log('📡 JSON à envoyer:', JSON.stringify(productData, null, 2));
+    console.log('============================');
 
     if (this.isEditMode && this.productId) {
-      // Modification
+      // MODIFICATION
+      console.log(`✏️ Modification produit ID: ${this.productId}`);
+      
       this.productService.update(this.productId, productData).subscribe({
         next: (response) => {
-          console.log('Produit modifié:', response);
-          this.successMessage = 'Produit modifié avec succès !';
+          console.log('✅ Réponse du serveur:', response);
+          
+          // Vérifiez la réponse
+          if (response.category || response.categoryId) {
+            console.log('🎉 Catégorie dans la réponse:', response.category || response.categoryId);
+            this.successMessage = 'Produit modifié avec succès !';
+          } else {
+            console.warn('⚠️ La réponse ne contient pas de catégorie');
+            this.successMessage = 'Produit modifié - Vérifiez la catégorie';
+          }
+          
           this.loading = false;
           
-          // Redirection après 2 secondes
           setTimeout(() => {
             this.router.navigate(['/products']);
           }, 2000);
         },
         error: (err) => {
-          console.error('Erreur modification:', err);
-          this.errorMessage = err.error?.message || 'Erreur lors de la modification';
+          console.error('❌ Erreur:', err);
+          console.error('❌ Message:', err.message);
+          this.errorMessage = err.message || 'Erreur lors de la modification';
           this.loading = false;
         }
       });
     } else {
-      // Création
+      // CRÉATION
+      console.log('🆕 Création d\'un nouveau produit');
+      
       this.productService.create(productData).subscribe({
         next: (response) => {
-          console.log('Produit créé:', response);
+          console.log('✅ Réponse création:', response);
           this.successMessage = 'Produit créé avec succès !';
           this.productForm.reset();
           this.loading = false;
           
-          // Redirection après 2 secondes
           setTimeout(() => {
             this.router.navigate(['/products']);
           }, 2000);
         },
         error: (err) => {
-          console.error('Erreur création:', err);
-          this.errorMessage = err.error?.message || 'Erreur lors de la création';
+          console.error('❌ Erreur création:', err);
+          this.errorMessage = err.message || 'Erreur lors de la création';
           this.loading = false;
         }
       });
@@ -173,4 +228,16 @@ export class ProductFormComponent implements OnInit {
   get stock() { return this.productForm.get('stock'); }
   get categoryId() { return this.productForm.get('categoryId'); }
   get imageUrl() { return this.productForm.get('imageUrl'); }
+
+  // Méthode pour obtenir le nom de la catégorie sélectionnée
+  getSelectedCategoryName(): string {
+    const categoryId = this.productForm.get('categoryId')?.value;
+    
+    if (!categoryId) return 'Non sélectionnée';
+    
+    const categoryIdNumber = Number(categoryId);
+    const category = this.categories.find(cat => cat.id === categoryIdNumber);
+    
+    return category ? category.nom : 'Catégorie non trouvée';
+  }
 }
