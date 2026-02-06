@@ -47,9 +47,62 @@ public class CartController {
         cartService.deleteCart(id);
     }
 
+    // AJOUTER UN ITEM À UN PANIER SPÉCIFIQUE (par cartId)
     @PostMapping("/{cartId}/add-item")
     public CartItem addItemToCart(@PathVariable Long cartId, @RequestBody CartItem cartItem) {
         return cartService.addItemToCart(cartId, cartItem);
     }
 
+    // AJOUTER UN PRODUIT AU PANIER (alternative)
+    @PostMapping("/{cartId}/add-product/{productId}")
+    public CartItem addProductToCart(@PathVariable Long cartId,
+                                     @PathVariable Long productId,
+                                     @RequestParam int quantity) {
+        return cartService.addProductToCart(cartId, productId, quantity);
+    }
+
+    // NOUVELLE MÉTHODE : AJOUTER UN ITEM AU PANIER DE L'UTILISATEUR
+    @PostMapping("/user/{userId}/add-item")
+    public CartItem addItemToUserCart(@PathVariable Long userId, @RequestBody CartItem cartItem) {
+        return cartService.addItemToUserCart(userId, cartItem);
+    }
+
+    // NOUVELLE MÉTHODE : RÉCUPÉRER LE PANIER DE L'UTILISATEUR
+    @GetMapping("/user/{userId}")
+    public Cart getCartByUserId(@PathVariable Long userId) {
+        return cartService.getCartByUserId(userId);
+    }
+
+    // NOUVELLE MÉTHODE : SUPPRIMER UN ITEM DU PANIER
+    @DeleteMapping("/{cartId}/remove-item/{itemId}")
+    public void removeItemFromCart(@PathVariable Long cartId, @PathVariable Long itemId) {
+        cartService.removeItemFromCart(cartId, itemId);
+    }
+
+    // NOUVELLE MÉTHODE : VIDER LE PANIER DE L'UTILISATEUR
+    @DeleteMapping("/user/{userId}/clear")
+    public void clearUserCart(@PathVariable Long userId) {
+        cartService.clearUserCart(userId);
+    }
+
+    // NOUVELLE MÉTHODE : METTRE À JOUR LA QUANTITÉ D'UN ITEM
+    @PutMapping("/{cartId}/update-item/{itemId}")
+    public CartItem updateCartItemQuantity(
+            @PathVariable Long cartId,
+            @PathVariable Long itemId,
+            @RequestParam int quantity) {
+        return cartService.updateCartItemQuantity(cartId, itemId, quantity);
+    }
+
+    // NOUVELLE MÉTHODE : CALCULER LE TOTAL DU PANIER
+    @GetMapping("/{cartId}/total")
+    public double calculateCartTotal(@PathVariable Long cartId) {
+        return cartService.calculateCartTotal(cartId);
+    }
+
+    // NOUVELLE MÉTHODE : TROUVER OU CRÉER UN PANIER POUR L'UTILISATEUR
+    @GetMapping("/user/{userId}/find-or-create")
+    public Cart findOrCreateCartForUser(@PathVariable Long userId) {
+        return cartService.findOrCreateCartForUser(userId);
+    }
 }
