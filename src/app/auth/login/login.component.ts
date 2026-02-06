@@ -2,9 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { environment } from 'src/environments/environment';
+import { ViewEncapsulation } from '@angular/core';
 @Component({
   selector: 'app-login',
-  templateUrl: './login.component.html'
+  templateUrl: './login.component.html',
+  encapsulation: ViewEncapsulation.None
 })
 export class LoginComponent implements OnInit {
   email = '';

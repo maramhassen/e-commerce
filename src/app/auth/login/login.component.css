@@ -1,0 +1,96 @@
+/* Background */
+.login-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #ff5f9e, #ff8ccf);
+}
+
+/* Card */
+.login-card {
+  background: #fff0f6; /* rose clair doux */
+  width: 420px;
+  padding: 2.5rem;
+  border-radius: 25px;
+  border: 1px solid #ffd6e8;
+}
+.login-card {
+  box-shadow: 0 15px 40px rgba(255, 63, 142, 0.15);
+}
+
+
+/* Header */
+.login-title {
+  color: #ff3f8e !important;
+  font-weight: 700;
+}
+
+.subtitle {
+  color: #9b4a6f !important;
+}
+
+/* Icon circle */
+.icon-circle {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #ff3f8e, #ff7eb3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+}
+
+.icon-main {
+  color: white !important;
+  font-size: 26px;
+}
+
+/* Labels */
+.login-label {
+  color: #9b4a6f !important;
+  font-weight: 600;
+}
+
+/* Inputs */
+.pink-bg {
+  background-color: #ffe0ec !important;
+  border: none;
+}
+
+.pink-icon {
+  color: #ff3f8e !important;
+}
+
+.pink-input {
+  border: 1px solid #f3b5cc !important;
+  border-radius: 12px;
+}
+
+.pink-input:focus {
+  border-color: #ff3f8e !important;
+  box-shadow: 0 0 0 0.2rem rgba(255, 63, 142, 0.3) !important;
+}
+
+/* Button */
+.btn-login {
+  background: linear-gradient(135deg, #ff3f8e, #ff7eb3) !important;
+  border: none;
+  color: white !important;
+  padding: 12px;
+  border-radius: 30px;
+  font-weight: 600;
+}
+
+.btn-login i {
+  color: white !important;
+}
+
+/* Footer */
+.login-text {
+  color: #9b4a6f;
+}
+
+.register-link {
+  color: #ff3f8e !important;
+  font-weight: 600;
+  cursor: pointer;
+}

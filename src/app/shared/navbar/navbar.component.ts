@@ -3,6 +3,8 @@ import { AuthService } from '../../core/services/auth.service';
 import { CategoryService } from '../../core/services/category.service';
 import { Subscription } from 'rxjs';
 import { Category } from '../../models/category';
+import { Router, NavigationEnd, Event } from '@angular/router';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-navbar',
@@ -13,17 +15,21 @@ export class NavbarComponent implements OnInit, OnDestroy {
   isAdmin = false;
   currentUser: any = null;
   categories: Category[] = [];
-  
+  isHomePage = false;
+
   private authSubscription!: Subscription;
+  private routerSubscription!: Subscription;
 
   constructor(
     private authService: AuthService,
-    private categoryService: CategoryService
+    private categoryService: CategoryService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
+    // Charger les catégories
     this.loadCategories();
-    
+
     // S'abonner aux changements d'état d'authentification
     this.authSubscription = this.authService.authState$.subscribe(
       (isAuthenticated: boolean) => {
@@ -37,6 +43,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
         }
       }
     );
+
+    // 🔧 Suivi de la page courante pour savoir si on est sur la home
+    this.routerSubscription = this.router.events
+      .pipe(
+        filter((event: Event): event is NavigationEnd => event instanceof NavigationEnd)
+      )
+      .subscribe((event: NavigationEnd) => {
+        this.isHomePage = event.urlAfterRedirects === '/';
+      });
   }
 
   private loadCategories(): void {
@@ -65,9 +80,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Nettoyer l'abonnement pour éviter les fuites mémoire
+    // Nettoyer les abonnements pour éviter les fuites mémoire
     if (this.authSubscription) {
       this.authSubscription.unsubscribe();
+    }
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
     }
   }
 }

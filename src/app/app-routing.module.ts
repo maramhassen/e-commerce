@@ -12,6 +12,8 @@ import { CartComponent } from './cart/cart/cart.component';
 import { OrderDetailComponent } from './orders/order-detail/order-detail.component';
 import { OrderListComponent } from './orders/order-list/order-list.component';
 import { HomeComponent } from './shared/home/home.component';
+import { UserListComponent } from './users/user-list/user-list.component';
+import { AdminGuard } from './core/guards/admin.guard'; // IMPORTANT: Ajoutez cette ligne
 
 const routes: Routes = [
   // ================= Pages publiques =================
@@ -61,16 +63,15 @@ const routes: Routes = [
     canActivate: [AuthGuard], 
     data: { role: 'ADMIN' } 
   },
-  { 
-    path: 'products/new', 
-    component: ProductFormComponent, 
-    canActivate: [AuthGuard], 
-    data: { role: 'ADMIN' } 
+  {
+  path: 'admin/products/new',
+  component: ProductFormComponent,
+  canActivate: [AdminGuard]
   },
   { 
     path: 'products/edit/:id', 
     component: ProductFormComponent, 
-    canActivate: [AuthGuard], 
+    canActivate: [AdminGuard], 
     data: { role: 'ADMIN' } 
   },
 
@@ -80,7 +81,7 @@ const routes: Routes = [
     component: ProductListComponent, 
     canActivate: [AuthGuard] 
   },
-
+  { path: 'users', component: UserListComponent },
   // ================= Redirections =================
   { path: '**', redirectTo: '' }
 ];

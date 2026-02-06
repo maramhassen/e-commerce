@@ -205,10 +205,31 @@ export class ProductListComponent implements OnInit {
   }
 
   goToEditProduct(id: number): void {
-    if (!this.isAdmin) {
-      alert('Accès réservé aux administrateurs');
-      return;
-    }
-    this.router.navigate(['/admin/products/edit', id]);
+  if (!this.isAdmin) {
+    alert('Accès réservé aux administrateurs');
+    return;
   }
+  
+  // Navigation vers l'édition
+  this.router.navigate(['/admin/products/edit', id]);
+}
+
+  // Méthode pour naviguer vers le formulaire d'ajout
+goToAddProduct(): void {
+  if (!this.isAdmin) {
+    alert('Accès réservé aux administrateurs');
+    return;
+  }
+  
+  // Option 1: Utilisez routerLink dans le template
+  this.router.navigate(['/admin/products/new']);
+  
+  // Option 2: Si vous voulez ajouter des paramètres
+  // this.router.navigate(['/admin/products/new'], {
+  //   queryParams: { mode: 'create' }
+  // });
+}
+
+// Si vous avez un bouton d'édition, assurez-vous qu'il fonctionne aussi :
+
 }

@@ -1,0 +1,97 @@
+/* Style pour les avatars circulaires */
+.avatar-circle {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.avatar-text {
+  text-transform: uppercase;
+}
+
+/* Style pour les badges */
+.badge {
+  font-size: 0.85em;
+  font-weight: 500;
+  padding: 0.5em 1em;
+}
+
+/* Animation pour le spinner */
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Style pour les cartes de statistiques */
+.card-stat {
+  border: none;
+  border-radius: 15px;
+  transition: transform 0.3s ease;
+}
+
+.card-stat:hover {
+  transform: translateY(-5px);
+}
+
+/* Style pour le tableau */
+.table-hover tbody tr:hover {
+  background-color: rgba(0, 123, 255, 0.05) !important;
+  transition: background-color 0.2s ease;
+}
+
+/* Style pour les boutons */
+.btn-group .btn {
+  border-radius: 5px !important;
+  margin: 0 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .avatar-circle {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+  
+  .btn-group .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  .display-6 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Style pour les messages d'erreur */
+.backend-error {
+  background-color: #f8d7da;
+  border-left: 4px solid #dc3545;
+  padding: 1rem;
+  border-radius: 5px;
+}
+
+.backend-error ul {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.backend-error code {
+  background-color: #e9ecef;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.875em;
+}

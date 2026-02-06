@@ -1,38 +1,67 @@
-<h2>Connexion</h2>
+<div class="login-page d-flex align-items-center justify-content-center">
+  <div class="login-card shadow-lg">
 
-<form (ngSubmit)="login()" #loginForm="ngForm">
-  <div>
-    <label for="email">Email</label>
-    <input
-      id="email"
-      name="email"
-      type="email"
-      placeholder="Email"
-      [(ngModel)]="email"
-      required
-    />
+    <!-- Header -->
+    <div class="login-header text-center">
+      <div class="icon-circle mb-3">
+        <i class="fas fa-user-lock icon-main"></i>
+      </div>
+      <h2 class="login-title">Connexion</h2>
+      <p class="subtitle">Ravi de vous revoir 💕</p>
+    </div>
+
+    <form (ngSubmit)="login()" #loginForm="ngForm">
+
+      <!-- Email -->
+      <div class="form-group mb-3">
+        <label class="login-label">Email</label>
+        <div class="input-group">
+          <span class="input-group-text pink-bg">
+            <i class="fas fa-envelope pink-icon"></i>
+          </span>
+          <input
+            type="email"
+            class="form-control pink-input"
+            [(ngModel)]="email"
+            name="email"
+            required
+          />
+        </div>
+      </div>
+
+      <!-- Mot de passe -->
+      <div class="form-group mb-4">
+        <label class="login-label">Mot de passe</label>
+        <div class="input-group">
+          <span class="input-group-text pink-bg">
+            <i class="fas fa-lock pink-icon"></i>
+          </span>
+          <input
+            type="password"
+            class="form-control pink-input"
+            [(ngModel)]="motDePasse"
+            name="motDePasse"
+            required
+          />
+        </div>
+      </div>
+
+      <!-- Bouton -->
+      <button
+        type="submit"
+        class="btn btn-login w-100"
+        [disabled]="!loginForm.valid || loading"
+      >
+        <i class="fas fa-heart me-2"></i>
+        Se connecter
+      </button>
+
+    </form>
+
+    <div class="text-center mt-4">
+      <p class="login-text">Pas encore de compte ?</p>
+      <a class="register-link" (click)="goToRegister()">Créer un compte</a>
+    </div>
+
   </div>
-
-  <div>
-    <label for="motDePasse">Mot de passe</label>
-    <input
-      id="motDePasse"
-      name="motDePasse"
-      type="password"
-      placeholder="Mot de passe"
-      [(ngModel)]="motDePasse"
-      required
-    />
-  </div>
-
-  <button type="submit" [disabled]="!loginForm.form.valid">Se connecter</button>
-</form>
-
-<p *ngIf="errorMessage" style="color:red">
-  {{ errorMessage }}
-</p>
-
-<p>
-  Pas de compte ?
-  <a routerLink="/register">S'inscrire</a>
-</p>
+</div>

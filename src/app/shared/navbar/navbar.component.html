@@ -1,219 +1,169 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
   <div class="container">
-    <!-- Logo / Brand -->
+
+    <!-- Logo -->
     <a class="navbar-brand d-flex align-items-center" routerLink="/">
       <i class="fas fa-store me-2"></i>
       <span>MaBoutique</span>
     </a>
 
     <!-- Mobile Toggle -->
-    <button class="navbar-toggler" 
-            type="button" 
-            data-bs-toggle="collapse" 
-            data-bs-target="#mainNavbar"
-            aria-controls="mainNavbar"
-            aria-expanded="false"
-            aria-label="Toggle navigation">
+    <button class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#mainNavbar">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <!-- Navbar Content -->
     <div class="collapse navbar-collapse" id="mainNavbar">
-      <!-- Menu principal -->
+
+      <!-- MENU PRINCIPAL -->
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link" 
-             routerLink="/" 
+
+        <!-- Accueil -->
+        <li class="nav-item" *ngIf="isAuthenticated || !isHomePage">
+          <a class="nav-link"
+             routerLink="/"
              routerLinkActive="active"
              [routerLinkActiveOptions]="{exact: true}">
             <i class="fas fa-home me-1"></i>Accueil
           </a>
         </li>
-        
-        <li class="nav-item">
-          <a class="nav-link" 
-             routerLink="/products" 
-             routerLinkActive="active">
-            <i class="fas fa-boxes me-1"></i>Produits
-          </a>
-        </li>
-        
-        <li class="nav-item dropdown" *ngIf="categories.length > 0">
-          <a class="nav-link dropdown-toggle" 
-             href="#" 
-             id="categoriesDropdown"
-             role="button"
-             data-bs-toggle="dropdown"
-             aria-expanded="false">
-            <i class="fas fa-tags me-1"></i>Catégories
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="categoriesDropdown">
-            <li *ngFor="let category of categories">
-              <a class="dropdown-item" 
-                 [routerLink]="['/products']">
-                {{ category.nom }}
-              </a>
-            </li>
-            <li><hr class="dropdown-divider"></li>
-            <li>
-              <a class="dropdown-item" routerLink="/categories">
-                <i class="fas fa-arrow-right me-2"></i>Toutes les catégories
-              </a>
-            </li>
-          </ul>
-        </li>
-        
-        <li class="nav-item" *ngIf="isAuthenticated">
-          <a class="nav-link" 
-             routerLink="/orders" 
-             routerLinkActive="active">
-            <i class="fas fa-clipboard-list me-1"></i>Mes commandes
-          </a>
-        </li>
-        
-        <li class="nav-item" *ngIf="isAuthenticated">
-          <a class="nav-link" 
-             routerLink="/cart" 
-             routerLinkActive="active">
-            <i class="fas fa-shopping-cart me-1"></i>Panier
-          </a>
-        </li>
+
+        <!-- ===== CLIENT : MENU INCHANGÉ ===== -->
+        <ng-container *ngIf="isAuthenticated && !isAdmin">
+
+          <li class="nav-item dropdown"
+              *ngIf="categories.length > 0 && (isAuthenticated || !isHomePage)">
+            <ul class="dropdown-menu">
+              <li *ngFor="let category of categories">
+                <a class="dropdown-item" [routerLink]="['/products']">
+                  {{ category.nom }}
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item" routerLink="/categories">
+                  <i class="fas fa-arrow-right me-2"></i>Toutes les catégories
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/orders" routerLinkActive="active">
+              <i class="fas fa-clipboard-list me-1"></i>Mes commandes
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/cart" routerLinkActive="active">
+              <i class="fas fa-shopping-cart me-1"></i>Panier
+            </a>
+          </li>
+
+        </ng-container>
+
+        <!-- ===== ADMIN : MENU SPÉCIAL ===== -->
+        <ng-container *ngIf="isAuthenticated && isAdmin">
+
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/categories" routerLinkActive="active">
+              <i class="fas fa-tags me-1"></i>Catégories
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/products" routerLinkActive="active">
+              <i class="fas fa-box me-1"></i>Produits
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/users" routerLinkActive="active">
+              <i class="fas fa-users me-1"></i>Utilisateurs
+            </a>
+          </li>
+
+        </ng-container>
+
       </ul>
 
-      <!-- Menu secondaire -->
+      <!-- MENU DROIT -->
       <ul class="navbar-nav">
-        <!-- Compte utilisateur -->
+
+        <!-- USER DROPDOWN -->
         <li class="nav-item dropdown" *ngIf="isAuthenticated; else loginButtons">
-          <a class="nav-link dropdown-toggle" 
-             href="#" 
-             id="userDropdown"
-             role="button"
-             data-bs-toggle="dropdown"
-             aria-expanded="false">
-            <i class="fas fa-user me-1"></i>
-            {{ userName }}
+          <a class="nav-link dropdown-toggle"
+             data-bs-toggle="dropdown">
+            <i class="fas fa-user me-1"></i>{{ userName }}
           </a>
-          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-            <li>
-              <a class="dropdown-item" routerLink="/profile">
-                <i class="fas fa-user-circle me-2"></i>Mon profil
-              </a>
-            </li>
-            <li>
-              <a class="dropdown-item" routerLink="/orders">
-                <i class="fas fa-clipboard-list me-2"></i>Mes commandes
-              </a>
-            </li>
-            <li *ngIf="isAdmin">
-              <hr class="dropdown-divider">
-              <h6 class="dropdown-header">Administration</h6>
-              <a class="dropdown-item" routerLink="/categories">
-                <i class="fas fa-tags me-2"></i>Catégories
-              </a>
-              <a class="dropdown-item" routerLink="/products/new">
-                <i class="fas fa-plus me-2"></i>Nouveau produit
-              </a>
-            </li>
+
+          <ul class="dropdown-menu dropdown-menu-end">
+
+            <!-- CLIENT -->
+            <ng-container *ngIf="!isAdmin">
+              <li>
+                <a class="dropdown-item" routerLink="/profile">
+                  <i class="fas fa-user-circle me-2"></i>Mon profil
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" routerLink="/orders">
+                  <i class="fas fa-clipboard-list me-2"></i>Mes commandes
+                </a>
+              </li>
+            </ng-container>
+
+            <!-- ADMIN -->
+            <ng-container *ngIf="isAdmin">
+              <li>
+                <h6 class="dropdown-header">Administration</h6>
+              </li>
+              <li>
+                <a class="dropdown-item" routerLink="/categories">
+                  <i class="fas fa-tags me-2"></i>Catégories
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" routerLink="/products/new">
+                  <i class="fas fa-plus me-2"></i>Nouveau produit
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" routerLink="/users">
+                  <i class="fas fa-users me-2"></i>Utilisateurs
+                </a>
+              </li>
+            </ng-container>
+
             <li><hr class="dropdown-divider"></li>
             <li>
               <a class="dropdown-item text-danger" (click)="logout()">
                 <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
               </a>
             </li>
+
           </ul>
         </li>
-        
+
+        <!-- LOGIN / REGISTER -->
         <ng-template #loginButtons>
-          <li class="nav-item">
+          <li class="nav-item" *ngIf="isAuthenticated || !isHomePage">
             <a class="nav-link" routerLink="/auth/login">
               <i class="fas fa-sign-in-alt me-1"></i>Connexion
             </a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" *ngIf="isAuthenticated || !isHomePage">
             <a class="nav-link" routerLink="/auth/register">
               <i class="fas fa-user-plus me-1"></i>Inscription
             </a>
           </li>
         </ng-template>
+
       </ul>
+
     </div>
   </div>
 </nav>
-
-<style>
-.navbar {
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 0.5rem 0;
-}
-
-.nav-link {
-  padding: 0.5rem 1rem !important;
-  border-radius: 5px;
-  margin: 0 2px;
-  transition: all 0.3s ease;
-  font-weight: 500;
-}
-
-.nav-link:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
-}
-
-.nav-link.active {
-  background-color: rgba(255, 255, 255, 0.2);
-  font-weight: 600;
-}
-
-.dropdown-menu {
-  border: none;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  margin-top: 5px;
-}
-
-.dropdown-item {
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.dropdown-item:hover {
-  background-color: #f8f9fa;
-  transform: translateX(5px);
-}
-
-.dropdown-divider {
-  margin: 0.5rem 0;
-}
-
-.navbar-toggler {
-  border: none;
-  padding: 0.5rem;
-}
-
-.navbar-toggler:focus {
-  box-shadow: none;
-}
-
-.navbar-brand {
-  font-weight: 700;
-  font-size: 1.3rem;
-}
-
-@media (max-width: 992px) {
-  .navbar-nav {
-    padding: 1rem 0;
-  }
-  
-  .nav-link {
-    margin: 2px 0;
-  }
-  
-  .dropdown-menu {
-    border: 1px solid #dee2e6;
-    box-shadow: none;
-    margin: 5px 0;
-  }
-}
-</style>

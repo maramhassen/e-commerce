@@ -141,18 +141,6 @@
                     (click)="goToProductDetail(product.id!)">
               👁️ Voir détails
             </button>
-
-            <!-- Boutons admin -->
-            <div *ngIf="isAdmin" class="d-flex gap-2 mt-2">
-              <button class="btn btn-warning btn-sm flex-fill"
-                      (click)="goToEditProduct(product.id!)">
-                ✏️ Modifier
-              </button>
-              <button class="btn btn-danger btn-sm flex-fill"
-                      (click)="deleteProduct(product.id!)">
-                🗑️ Supprimer
-              </button>
-            </div>
           </div>
         </div>
 
@@ -213,50 +201,10 @@
     </p>
   </div>
 
-  <!-- Bouton ajout admin -->
-  <div *ngIf="isAdmin" class="mt-4 text-end">
-    <button class="btn btn-success" routerLink="/admin/products/new">
-      ➕ Ajouter un produit
-    </button>
-  </div>
-</div>
+  <button
+  class="btn btn-success"
+  routerLink="/admin/products/new">
+  ➕ Ajouter un produit
+  </button>
 
-<style>
-.card {
-  transition: transform 0.2s;
-  border: 1px solid #eaeaea;
-}
 
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.card-img-top {
-  height: 200px;
-  object-fit: cover;
-}
-
-.btn {
-  transition: all 0.2s;
-}
-
-.badge {
-  font-size: 0.75rem;
-}
-
-.page-link {
-  cursor: pointer;
-}
-
-@media (max-width: 768px) {
-  .col-md-4, .col-lg-3 {
-    margin-bottom: 1rem;
-  }
-  
-  .btn {
-    padding: 0.5rem;
-    font-size: 0.9rem;
-  }
-}
-</style>
