@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, map, catchError, throwError, BehaviorSubject } from 'rxjs';
 import { User } from '../../models/user';
+import { Subject } from 'rxjs';
 
 // Interface pour l'utilisateur stocké (sans motDePasse)
 interface StoredUser {
@@ -21,7 +22,7 @@ export class AuthService {
   
   private authState = new BehaviorSubject<boolean>(this.isAuthenticated());
   public authState$ = this.authState.asObservable();
-  
+  private authStateChange = new Subject<void>();
   constructor(
     private http: HttpClient,
     private router: Router
@@ -277,5 +278,14 @@ export class AuthService {
     }
     
     return error;
+  }
+
+  notifyAuthStateChange(): void {
+    this.authStateChange.next();
+  }
+  
+  // Observable pour écouter les changements
+  onAuthStateChange(): Observable<void> {
+    return this.authStateChange.asObservable();
   }
 }

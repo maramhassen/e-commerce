@@ -46,6 +46,13 @@ export class ProductListComponent implements OnInit {
     this.loadProducts();
     this.loadCategories();
     this.checkAuthStatus();
+    
+    // S'abonner aux changements d'authentification
+    if (this.authService.onAuthStateChange) {
+      this.authService.onAuthStateChange().subscribe(() => {
+        this.checkAuthStatus();
+      });
+    }
   }
 
   private checkAuthStatus(): void {
@@ -62,6 +69,19 @@ export class ProductListComponent implements OnInit {
         this.products = products;
         this.filteredProducts = [...products];
         this.totalItems = products.length;
+        
+        // Debug: Afficher les produits avec leurs catégories
+        console.log('=== PRODUITS CHARGÉS ===');
+        products.forEach((product, index) => {
+          console.log(`Produit ${index + 1}:`, {
+            id: product.id,
+            nom: product.nom,
+            category: product.category,
+            categoryId: product.category?.id,
+            categoryNom: product.category?.nom
+          });
+        });
+        
         this.applyFilters();
         this.loading = false;
       },
@@ -77,6 +97,14 @@ export class ProductListComponent implements OnInit {
     this.categoryService.getAll().subscribe({
       next: (categories) => {
         this.categories = categories;
+        console.log('=== CATÉGORIES CHARGÉES ===');
+        categories.forEach((cat, index) => {
+          console.log(`Catégorie ${index + 1}:`, {
+            id: cat.id,
+            nom: cat.nom,
+            description: cat.description
+          });
+        });
       },
       error: (err) => {
         console.error('Erreur chargement catégories:', err);
@@ -85,43 +113,85 @@ export class ProductListComponent implements OnInit {
   }
 
   applyFilters(): void {
+    console.log('=== APPLICATION DES FILTRES ===');
+    console.log('Catégorie sélectionnée:', this.selectedCategoryId);
+    console.log('Recherche:', this.searchKeyword);
+    console.log('Prix min:', this.minPrice);
+    console.log('Prix max:', this.maxPrice);
+    console.log('En stock seulement:', this.inStockOnly);
+
     let filtered = this.products;
 
-    // Filtre par catégorie
-    if (this.selectedCategoryId) {
-      filtered = filtered.filter(product => 
-        product.category?.id === this.selectedCategoryId
-      );
+    // Filtre par catégorie - CORRECTION IMPORTANTE
+    if (this.selectedCategoryId !== null && this.selectedCategoryId !== undefined) {
+      const selectedId = Number(this.selectedCategoryId);
+      console.log(`Filtrage par catégorie ID: ${selectedId}`);
+      
+      filtered = filtered.filter(product => {
+        const productCategoryId = product.category?.id;
+        
+        // Vérifier si le produit a une catégorie avec un ID
+        if (productCategoryId !== undefined && productCategoryId !== null) {
+          const matches = Number(productCategoryId) === selectedId;
+          
+          if (matches) {
+            console.log(`✓ Produit "${product.nom}" correspond à la catégorie ${selectedId}`);
+          }
+          
+          return matches;
+        }
+        
+        // Si le produit n'a pas de catégorie
+        console.log(`✗ Produit "${product.nom}" n'a pas de catégorie`);
+        return false;
+      });
+      
+      console.log(`${filtered.length} produits après filtre catégorie`);
     }
 
     // Filtre par recherche
     if (this.searchKeyword.trim()) {
       const keyword = this.searchKeyword.toLowerCase();
+      const beforeSearchCount = filtered.length;
+      
       filtered = filtered.filter(product =>
         product.nom.toLowerCase().includes(keyword) ||
-        product.description.toLowerCase().includes(keyword)
+        (product.description && product.description.toLowerCase().includes(keyword))
       );
+      
+      console.log(`${beforeSearchCount} → ${filtered.length} produits après recherche "${keyword}"`);
     }
 
     // Filtre par prix
-    if (this.minPrice) {
+    if (this.minPrice !== undefined && this.minPrice !== null) {
+      const beforePriceFilter = filtered.length;
       filtered = filtered.filter(product => product.prix >= this.minPrice!);
+      console.log(`${beforePriceFilter} → ${filtered.length} produits après prix min (${this.minPrice} €)`);
     }
-    if (this.maxPrice) {
+    
+    if (this.maxPrice !== undefined && this.maxPrice !== null) {
+      const beforePriceFilter = filtered.length;
       filtered = filtered.filter(product => product.prix <= this.maxPrice!);
+      console.log(`${beforePriceFilter} → ${filtered.length} produits après prix max (${this.maxPrice} €)`);
     }
 
     // Filtre par stock
     if (this.inStockOnly) {
+      const beforeStockFilter = filtered.length;
       filtered = filtered.filter(product => product.stock > 0);
+      console.log(`${beforeStockFilter} → ${filtered.length} produits après filtre "en stock seulement"`);
     }
 
     this.filteredProducts = filtered;
     this.totalItems = filtered.length;
     this.currentPage = 1;
+    
+    console.log('=== FILTRES APPLIQUÉS ===');
+    console.log(`${this.totalItems} produits filtrés sur ${this.products.length} au total`);
   }
 
   clearFilters(): void {
+    console.log('Réinitialisation des filtres');
     this.selectedCategoryId = null;
     this.searchKeyword = '';
     this.minPrice = undefined;
@@ -130,37 +200,163 @@ export class ProductListComponent implements OnInit {
     this.applyFilters();
   }
 
+  // Vérifie si un produit est disponible (stock > 0 et actif)
+  isProductAvailable(product: Product): boolean {
+    return product.stock > 0 && product.actif !== false;
+  }
+
+  // Vérifie si l'utilisateur peut voir le bouton "Ajouter au panier"
+  canShowAddToCartButton(): boolean {
+    // Seuls les clients (non-admins) peuvent voir ce bouton
+    return this.isAuthenticated && !this.isAdmin;
+  }
+
   addToCart(product: Product): void {
+    // Vérifier si l'utilisateur est admin
+    if (this.isAdmin) {
+      this.showNotification('Cette fonctionnalité est réservée aux clients', 'warning');
+      return;
+    }
+    
+    // Vérifier si l'utilisateur est connecté
     if (!this.isAuthenticated) {
       this.router.navigate(['/login']);
       return;
     }
-
-    if (product.stock > 0) {
-      // Implémentez votre logique d'ajout au panier ici
-      console.log('Ajouter au panier:', product);
-      alert(`${product.nom} ajouté au panier!`);
-    } else {
-      alert('Produit en rupture de stock');
+    
+    // Vérifier si le produit est disponible
+    if (!this.isProductAvailable(product)) {
+      if (product.stock <= 0) {
+        this.showNotification('Ce produit est en rupture de stock', 'danger');
+      } else if (!product.actif) {
+        this.showNotification('Ce produit n\'est pas disponible', 'warning');
+      }
+      return;
     }
+
+    // Ajouter au panier
+    try {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const existingItemIndex = cart.findIndex((item: any) => item.productId === product.id);
+      
+      if (existingItemIndex > -1) {
+        cart[existingItemIndex].quantity += 1;
+      } else {
+        cart.push({
+          productId: product.id,
+          productName: product.nom,
+          price: product.prix,
+          quantity: 1,
+          imageUrl: product.imageUrl || 'assets/default-product.jpg'
+        });
+      }
+      
+      localStorage.setItem('cart', JSON.stringify(cart));
+      this.showNotification(`${product.nom} a été ajouté au panier`, 'success');
+      
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout au panier:', error);
+      this.showNotification('Erreur lors de l\'ajout au panier', 'danger');
+    }
+  }
+
+  goToLogin(): void {
+    this.router.navigate(['/login']);
+  }
+
+  private showNotification(message: string, type: 'success' | 'danger' | 'warning' = 'success'): void {
+    // Créer un élément de notification
+    const notification = document.createElement('div');
+    
+    // Styles CSS
+    const styles: any = {
+      position: 'fixed',
+      top: '20px',
+      right: '20px',
+      padding: '15px 20px',
+      borderRadius: '5px',
+      color: 'white',
+      zIndex: '9999',
+      animation: 'slideIn 0.3s ease',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+      maxWidth: '400px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '10px'
+    };
+    
+    // Couleur selon le type
+    switch (type) {
+      case 'success':
+        styles.backgroundColor = '#28a745';
+        break;
+      case 'danger':
+        styles.backgroundColor = '#dc3545';
+        break;
+      case 'warning':
+        styles.backgroundColor = '#ffc107';
+        styles.color = '#212529';
+        break;
+    }
+    
+    // Appliquer les styles
+    Object.keys(styles).forEach(key => {
+      (notification.style as any)[key] = styles[key];
+    });
+    
+    // Icône selon le type
+    let icon = '';
+    switch (type) {
+      case 'success':
+        icon = '✓';
+        break;
+      case 'danger':
+        icon = '✗';
+        break;
+      case 'warning':
+        icon = '⚠';
+        break;
+    }
+    
+    // Contenu
+    notification.innerHTML = `
+      <span style="font-weight: bold; font-size: 1.2em;">${icon}</span>
+      <span>${message}</span>
+    `;
+    
+    // Ajouter au DOM
+    document.body.appendChild(notification);
+    
+    // Supprimer après 3 secondes
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+          if (notification.parentNode) {
+            document.body.removeChild(notification);
+          }
+        }, 300);
+      }
+    }, 3000);
   }
 
   deleteProduct(id: number): void {
     if (!this.isAdmin) {
-      alert('Vous n\'avez pas les permissions nécessaires');
+      this.showNotification('Vous n\'avez pas les permissions nécessaires', 'warning');
       return;
     }
 
-    if (confirm('Supprimer ce produit ?')) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.')) {
       this.productService.delete(id).subscribe({
         next: () => {
           this.products = this.products.filter(p => p.id !== id);
           this.filteredProducts = this.filteredProducts.filter(p => p.id !== id);
-          this.totalItems--;
+          this.totalItems = this.filteredProducts.length;
+          this.showNotification('Produit supprimé avec succès', 'success');
         },
         error: (err) => {
           console.error('Erreur suppression:', err);
-          alert('Erreur lors de la suppression');
+          this.showNotification('Erreur lors de la suppression du produit', 'danger');
         }
       });
     }
@@ -178,58 +374,85 @@ export class ProductListComponent implements OnInit {
   changePage(page: number): void {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
   getPageNumbers(): number[] {
     const maxVisiblePages = 5;
-    const pages = [];
+    const pages: number[] = [];
     
-    let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(this.totalPages, startPage + maxVisiblePages - 1);
-    
-    if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
-    
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
+    if (this.totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
+      let endPage = Math.min(this.totalPages, startPage + maxVisiblePages - 1);
+      
+      if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
     }
     
     return pages;
   }
 
-  // Navigation
   goToProductDetail(id: number): void {
     this.router.navigate(['/products', id]);
   }
 
   goToEditProduct(id: number): void {
-  if (!this.isAdmin) {
-    alert('Accès réservé aux administrateurs');
-    return;
+    if (!this.isAdmin) {
+      this.showNotification('Accès réservé aux administrateurs', 'warning');
+      return;
+    }
+    
+    this.router.navigate(['/admin/products/edit', id]);
   }
-  
-  // Navigation vers l'édition
-  this.router.navigate(['/admin/products/edit', id]);
-}
 
-  // Méthode pour naviguer vers le formulaire d'ajout
-goToAddProduct(): void {
-  if (!this.isAdmin) {
-    alert('Accès réservé aux administrateurs');
-    return;
+  goToAddProduct(): void {
+    if (!this.isAdmin) {
+      this.showNotification('Accès réservé aux administrateurs', 'warning');
+      return;
+    }
+    
+    this.router.navigate(['/admin/products/new']);
   }
+
+  getStockStatus(product: Product): { text: string, color: string } {
+    if (product.stock <= 0) {
+      return { text: 'Rupture de stock', color: '#dc3545' };
+    } else if (product.stock <= 5) {
+      return { text: `Plus que ${product.stock} en stock`, color: '#ffc107' };
+    } else {
+      return { text: `${product.stock} en stock`, color: '#28a745' };
+    }
+  }
+
+  // Méthode de débogage
+  debugFilters(): void {
+    console.log('=== DÉBOGAGE DES FILTRES ===');
+    console.log('Catégories disponibles:', this.categories);
+    console.log('Produits:', this.products.length);
+    console.log('Filtres actuels:', {
+      selectedCategoryId: this.selectedCategoryId,
+      searchKeyword: this.searchKeyword,
+      minPrice: this.minPrice,
+      maxPrice: this.maxPrice,
+      inStockOnly: this.inStockOnly
+    });
+    this.applyFilters();
+  }
+  // Ajoutez cette méthode dans la classe ProductListComponent
+getCategoryName(categoryId: number | null): string {
+  if (!categoryId) return 'Aucune';
   
-  // Option 1: Utilisez routerLink dans le template
-  this.router.navigate(['/admin/products/new']);
-  
-  // Option 2: Si vous voulez ajouter des paramètres
-  // this.router.navigate(['/admin/products/new'], {
-  //   queryParams: { mode: 'create' }
-  // });
+  const category = this.categories.find(c => c.id === categoryId);
+  return category ? category.nom : 'Catégorie inconnue';
 }
-
-// Si vous avez un bouton d'édition, assurez-vous qu'il fonctionne aussi :
-
 }
