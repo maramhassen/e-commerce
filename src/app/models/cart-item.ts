@@ -1,3 +1,4 @@
+import { Cart } from "./cart";
 import { Product } from "./product";
 
 export interface CartItem {
@@ -5,4 +6,6 @@ export interface CartItem {
   quantite: number;
   prixUnitaire: number;
   product: Partial<Product>;
+  cart?: Cart;  // ✅ AJOUTEZ CETTE LIGNE
+  cartId?: number;
 }

@@ -12,7 +12,7 @@ import { Category } from 'src/app/models/category';
   styleUrls: ['./product-form.component.css']
 })
 export class ProductFormComponent implements OnInit {
-  productForm!: FormGroup;
+  productForm: FormGroup;
   categories: Category[] = [];
   
   isEditMode = false;
@@ -27,84 +27,79 @@ export class ProductFormComponent implements OnInit {
     private categoryService: CategoryService,
     private route: ActivatedRoute,
     private router: Router
-  ) {}
-
-  ngOnInit(): void {
-    this.initForm();
-    this.loadCategories();
-    this.checkEditMode();
-  }
-
-  private initForm(): void {
+  ) {
+    // Initialiser le formulaire
     this.productForm = this.fb.group({
       nom: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
       description: ['', [Validators.required, Validators.maxLength(500)]],
       prix: ['', [Validators.required, Validators.min(0.01)]],
       stock: ['', [Validators.required, Validators.min(0)]],
       imageUrl: [''],
-      categoryId: ['', Validators.required], // NOTE: On utilise categoryId au lieu de category
+      categoryId: ['', Validators.required],
       actif: [true]
     });
   }
 
+  ngOnInit(): void {
+    this.loadCategories();
+    this.checkEditMode();
+  }
+
+  // Charger les catégories
   private loadCategories(): void {
     this.loading = true;
+    
     this.categoryService.getAll().subscribe({
       next: (categories) => {
-        console.log('✅ Catégories chargées:', categories);
         this.categories = categories;
-        
-        // Vérification
-        if (categories.length > 0) {
-          console.log('📋 Liste des catégories:');
-          categories.forEach(cat => {
-            console.log(`   ID: ${cat.id} - Nom: ${cat.nom}`);
-          });
-        }
-        
+        console.log(`✅ ${categories.length} catégories chargées`);
         this.loading = false;
       },
       error: (err) => {
-        console.error('❌ Erreur chargement catégories:', err);
+        console.error('❌ Erreur catégories:', err);
         this.errorMessage = 'Erreur lors du chargement des catégories';
         this.loading = false;
       }
     });
   }
 
+  // Vérifier si on est en mode édition
   private checkEditMode(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
+    
+    if (id && !isNaN(+id)) {
       this.isEditMode = true;
       this.productId = +id;
       this.loadProduct();
     }
   }
 
+  // Charger le produit à modifier
   private loadProduct(): void {
     if (!this.productId) return;
     
     this.loading = true;
-    this.errorMessage = '';
     
     this.productService.getById(this.productId).subscribe({
       next: (product) => {
-        console.log('📦 Produit chargé:', product);
+        console.log('📦 Produit chargé:', {
+          nom: product.nom,
+          categoryId: product.categoryId,
+          category: product.category
+        });
         
-        // Récupère l'ID de la catégorie
+        // Déterminer la valeur de categoryId
         let categoryIdValue = '';
         
-        if (product.category && product.category.id) {
-          categoryIdValue = product.category.id.toString();
-          console.log(`🎯 Catégorie trouvée: ID=${categoryIdValue}, Nom=${product.category.nom}`);
-        } else if (product.categoryId) {
+        if (product.categoryId) {
           categoryIdValue = product.categoryId.toString();
-          console.log(`🎯 CategoryId trouvé: ${categoryIdValue}`);
-        } else {
-          console.warn('⚠️ Le produit n\'a pas de catégorie associée');
+          console.log(`🎯 Utilisation categoryId: ${categoryIdValue}`);
+        } else if (product.category && product.category.id) {
+          categoryIdValue = product.category.id.toString();
+          console.log(`🎯 Utilisation category.id: ${categoryIdValue}`);
         }
         
-        // Patch du formulaire
+        // Remplir le formulaire
         this.productForm.patchValue({
           nom: product.nom,
           description: product.description,
@@ -125,95 +120,82 @@ export class ProductFormComponent implements OnInit {
     });
   }
 
+  // Soumettre le formulaire
   onSubmit(): void {
+    // Vérifier la validité
     if (this.productForm.invalid) {
-      console.log('❌ Formulaire invalide');
       this.markAllAsTouched();
+      this.errorMessage = 'Veuillez corriger les erreurs dans le formulaire';
       return;
     }
-
+    
     this.loading = true;
     this.errorMessage = '';
     this.successMessage = '';
-
-    // Récupère les valeurs du formulaire
+    
     const formValues = this.productForm.value;
     console.log('📋 Valeurs du formulaire:', formValues);
-
-    // Construit l'objet product AVEC categoryId
-    const productData: any = {
+    
+    // Préparer les données
+    const productData = {
       nom: formValues.nom,
       description: formValues.description,
       prix: formValues.prix,
       stock: formValues.stock,
       imageUrl: formValues.imageUrl || null,
-      actif: formValues.actif,
-      categoryId: Number(formValues.categoryId) // CONVERTIR EN NUMBER
+      categoryId: Number(formValues.categoryId), // CONVERTIR EN NOMBRE
+      actif: formValues.actif
     };
-
-    console.log('🚀 === DONNÉES À ENVOYER ===');
-    console.log('📦 ProductData:', productData);
-    console.log('📡 JSON à envoyer:', JSON.stringify(productData, null, 2));
-    console.log('============================');
-
+    
+    console.log('🚀 Données à envoyer:', productData);
+    
     if (this.isEditMode && this.productId) {
-      // MODIFICATION
-      console.log(`✏️ Modification produit ID: ${this.productId}`);
-      
+      // Modification
       this.productService.update(this.productId, productData).subscribe({
         next: (response) => {
-          console.log('✅ Réponse du serveur:', response);
-          
-          // Vérifiez la réponse
-          if (response.category || response.categoryId) {
-            console.log('🎉 Catégorie dans la réponse:', response.category || response.categoryId);
-            this.successMessage = 'Produit modifié avec succès !';
-          } else {
-            console.warn('⚠️ La réponse ne contient pas de catégorie');
-            this.successMessage = 'Produit modifié - Vérifiez la catégorie';
-          }
-          
-          this.loading = false;
-          
-          setTimeout(() => {
-            this.router.navigate(['/products']);
-          }, 2000);
+          this.handleSuccess('Produit modifié avec succès !');
         },
         error: (err) => {
-          console.error('❌ Erreur:', err);
-          console.error('❌ Message:', err.message);
-          this.errorMessage = err.message || 'Erreur lors de la modification';
-          this.loading = false;
+          this.handleError('Erreur lors de la modification', err);
         }
       });
     } else {
-      // CRÉATION
-      console.log('🆕 Création d\'un nouveau produit');
-      
+      // Création
       this.productService.create(productData).subscribe({
         next: (response) => {
-          console.log('✅ Réponse création:', response);
-          this.successMessage = 'Produit créé avec succès !';
-          this.productForm.reset();
-          this.loading = false;
-          
-          setTimeout(() => {
-            this.router.navigate(['/products']);
-          }, 2000);
+          this.handleSuccess('Produit créé avec succès !');
         },
         error: (err) => {
-          console.error('❌ Erreur création:', err);
-          this.errorMessage = err.message || 'Erreur lors de la création';
-          this.loading = false;
+          this.handleError('Erreur lors de la création', err);
         }
       });
     }
   }
 
+  // Gérer le succès
+  private handleSuccess(message: string): void {
+    this.successMessage = message;
+    this.loading = false;
+    
+    // Redirection après 2 secondes
+    setTimeout(() => {
+      this.router.navigate(['/products']);
+    }, 2000);
+  }
+
+  // Gérer l'erreur
+  private handleError(context: string, error: any): void {
+    console.error(`❌ ${context}:`, error);
+    this.errorMessage = error.message || context;
+    this.loading = false;
+  }
+
+  // Annuler
   onCancel(): void {
     this.router.navigate(['/products']);
   }
 
+  // Marquer tous les champs comme touchés (pour validation)
   private markAllAsTouched(): void {
     Object.keys(this.productForm.controls).forEach(key => {
       const control = this.productForm.get(key);
@@ -221,7 +203,8 @@ export class ProductFormComponent implements OnInit {
     });
   }
 
-  // Getters pour les contrôles
+  // ==================== GETTERS POUR LE TEMPLATE ====================
+
   get nom() { return this.productForm.get('nom'); }
   get description() { return this.productForm.get('description'); }
   get prix() { return this.productForm.get('prix'); }
@@ -229,15 +212,36 @@ export class ProductFormComponent implements OnInit {
   get categoryId() { return this.productForm.get('categoryId'); }
   get imageUrl() { return this.productForm.get('imageUrl'); }
 
-  // Méthode pour obtenir le nom de la catégorie sélectionnée
-  getSelectedCategoryName(): string {
-    const categoryId = this.productForm.get('categoryId')?.value;
+  // Nom de la catégorie sélectionnée
+  get selectedCategoryName(): string {
+    const categoryId = this.categoryId?.value;
     
     if (!categoryId) return 'Non sélectionnée';
     
-    const categoryIdNumber = Number(categoryId);
-    const category = this.categories.find(cat => cat.id === categoryIdNumber);
+    const category = this.categories.find(c => c.id === Number(categoryId));
+    return category ? `${category.nom} (ID: ${category.id})` : 'Catégorie inconnue';
+  }
+
+  // Compteur de caractères pour la description
+  get characterCount(): number {
+    return this.description?.value?.length || 0;
+  }
+
+  get maxCharacters(): number {
+    return 500;
+  }
+
+  // Messages d'erreur
+  getValidationMessage(controlName: string): string {
+    const control = this.productForm.get(controlName);
     
-    return category ? category.nom : 'Catégorie non trouvée';
+    if (!control || !control.errors || !control.touched) return '';
+    
+    if (control.errors['required']) return 'Ce champ est obligatoire';
+    if (control.errors['minlength']) return 'Trop court';
+    if (control.errors['maxlength']) return 'Trop long';
+    if (control.errors['min']) return 'Valeur trop basse';
+    
+    return 'Valeur invalide';
   }
 }

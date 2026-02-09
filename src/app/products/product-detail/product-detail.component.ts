@@ -299,7 +299,7 @@ export class ProductDetailComponent implements OnInit {
   
   addToCart(): void {
     if (!this.isAdmin && this.product) {
-      this.cartService.addToCart(this.product.id!, this.quantity).subscribe({
+      this.cartService.addProductToCartSimple(this.product.id!, this.quantity).subscribe({
         next: () => {
           alert(`${this.quantity} × ${this.product?.nom} ajouté au panier ✅`);
         },

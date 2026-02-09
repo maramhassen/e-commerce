@@ -12,12 +12,7 @@
     </div>
     
     <div class="header-actions">
-      <button *ngIf="!isAdmin" 
-              (click)="createOrderFromCart()" 
-              [disabled]="loading"
-              class="btn btn-success">
-        <i class="fas fa-cart-plus me-2"></i> Créer commande
-      </button>
+      
       <button (click)="loadOrders()" 
               [disabled]="loading"
               class="btn btn-primary">

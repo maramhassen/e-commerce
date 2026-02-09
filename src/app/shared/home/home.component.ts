@@ -7,6 +7,7 @@ import { CartService } from '../../core/services/cart.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Product } from '../../models/product';
 import { Category } from '../../models/category';
+import { CartItem } from '../../models/cart-item'; // AJOUTER CET IMPORT
 
 @Component({
   selector: 'app-home',
@@ -72,6 +73,7 @@ export class HomeComponent implements OnInit {
     }
   }
 
+  // ========== MÉTHODE ADD TO CART CORRIGÉE ==========
   addToCart(product: Product): void {
     if (!this.isAuthenticated) {
       this.router.navigate(['/auth/login'], {
@@ -80,24 +82,100 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    if (product.id) {
-      this.cartService.addToCart(product.id, 1).subscribe({
-        next: () => {
-          console.log('Produit ajouté au panier:', product.nom);
-          // Notifier la mise à jour du panier
-          this.cartService.notifyCartUpdate();
-          // Afficher une notification (vous pouvez ajouter un toast)
-          alert(`${product.nom} a été ajouté au panier!`);
-        },
-        error: (error) => {
-          console.error('Erreur lors de l\'ajout au panier:', error);
-        }
-      });
+    if (!product.id) {
+      console.error('Produit sans ID');
+      return;
     }
+
+    // CORRECTION : Utilisez la méthode SIMPLIFIÉE qui prend seulement productId et quantity
+    this.cartService.addProductToCartSimple(product.id, 1).subscribe({
+      next: (cartItem: CartItem) => {
+        console.log('✅ Produit ajouté au panier:', product.nom, cartItem);
+        
+        // Notifier la mise à jour du panier (déjà fait dans addProductToCartSimple)
+        // this.cartService.notifyCartUpdate(); // ← PLUS BESOIN, déjà fait
+        
+        // Afficher une notification
+        alert(`${product.nom} a été ajouté au panier!`);
+      },
+      error: (error: any) => {
+        console.error('❌ Erreur lors de l\'ajout au panier:', error);
+        
+        // Gestion d'erreur améliorée
+        if (error.message === 'Utilisateur non connecté') {
+          alert('Veuillez vous reconnecter');
+          this.router.navigate(['/auth/login']);
+        } else {
+          alert('Erreur lors de l\'ajout au panier');
+        }
+      }
+    });
+  }
+
+  // ========== MÉTHODE ALTERNATIVE POUR AJOUTER AVEC LE PRODUIT COMPLET ==========
+  addProductToCart(product: Product): void {
+    if (!this.isAuthenticated) {
+      this.router.navigate(['/auth/login'], {
+        queryParams: { returnUrl: this.router.url }
+      });
+      return;
+    }
+
+    // Utilisation de la méthode avec produit complet
+    this.cartService.addProductToCart(product, 1).subscribe({
+      next: (cartItem: CartItem) => {
+        console.log('✅ Produit ajouté:', cartItem);
+        alert(`${product.nom} ajouté au panier !`);
+      },
+      error: (err: any) => {
+        console.error('❌ Erreur:', err);
+        alert('Erreur lors de l\'ajout au panier');
+      }
+    });
   }
 
   formatPrice(price: number | undefined): string {
     if (!price) return '0.00 €';
     return price.toFixed(2) + ' €';
+  }
+
+  // ========== MÉTHODE POUR AFFICHER L'IMAGE PAR DÉFAUT ==========
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.src = 'assets/images/default-product.jpg';
+  }
+
+  // ========== MÉTHODE POUR FILTRER LES PRODUITS EN VEDETTE ==========
+  getProductImage(product: Product): string {
+    return product.imageUrl || 'assets/images/default-product.jpg';
+  }
+
+  // ========== MÉTHODE POUR TRACKER LES PRODUITS DANS NG FOR ==========
+  trackByProductId(index: number, product: Product): number {
+    return product.id || index;
+  }
+
+  // ========== MÉTHODE POUR DÉTERMINER SI UN PRODUIT EST EN PROMOTION ==========
+  isOnSale(product: Product): boolean {
+    // Logique de promotion simple (exemple : produits avec prix > 200)
+    return (product.prix || 0) > 200;
+  }
+
+  // ========== MÉTHODE POUR FORMER LE NOM COMPLET DU PRODUIT ==========
+  getProductFullName(product: Product): string {
+    const categoryName = product.category?.nom ? ` - ${product.category.nom}` : '';
+    return `${product.nom}${categoryName}`;
+  }
+
+  // ========== MÉTHODE POUR NAVIGUER VERS LES CATÉGORIES ==========
+  goToCategory(categoryId: number | undefined): void {
+    if (categoryId) {
+      this.router.navigate(['/products/category', categoryId]);
+    }
+  }
+
+  // ========== MÉTHODE POUR NAVIGUER VERS TOUS LES PRODUITS ==========
+  goToAllProducts(): void {
+    this.router.navigate(['/products']);
   }
 }

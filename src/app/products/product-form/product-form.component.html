@@ -21,50 +21,44 @@
           </div>
 
           <!-- Loading -->
-          <div *ngIf="loading && !isEditMode" class="text-center">
+          <div *ngIf="loading" class="text-center">
             <div class="spinner-border text-primary" role="status">
               <span class="visually-hidden">Chargement...</span>
             </div>
-            <p class="mt-2">Chargement des catégories...</p>
+            <p class="mt-2">Chargement...</p>
           </div>
 
           <!-- Formulaire -->
-          <form *ngIf="!loading || isEditMode" [formGroup]="productForm" (ngSubmit)="onSubmit()">
+          <form *ngIf="!loading" [formGroup]="productForm" (ngSubmit)="onSubmit()">
             
             <!-- Nom -->
             <div class="mb-3">
               <label for="nom" class="form-label">
-                <i class="bi bi-tag"></i> Nom du produit <span class="text-danger">*</span>
+                <i class="bi bi-tag"></i> Nom du produit *
               </label>
               <input type="text" 
                      id="nom"
                      class="form-control"
                      formControlName="nom"
-                     placeholder="Ex: iPhone 13, T-shirt en coton..."
-                     [class.is-invalid]="nom?.invalid && (nom?.dirty || nom?.touched)">
+                     placeholder="Ex: iPhone 13, T-shirt..."
+                     [class.is-invalid]="nom?.invalid && nom?.touched">
               
               <div class="invalid-feedback">
                 <div *ngIf="nom?.errors?.['required']">Le nom est obligatoire</div>
                 <div *ngIf="nom?.errors?.['minlength']">Minimum 2 caractères</div>
-                <div *ngIf="nom?.errors?.['maxlength']">Maximum 100 caractères</div>
               </div>
             </div>
 
             <!-- Catégorie -->
             <div class="mb-3">
               <label for="categoryId" class="form-label">
-                <i class="bi bi-tags"></i> Catégorie <span class="text-danger">*</span>
+                <i class="bi bi-tags"></i> Catégorie *
               </label>
-              
-              <div *ngIf="categories.length === 0 && !loading" class="alert alert-warning mb-2">
-                <i class="bi bi-exclamation-triangle"></i> Aucune catégorie disponible.
-              </div>
               
               <select id="categoryId"
                       class="form-select"
                       formControlName="categoryId"
-                      [class.is-invalid]="categoryId?.invalid && (categoryId?.dirty || categoryId?.touched)"
-                      [disabled]="categories.length === 0">
+                      [class.is-invalid]="categoryId?.invalid && categoryId?.touched">
                 <option value="" disabled selected>Sélectionnez une catégorie</option>
                 <option *ngFor="let cat of categories" [value]="cat.id">
                   {{ cat.nom }} (ID: {{ cat.id }})
@@ -78,21 +72,20 @@
               <!-- Info sur la sélection -->
               <div *ngIf="categoryId?.value" class="form-text text-success mt-1">
                 <i class="bi bi-check-circle"></i> 
-                Catégorie sélectionnée: {{ getSelectedCategoryName() }}
-                (ID: {{ categoryId?.value }})
+                Catégorie sélectionnée: {{ selectedCategoryName }}
               </div>
             </div>
 
             <!-- Description -->
             <div class="mb-3">
               <label for="description" class="form-label">
-                <i class="bi bi-card-text"></i> Description <span class="text-danger">*</span>
+                <i class="bi bi-card-text"></i> Description *
               </label>
               <textarea id="description"
                         class="form-control"
                         formControlName="description"
                         rows="4"
-                        placeholder="Décrivez votre produit (caractéristiques, avantages, etc.)..."
+                        placeholder="Décrivez votre produit..."
                         [class.is-invalid]="description?.invalid && (description?.dirty || description?.touched)">
               </textarea>
               
@@ -101,7 +94,7 @@
                 <div *ngIf="description?.errors?.['maxlength']">Maximum 500 caractères</div>
               </div>
               <div class="form-text text-end">
-                {{ description?.value?.length || 0 }}/500 caractères
+                {{ characterCount }}/500 caractères
               </div>
             </div>
 
@@ -109,7 +102,7 @@
               <!-- Prix -->
               <div class="col-md-6 mb-3">
                 <label for="prix" class="form-label">
-                  <i class="bi bi-currency-euro"></i> Prix (€) <span class="text-danger">*</span>
+                  <i class="bi bi-currency-euro"></i> Prix (€) *
                 </label>
                 <div class="input-group">
                   <span class="input-group-text">€</span>
@@ -132,7 +125,7 @@
               <!-- Stock -->
               <div class="col-md-6 mb-3">
                 <label for="stock" class="form-label">
-                  <i class="bi bi-box"></i> Quantité en stock <span class="text-danger">*</span>
+                  <i class="bi bi-box"></i> Quantité en stock *
                 </label>
                 <input type="number" 
                        id="stock"
@@ -159,23 +152,6 @@
                      class="form-control"
                      formControlName="imageUrl"
                      placeholder="https://exemple.com/image.jpg">
-              <div class="form-text">
-                Laissez vide pour utiliser l'image par défaut. Formats supportés: JPG, PNG, GIF
-              </div>
-              
-              <!-- Aperçu image -->
-              <div *ngIf="imageUrl?.value" class="mt-3">
-                <p class="small text-muted mb-2">Aperçu de l'image :</p>
-                <div class="text-center">
-                  <img [src]="imageUrl?.value" 
-                       alt="Aperçu du produit" 
-                       class="img-thumbnail preview-image"
-                       onerror="this.src='https://placehold.co/400x300?text=Image+non+disponible'">
-                  <div class="mt-1 small text-muted">
-                    {{ imageUrl?.value }}
-                  </div>
-                </div>
-              </div>
             </div>
 
             <!-- Statut -->
@@ -206,7 +182,7 @@
               <button type="submit" 
                       class="btn"
                       [ngClass]="{'btn-primary': !isEditMode, 'btn-warning': isEditMode}"
-                      [disabled]="productForm.invalid || loading || categories.length === 0">
+                      [disabled]="productForm.invalid || loading">
                 <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"></span>
                 <i class="bi" [ngClass]="{'bi-plus-circle': !isEditMode, 'bi-check-circle': isEditMode}"></i>
                 {{ isEditMode ? 'Modifier' : 'Créer' }}

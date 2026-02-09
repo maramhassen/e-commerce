@@ -211,55 +211,24 @@ export class ProductListComponent implements OnInit {
     return this.isAuthenticated && !this.isAdmin;
   }
 
-  addToCart(product: Product): void {
-    // Vérifier si l'utilisateur est admin
-    if (this.isAdmin) {
-      this.showNotification('Cette fonctionnalité est réservée aux clients', 'warning');
-      return;
-    }
-    
-    // Vérifier si l'utilisateur est connecté
-    if (!this.isAuthenticated) {
-      this.router.navigate(['/login']);
-      return;
-    }
-    
-    // Vérifier si le produit est disponible
-    if (!this.isProductAvailable(product)) {
-      if (product.stock <= 0) {
-        this.showNotification('Ce produit est en rupture de stock', 'danger');
-      } else if (!product.actif) {
-        this.showNotification('Ce produit n\'est pas disponible', 'warning');
-      }
-      return;
-    }
-
-    // Ajouter au panier
-    try {
-      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      const existingItemIndex = cart.findIndex((item: any) => item.productId === product.id);
-      
-      if (existingItemIndex > -1) {
-        cart[existingItemIndex].quantity += 1;
+  // Dans product-list.component.ts, modifiez la méthode d'ajout :
+addToCart(product: Product): void {
+  this.cartService.addProductToCartSimple(product.id!, 1).subscribe({
+    next: (cartItem) => {
+      console.log('✅ Produit ajouté:', cartItem);
+      alert(`${product.nom} ajouté au panier !`);
+    },
+    error: (err) => {
+      console.error('❌ Erreur:', err);
+      if (err.message === 'Utilisateur non connecté') {
+        alert('Veuillez vous connecter pour ajouter au panier');
       } else {
-        cart.push({
-          productId: product.id,
-          productName: product.nom,
-          price: product.prix,
-          quantity: 1,
-          imageUrl: product.imageUrl || 'assets/default-product.jpg'
-        });
+        alert('Erreur lors de l\'ajout au panier');
       }
-      
-      localStorage.setItem('cart', JSON.stringify(cart));
-      this.showNotification(`${product.nom} a été ajouté au panier`, 'success');
-      
-    } catch (error) {
-      console.error('Erreur lors de l\'ajout au panier:', error);
-      this.showNotification('Erreur lors de l\'ajout au panier', 'danger');
     }
-  }
-
+  });
+}
+   
   goToLogin(): void {
     this.router.navigate(['/login']);
   }
