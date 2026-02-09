@@ -1,5 +1,6 @@
 package com.example.e_commerce.Services;
 
+import com.example.e_commerce.DTO.CartItemRequest;
 import com.example.e_commerce.Entities.Cart;
 import com.example.e_commerce.Entities.CartItem;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ public interface ICartService {
     CartItem updateCartItemQuantity(Long cartId, Long itemId, int quantity);
     double calculateCartTotal(Long cartId);
 
-    // OPTIONNEL : Trouver ou créer un panier
     Cart findOrCreateCartForUser(Long userId);
+    CartItem addItemToUserCart(Long userId, CartItemRequest request);
+
 }

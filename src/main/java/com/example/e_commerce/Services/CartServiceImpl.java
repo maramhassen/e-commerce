@@ -1,5 +1,6 @@
 package com.example.e_commerce.Services;
 
+import com.example.e_commerce.DTO.CartItemRequest;
 import com.example.e_commerce.Entities.Cart;
 import com.example.e_commerce.Entities.CartItem;
 import com.example.e_commerce.Entities.Product;
@@ -165,7 +166,6 @@ public class CartServiceImpl implements ICartService {
         }
     }
 
-    // NOUVELLES MÉTHODES
     @Override
     public CartItem addItemToUserCart(Long userId, CartItem cartItem) {
         // 1. Trouver ou créer le panier de l'utilisateur
@@ -336,5 +336,14 @@ public class CartServiceImpl implements ICartService {
                 .mapToDouble(item -> item.getQuantite() * item.getPrixUnitaire())
                 .sum();
         cart.setTotal(total);
+    }
+    // Dans CartServiceImpl.java, ajoutez cette méthode :
+    @Override
+    public CartItem addItemToUserCart(Long userId, CartItemRequest request) {
+        // 1. Trouver ou créer le panier
+        Cart cart = findOrCreateCartForUser(userId);
+
+        // 2. Appeler la méthode existante
+        return addProductToCart(cart.getId(), request.getProductId(), request.getQuantite());
     }
 }
