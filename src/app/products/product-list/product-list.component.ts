@@ -17,14 +17,12 @@ export class ProductListComponent implements OnInit {
   categories: Category[] = [];
   filteredProducts: Product[] = [];
   
-  // Filtres
   selectedCategoryId: number | null = null;
   searchKeyword = '';
   minPrice?: number;
   maxPrice?: number;
   inStockOnly = false;
   
-  // Pagination
   currentPage = 1;
   itemsPerPage = 12;
   totalItems = 0;
@@ -47,7 +45,6 @@ export class ProductListComponent implements OnInit {
     this.loadCategories();
     this.checkAuthStatus();
     
-    // S'abonner aux changements d'authentification
     if (this.authService.onAuthStateChange) {
       this.authService.onAuthStateChange().subscribe(() => {
         this.checkAuthStatus();
@@ -60,51 +57,70 @@ export class ProductListComponent implements OnInit {
     this.isAdmin = this.authService.isAdmin();
   }
 
+  // ========== CHARGEMENT DES PRODUITS ==========
   loadProducts(): void {
     this.loading = true;
     this.errorMessage = '';
     
     this.productService.getAll().subscribe({
       next: (products) => {
-        this.products = products;
-        this.filteredProducts = [...products];
+        // S'assurer que toutes les URLs d'images sont formatées
+        this.products = products.map(product => {
+          // Debug: Afficher l'état du produit
+          console.log(`📊 Produit "${product.nom}":`, {
+            id: product.id,
+            imageUrl: product.imageUrl,
+            categoryId: product.categoryId,
+            category: product.category,
+            hasCategory: !!product.category
+          });
+          
+          // S'assurer que l'image a une URL complète
+          if (product.imageUrl) {
+            product.imageUrl = this.getProductImageUrl(product);
+          }
+          
+          return product;
+        });
+        
+        this.filteredProducts = [...this.products];
         this.totalItems = products.length;
         
-        // Debug: Afficher les produits avec leurs catégories
-        console.log('=== PRODUITS CHARGÉS ===');
-        products.forEach((product, index) => {
-          console.log(`Produit ${index + 1}:`, {
-            id: product.id,
-            nom: product.nom,
-            category: product.category,
-            categoryId: product.category?.id,
-            categoryNom: product.category?.nom
-          });
+        console.log('✅ PRODUITS CHARGÉS:', {
+          total: this.products.length,
+          avecImages: this.products.filter(p => p.imageUrl && p.imageUrl !== 'assets/images/default-product.jpg').length,
+          avecCatégories: this.products.filter(p => p.category).length
         });
         
         this.applyFilters();
         this.loading = false;
       },
       error: (err) => {
-        console.error('Erreur:', err);
+        console.error('❌ Erreur chargement produits:', err);
         this.errorMessage = 'Erreur lors du chargement des produits';
         this.loading = false;
       }
     });
   }
 
+  // ========== MÉTHODE POUR OBTENIR L'URL DE L'IMAGE ==========
+  getProductImageUrl(product: Product): string {
+    return this.productService.getImageUrl(product.imageUrl);
+  }
+
+  // ========== GESTION ERREUR IMAGE ==========
+  onImageError(event: Event, product: Product): void {
+    const img = event.target as HTMLImageElement;
+    console.warn(`❌ Image non chargée pour "${product.nom}":`, img.src);
+    img.src = 'assets/images/default-product.jpg';
+    product.imageUrl = 'assets/images/default-product.jpg';
+  }
+
   loadCategories(): void {
     this.categoryService.getAll().subscribe({
       next: (categories) => {
         this.categories = categories;
-        console.log('=== CATÉGORIES CHARGÉES ===');
-        categories.forEach((cat, index) => {
-          console.log(`Catégorie ${index + 1}:`, {
-            id: cat.id,
-            nom: cat.nom,
-            description: cat.description
-          });
-        });
+        console.log('✅ CATÉGORIES CHARGÉES:', categories.length);
       },
       error: (err) => {
         console.error('Erreur chargement catégories:', err);
@@ -113,85 +129,54 @@ export class ProductListComponent implements OnInit {
   }
 
   applyFilters(): void {
-    console.log('=== APPLICATION DES FILTRES ===');
-    console.log('Catégorie sélectionnée:', this.selectedCategoryId);
-    console.log('Recherche:', this.searchKeyword);
-    console.log('Prix min:', this.minPrice);
-    console.log('Prix max:', this.maxPrice);
-    console.log('En stock seulement:', this.inStockOnly);
-
+    console.log('🔍 Application des filtres');
+    
     let filtered = this.products;
 
-    // Filtre par catégorie - CORRECTION IMPORTANTE
+    // Filtre par catégorie
     if (this.selectedCategoryId !== null && this.selectedCategoryId !== undefined) {
       const selectedId = Number(this.selectedCategoryId);
-      console.log(`Filtrage par catégorie ID: ${selectedId}`);
-      
       filtered = filtered.filter(product => {
-        const productCategoryId = product.category?.id;
-        
-        // Vérifier si le produit a une catégorie avec un ID
-        if (productCategoryId !== undefined && productCategoryId !== null) {
-          const matches = Number(productCategoryId) === selectedId;
-          
-          if (matches) {
-            console.log(`✓ Produit "${product.nom}" correspond à la catégorie ${selectedId}`);
-          }
-          
-          return matches;
-        }
-        
-        // Si le produit n'a pas de catégorie
-        console.log(`✗ Produit "${product.nom}" n'a pas de catégorie`);
-        return false;
+        const productCategoryId = product.category?.id || product.categoryId;
+        return productCategoryId !== undefined && Number(productCategoryId) === selectedId;
       });
-      
-      console.log(`${filtered.length} produits après filtre catégorie`);
     }
 
     // Filtre par recherche
     if (this.searchKeyword.trim()) {
       const keyword = this.searchKeyword.toLowerCase();
-      const beforeSearchCount = filtered.length;
-      
       filtered = filtered.filter(product =>
         product.nom.toLowerCase().includes(keyword) ||
         (product.description && product.description.toLowerCase().includes(keyword))
       );
-      
-      console.log(`${beforeSearchCount} → ${filtered.length} produits après recherche "${keyword}"`);
     }
 
     // Filtre par prix
     if (this.minPrice !== undefined && this.minPrice !== null) {
-      const beforePriceFilter = filtered.length;
       filtered = filtered.filter(product => product.prix >= this.minPrice!);
-      console.log(`${beforePriceFilter} → ${filtered.length} produits après prix min (${this.minPrice} €)`);
     }
     
     if (this.maxPrice !== undefined && this.maxPrice !== null) {
-      const beforePriceFilter = filtered.length;
       filtered = filtered.filter(product => product.prix <= this.maxPrice!);
-      console.log(`${beforePriceFilter} → ${filtered.length} produits après prix max (${this.maxPrice} €)`);
     }
 
     // Filtre par stock
     if (this.inStockOnly) {
-      const beforeStockFilter = filtered.length;
       filtered = filtered.filter(product => product.stock > 0);
-      console.log(`${beforeStockFilter} → ${filtered.length} produits après filtre "en stock seulement"`);
     }
 
     this.filteredProducts = filtered;
     this.totalItems = filtered.length;
     this.currentPage = 1;
     
-    console.log('=== FILTRES APPLIQUÉS ===');
-    console.log(`${this.totalItems} produits filtrés sur ${this.products.length} au total`);
+    console.log('✅ FILTRES APPLIQUÉS:', {
+      totalFiltrés: this.totalItems,
+      totalOriginal: this.products.length
+    });
   }
 
   clearFilters(): void {
-    console.log('Réinitialisation des filtres');
+    console.log('🔄 Réinitialisation des filtres');
     this.selectedCategoryId = null;
     this.searchKeyword = '';
     this.minPrice = undefined;
@@ -200,44 +185,38 @@ export class ProductListComponent implements OnInit {
     this.applyFilters();
   }
 
-  // Vérifie si un produit est disponible (stock > 0 et actif)
   isProductAvailable(product: Product): boolean {
     return product.stock > 0 && product.actif !== false;
   }
 
-  // Vérifie si l'utilisateur peut voir le bouton "Ajouter au panier"
   canShowAddToCartButton(): boolean {
-    // Seuls les clients (non-admins) peuvent voir ce bouton
     return this.isAuthenticated && !this.isAdmin;
   }
 
-  // Dans product-list.component.ts, modifiez la méthode d'ajout :
-addToCart(product: Product): void {
-  this.cartService.addProductToCartSimple(product.id!, 1).subscribe({
-    next: (cartItem) => {
-      console.log('✅ Produit ajouté:', cartItem);
-      alert(`${product.nom} ajouté au panier !`);
-    },
-    error: (err) => {
-      console.error('❌ Erreur:', err);
-      if (err.message === 'Utilisateur non connecté') {
-        alert('Veuillez vous connecter pour ajouter au panier');
-      } else {
-        alert('Erreur lors de l\'ajout au panier');
+  addToCart(product: Product): void {
+    this.cartService.addProductToCartSimple(product.id!, 1).subscribe({
+      next: (cartItem) => {
+        console.log('✅ Produit ajouté:', cartItem);
+        this.showNotification(`${product.nom} ajouté au panier !`, 'success');
+      },
+      error: (err) => {
+        console.error('❌ Erreur:', err);
+        if (err.message === 'Utilisateur non connecté') {
+          this.showNotification('Veuillez vous connecter pour ajouter au panier', 'warning');
+        } else {
+          this.showNotification('Erreur lors de l\'ajout au panier', 'danger');
+        }
       }
-    }
-  });
-}
+    });
+  }
    
   goToLogin(): void {
     this.router.navigate(['/login']);
   }
 
   private showNotification(message: string, type: 'success' | 'danger' | 'warning' = 'success'): void {
-    // Créer un élément de notification
     const notification = document.createElement('div');
     
-    // Styles CSS
     const styles: any = {
       position: 'fixed',
       top: '20px',
@@ -254,7 +233,6 @@ addToCart(product: Product): void {
       gap: '10px'
     };
     
-    // Couleur selon le type
     switch (type) {
       case 'success':
         styles.backgroundColor = '#28a745';
@@ -268,12 +246,10 @@ addToCart(product: Product): void {
         break;
     }
     
-    // Appliquer les styles
     Object.keys(styles).forEach(key => {
       (notification.style as any)[key] = styles[key];
     });
     
-    // Icône selon le type
     let icon = '';
     switch (type) {
       case 'success':
@@ -287,16 +263,13 @@ addToCart(product: Product): void {
         break;
     }
     
-    // Contenu
     notification.innerHTML = `
       <span style="font-weight: bold; font-size: 1.2em;">${icon}</span>
       <span>${message}</span>
     `;
     
-    // Ajouter au DOM
     document.body.appendChild(notification);
     
-    // Supprimer après 3 secondes
     setTimeout(() => {
       if (notification.parentNode) {
         notification.style.animation = 'slideOut 0.3s ease';
@@ -403,25 +376,33 @@ addToCart(product: Product): void {
     }
   }
 
-  // Méthode de débogage
-  debugFilters(): void {
-    console.log('=== DÉBOGAGE DES FILTRES ===');
-    console.log('Catégories disponibles:', this.categories);
-    console.log('Produits:', this.products.length);
-    console.log('Filtres actuels:', {
-      selectedCategoryId: this.selectedCategoryId,
-      searchKeyword: this.searchKeyword,
-      minPrice: this.minPrice,
-      maxPrice: this.maxPrice,
-      inStockOnly: this.inStockOnly
-    });
-    this.applyFilters();
+  // ========== RAFFRAÎCHISSEMENT DES PRODUITS ==========
+  refreshProducts(): void {
+    console.log('🔄 Rafraîchissement manuel des produits');
+    this.loadProducts();
   }
-  // Ajoutez cette méthode dans la classe ProductListComponent
-getCategoryName(categoryId: number | null): string {
-  if (!categoryId) return 'Aucune';
-  
-  const category = this.categories.find(c => c.id === categoryId);
-  return category ? category.nom : 'Catégorie inconnue';
-}
+
+  // ========== RETOUR DU FORMULAIRE ==========
+  handleFormReturn(): void {
+    this.router.navigate(['/products']).then(() => {
+      setTimeout(() => {
+        this.refreshProducts();
+      }, 300);
+    });
+  }
+
+  getCategoryName(categoryId: number | null): string {
+    if (!categoryId) return 'Aucune';
+    
+    const category = this.categories.find(c => c.id === categoryId);
+    return category ? category.nom : 'Catégorie inconnue';
+  }
+
+  // ========== FORCER LE RECHARGEMENT ==========
+  forceReload(): void {
+    console.log('🔄 Forcer le rechargement complet');
+    this.products = [];
+    this.filteredProducts = [];
+    this.loadProducts();
+  }
 }

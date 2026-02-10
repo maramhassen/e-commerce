@@ -33,6 +33,7 @@ export class HomeComponent implements OnInit {
     this.loadFeaturedProducts();
     this.loadCategories();
     this.checkAuthStatus();
+    this.isAuthenticated = this.authService.isAuthenticated()
   }
 
   private loadFeaturedProducts(): void {

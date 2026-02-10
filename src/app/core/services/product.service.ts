@@ -5,6 +5,14 @@ import { catchError, map, tap, switchMap, shareReplay } from 'rxjs/operators';
 import { Product } from '../../models/product';
 import { Category } from '../../models/category';
 
+export interface UploadResponse {
+  fileName: string;
+  message: string;
+  fileType: string;
+  size: string;
+  originalName?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -12,45 +20,135 @@ export class ProductService {
   private apiUrl = 'http://localhost:8080/api/products';
   private categoryApiUrl = 'http://localhost:8080/api/categories';
   
-  // Cache pour éviter de recharger les catégories
   private categoriesCache$: Observable<Category[]> | null = null;
 
   constructor(private http: HttpClient) {}
-
-  // ==================== MÉTHODES PRINCIPALES ====================
-
-  /**
-   * Récupère TOUS les produits AVEC leurs catégories
-   * SOLUTION: Charge les catégories séparément et les associe
-   */
-  getAll(): Observable<Product[]> {
-    console.log('🔄 ProductService - Chargement de tous les produits');
-    
-    // Charge produits et catégories en parallèle
-    return forkJoin({
-      products: this.http.get<Product[]>(this.apiUrl),
-      categories: this.getCategories()
-    }).pipe(
-      map(({ products, categories }) => {
-        console.log(`📊 ${products.length} produits, ${categories.length} catégories`);
-        
-        // Associe chaque produit avec sa catégorie
-        const enrichedProducts = products.map(product => 
-          this.enrichProductWithCategory(product, categories)
-        );
-        
-        return enrichedProducts;
-      }),
-      tap(products => {
-        this.logProductsWithCategories(products);
-      }),
-      catchError(this.handleError)
-    );
+  
+  // ==================== MÉTHODE POUR OBTENIR L'URL DE L'IMAGE ====================
+  
+  getImageUrl(imageUrl?: string | null): string {
+  if (!imageUrl) {
+    return 'assets/images/no-image.png';
   }
 
-  /**
-   * Récupère un produit par ID AVEC sa catégorie
-   */
+  return `${this.apiUrl}/images/${imageUrl}`;
+}
+  // ==================== CRÉATION AVEC IMAGE ====================
+  
+  createWithImage(productData: any, imageFile?: File): Observable<Product> {
+    console.log('🚀 Création produit avec image', productData);
+    
+    if (imageFile) {
+      console.log('📤 Utilisation endpoint /upload avec FormData');
+      
+      const formData = new FormData();
+      formData.append('image', imageFile);
+      formData.append('product', JSON.stringify({
+        ...productData,
+        imageUrl: null
+      }));
+      
+      return this.http.post<Product>(`${this.apiUrl}/upload`, formData).pipe(
+        // IMPORTANT: Recharger le produit pour avoir toutes les données
+        switchMap(createdProduct => {
+          console.log('📦 Produit créé (brut):', createdProduct);
+          
+          if (createdProduct.id) {
+            return this.getById(createdProduct.id).pipe(
+              tap(fullProduct => {
+                console.log('🔄 Produit rechargé complet:', {
+                  id: fullProduct.id,
+                  nom: fullProduct.nom,
+                  imageUrl: fullProduct.imageUrl,
+                  category: fullProduct.category,
+                  categoryId: fullProduct.categoryId
+                });
+              })
+            );
+          }
+          
+          return of(this.enrichProductData(createdProduct, productData));
+        }),
+        catchError(this.handleError)
+      );
+    } else {
+      return this.create(productData);
+    }
+  }
+  
+  // ==================== MISE À JOUR AVEC IMAGE ====================
+  
+  updateWithImage(id: number, productData: any, imageFile?: File): Observable<Product> {
+    console.log(`✏️ Mise à jour produit ${id} avec image`);
+    
+    if (imageFile) {
+      const formData = new FormData();
+      formData.append('image', imageFile);
+      formData.append('product', JSON.stringify({
+        ...productData,
+        imageUrl: null
+      }));
+      
+      return this.http.put<Product>(`${this.apiUrl}/${id}/upload`, formData).pipe(
+        switchMap(updatedProduct => {
+          console.log('📦 Produit mis à jour (brut):', updatedProduct);
+          
+          if (updatedProduct.id) {
+            return this.getById(updatedProduct.id);
+          }
+          
+          return of(this.enrichProductData(updatedProduct, productData));
+        }),
+        catchError(this.handleError)
+      );
+    } else {
+      return this.update(id, productData);
+    }
+  }
+  
+  // ==================== ENRICHISSEMENT DES DONNÉES ====================
+  
+  private enrichProductData(product: Product, originalData: any): Product {
+    const enriched: Product = {
+      ...product,
+      imageUrl: product.imageUrl ? this.getImageUrl(product.imageUrl) : 'assets/images/default-product.jpg'
+    };
+    
+    return enriched;
+  }
+  
+  // ==================== EXTRACTION DU NOM DE FICHIER ====================
+  
+  extractFileName(imageUrl: string | null | undefined): string | null {
+    if (!imageUrl) {
+      return null;
+    }
+    
+    if (imageUrl.includes('/images/')) {
+      const parts = imageUrl.split('/');
+      return parts[parts.length - 1];
+    }
+    
+    if (!imageUrl.includes('/') && !imageUrl.startsWith('http') && !imageUrl.startsWith('assets/')) {
+      return imageUrl;
+    }
+    
+    return null;
+  }
+  
+  // ==================== CRUD OPERATIONS ====================
+  
+  getAll() {
+  return this.http.get<Product[]>(this.apiUrl).pipe(
+    map(products =>
+      products.map(product => ({
+        ...product,
+        imageUrl: this.getImageUrl(product.imageUrl)
+      }))
+    )
+  );
+}
+  
   getById(id: number): Observable<Product> {
     console.log(`🔄 ProductService - Récupération produit ${id}`);
     
@@ -59,119 +157,72 @@ export class ProductService {
       categories: this.getCategories()
     }).pipe(
       map(({ product, categories }) => {
-        return this.enrichProductWithCategory(product, categories);
-      }),
-      tap(product => {
-        console.log(`✅ Produit ${id} chargé:`, {
-          nom: product.nom,
-          category: product.category,
-          categoryId: product.categoryId
-        });
-      }),
-      catchError(this.handleError)
-    );
-  }
-
-  /**
-   * Crée un nouveau produit
-   * SOLUTION: Après création, récupère le produit complet pour avoir la catégorie
-   */
-  create(productData: any): Observable<Product> {
-    console.log('🚀 ProductService - Création nouveau produit');
-    
-    // Préparer les données
-    const payload = this.preparePayload(productData);
-    console.log('📦 Données envoyées:', payload);
-    
-    return this.http.post<Product>(this.apiUrl, payload).pipe(
-      // APRÈS CRÉATION, RÉCUPÈRE LE PRODUIT COMPLET
-      switchMap(createdProduct => {
-        console.log('📥 Produit créé (réponse partielle):', createdProduct);
+        const enrichedProduct = this.enrichProductWithCategory(product, categories);
         
-        if (createdProduct.id) {
-          console.log('🔄 Récupération du produit complet...');
-          return this.getById(createdProduct.id);
+        if (enrichedProduct.imageUrl) {
+          enrichedProduct.imageUrl = this.getImageUrl(enrichedProduct.imageUrl);
         }
         
+        return enrichedProduct;
+      }),
+      catchError(this.handleError)
+    );
+  }
+  
+  create(productData: any): Observable<Product> {
+    const payload = this.preparePayload(productData);
+    
+    console.log('📤 Création produit:', payload);
+    
+    return this.http.post<Product>(this.apiUrl, payload).pipe(
+      switchMap(createdProduct => {
+        if (createdProduct.id) {
+          return this.getById(createdProduct.id);
+        }
         return of(createdProduct);
       }),
-      tap(finalProduct => {
-        console.log('✅ Produit final après création:', {
-          id: finalProduct.id,
-          nom: finalProduct.nom,
-          category: finalProduct.category,
-          hasCategory: !!finalProduct.category
-        });
-      }),
       catchError(this.handleError)
     );
   }
-
-  /**
-   * Met à jour un produit existant
-   * SOLUTION: Après mise à jour, récupère le produit complet
-   */
+  
   update(id: number, productData: any): Observable<Product> {
-    console.log(`✏️ ProductService - Mise à jour produit ${id}`);
-    
     const payload = this.preparePayload(productData);
-    console.log('📦 Données de mise à jour:', payload);
+    
+    console.log(`📤 Mise à jour produit ${id}:`, payload);
     
     return this.http.put<Product>(`${this.apiUrl}/${id}`, payload).pipe(
-      // APRÈS MISE À JOUR, RÉCUPÈRE LE PRODUIT COMPLET
-      switchMap(() => {
-        console.log('🔄 Récupération du produit mis à jour...');
-        return this.getById(id);
-      }),
-      tap(finalProduct => {
-        console.log(`✅ Produit ${id} mis à jour:`, finalProduct);
-      }),
+      switchMap(() => this.getById(id)),
       catchError(this.handleError)
     );
   }
-
-  /**
-   * Supprime un produit
-   */
+  
   delete(id: number): Observable<void> {
-    console.log(`🗑️ ProductService - Suppression produit ${id}`);
+    console.log(`🗑️ Suppression produit ${id}`);
     
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
-      tap(() => {
-        console.log(`✅ Produit ${id} supprimé`);
-      }),
+      tap(() => console.log(`✅ Produit ${id} supprimé`)),
       catchError(this.handleError)
     );
   }
-
+  
   // ==================== MÉTHODES PRIVÉES ====================
-
-  /**
-   * Charge les catégories (avec cache)
-   */
+  
   private getCategories(): Observable<Category[]> {
     if (!this.categoriesCache$) {
-      console.log('📚 ProductService - Chargement des catégories...');
       this.categoriesCache$ = this.http.get<Category[]>(this.categoryApiUrl).pipe(
-        tap(categories => {
-          console.log(`✅ ${categories.length} catégories chargées`);
-        }),
-        shareReplay(1) // Cache les résultats
+        shareReplay(1)
       );
     }
     return this.categoriesCache$;
   }
-
-  /**
-   * Associe un produit avec sa catégorie
-   */
+  
   private enrichProductWithCategory(product: Product, categories: Category[]): Product {
-    // Si le produit a déjà un objet category, on le garde
+    // Si le produit a déjà une catégorie complète
     if (product.category && product.category.id) {
       return product;
     }
     
-    // Cherche la catégorie par categoryId
+    // Si le produit a seulement un categoryId
     if (product.categoryId) {
       const category = categories.find(c => c.id === product.categoryId);
       if (category) {
@@ -179,7 +230,7 @@ export class ProductService {
       }
     }
     
-    // Si le backend envoie category_id au lieu de categoryId
+    // Si le backend a envoyé category_id (format différent)
     if ((product as any).category_id) {
       const categoryId = (product as any).category_id;
       const category = categories.find(c => c.id === categoryId);
@@ -194,10 +245,7 @@ export class ProductService {
     
     return product;
   }
-
-  /**
-   * Prépare les données pour l'envoi au backend
-   */
+  
   private preparePayload(productData: any): any {
     const payload: any = {
       nom: String(productData.nom || '').trim(),
@@ -207,65 +255,62 @@ export class ProductService {
       actif: Boolean(productData.actif !== false)
     };
     
-    // Image URL (optionnel)
+    // Image URL
     if (productData.imageUrl && productData.imageUrl.trim()) {
-      payload.imageUrl = productData.imageUrl.trim();
+      const imageUrl = productData.imageUrl.trim();
+      
+      if (!imageUrl.startsWith('assets/') && 
+          !imageUrl.startsWith('data:') && 
+          !imageUrl.startsWith('blob:') &&
+          !imageUrl.includes('http://') &&
+          !imageUrl.includes('https://') &&
+          !imageUrl.includes('/images/')) {
+        payload.imageUrl = imageUrl;
+      }
     }
     
-    // CATÉGORIE - Convertir en nombre
+    // Catégorie
     if (productData.categoryId) {
       payload.categoryId = Number(productData.categoryId);
-      console.log(`✅ categoryId envoyé: ${payload.categoryId} (type: ${typeof payload.categoryId})`);
     }
     
+    console.log('📦 Payload préparé:', payload);
     return payload;
   }
-
-  /**
-   * Log les produits avec leurs catégories
-   */
-  private logProductsWithCategories(products: Product[]): void {
-    console.log('=== PRODUITS AVEC CATÉGORIES ===');
-    products.forEach((product, i) => {
-      const categoryInfo = product.category 
-        ? `${product.category.nom} (ID: ${product.category.id})` 
-        : product.categoryId 
-          ? `ID: ${product.categoryId} (objet manquant)`
-          : 'Non catégorisé';
-      
-      console.log(`${i+1}. "${product.nom}" - ${categoryInfo}`);
-    });
-    console.log('===============================');
-  }
-
-  /**
-   * Gestion d'erreur
-   */
+  
   private handleError(error: HttpErrorResponse): Observable<never> {
-    console.error('❌ ProductService Error:', error);
+    console.error('❌ ProductService Error:', {
+      status: error.status,
+      statusText: error.statusText,
+      url: error.url,
+      error: error.error
+    });
     
     let errorMessage = 'Une erreur est survenue';
     
     if (error.error instanceof ErrorEvent) {
       errorMessage = `Erreur: ${error.error.message}`;
     } else {
-      if (error.error && error.error.message) {
+      if (error.error && error.error.error) {
+        errorMessage = error.error.error;
+      } else if (error.error && error.error.message) {
         errorMessage = error.error.message;
       } else if (error.status === 400) {
         errorMessage = 'Données invalides';
       } else if (error.status === 404) {
-        errorMessage = 'Non trouvé';
+        errorMessage = `Endpoint non trouvé: ${error.url}`;
+      } else if (error.status === 500) {
+        errorMessage = 'Erreur serveur. Veuillez réessayer.';
+      } else if (error.status === 0) {
+        errorMessage = 'Impossible de se connecter au serveur. Vérifiez que le backend est démarré.';
       }
     }
     
     return throwError(() => new Error(errorMessage));
   }
-
+  
   // ==================== MÉTHODES UTILITAIRES ====================
-
-  /**
-   * Obtient le nom de la catégorie d'un produit
-   */
+  
   getCategoryName(product: Product): string {
     if (product.category && product.category.nom) {
       return product.category.nom;

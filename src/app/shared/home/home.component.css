@@ -1,0 +1,129 @@
+.home-page {
+  overflow-x: hidden;
+}
+
+.hero-section {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 60px 0;
+}
+
+.section-title {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  background-color: #007bff;
+}
+
+.category-card, .product-card, .feature-card {
+  transition: all 0.3s ease;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.category-card:hover, .product-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
+}
+
+.product-image {
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.product-image img {
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-image img {
+  transform: scale(1.05);
+}
+
+.product-badge {
+  padding: 5px 10px;
+  color: white;
+  font-size: 0.8rem;
+  border-radius: 20px;
+  font-weight: bold;
+  z-index: 1;
+}
+
+.product-title {
+  color: #333;
+  cursor: pointer;
+  transition: color 0.2s;
+  min-height: auto;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.product-title:hover {
+  color: #007bff;
+  text-decoration: underline;
+}
+
+.feature-icon {
+  width: 80px;
+  height: 80px;
+  background: rgba(0, 123, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.cta-section {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 40px 0;
+    text-align: center;
+  }
+  
+  .hero-section h1 {
+    font-size: 2.5rem;
+  }
+  
+  .section-title {
+    font-size: 1.8rem;
+  }
+  
+  .product-image img {
+    height: 150px;
+  }
+  
+  .d-flex.flex-wrap {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 576px) {
+  .col-md-3, .col-lg-3, .col-sm-6 {
+    padding: 10px;
+  }
+  
+  .category-card, .product-card {
+    margin-bottom: 20px;
+  }
+  
+  .features-section .row {
+    row-gap: 20px;
+  }
+}

@@ -36,6 +36,7 @@ export class ProductDetailComponent implements OnInit {
     console.log('Admin status:', this.isAdmin);
   }
 
+  // ========== CHARGEMENT DU PRODUIT ==========
   private loadProduct(): void {
     const id = this.route.snapshot.paramMap.get('id');
 
@@ -49,7 +50,11 @@ export class ProductDetailComponent implements OnInit {
 
     this.productService.getById(+id).subscribe({
       next: (product) => {
-        console.log('Produit chargé:', product);
+        console.log('Produit chargé:', {
+          nom: product.nom,
+          imageUrl: product.imageUrl
+        });
+        
         this.product = product;
         this.loading = false;
       },
@@ -67,6 +72,21 @@ export class ProductDetailComponent implements OnInit {
     img.src = 'assets/images/default-product.jpg';
   }
 
+  // ========== GETTER POUR L'IMAGE ==========
+  get productImage(): string {
+    if (!this.product || !this.product.imageUrl) {
+      return 'assets/images/default-product.jpg';
+    }
+    
+    // Si c'est déjà une URL complète
+    if (this.product.imageUrl.startsWith('http') || this.product.imageUrl.startsWith('data:')) {
+      return this.product.imageUrl;
+    }
+    
+    // Construire l'URL via le service
+    return this.productService.getImageUrl(this.product.imageUrl);
+  }
+
   // ========== MÉTHODE PRINCIPALE DE SUPPRESSION ==========
   deleteProduct(): void {
     if (!this.product?.id) {
@@ -76,7 +96,6 @@ export class ProductDetailComponent implements OnInit {
 
     const productName = this.product.nom || 'ce produit';
     
-    // Message d'information clair
     const confirmation = confirm(
       `TRAITEMENT DU PRODUIT\n\n` +
       `Nom: "${productName}"\n` +
@@ -97,14 +116,11 @@ export class ProductDetailComponent implements OnInit {
 
     console.log(`🚀 Début du traitement du produit ID: ${this.product.id}`);
 
-    // Utilisation de la méthode delete qui gère l'erreur 500
     this.productService.delete(this.product.id).subscribe({
       next: () => {
-        // SUCCÈS - soit suppression réelle, soit soft delete via erreur 500
         this.handleDeleteSuccess();
       },
       error: (error: Error) => {
-        // ERREUR (autre que 500)
         this.handleDeleteError(error);
       }
     });
@@ -116,7 +132,6 @@ export class ProductDetailComponent implements OnInit {
 
     const productName = this.product.nom;
     
-    // Propose un menu de choix
     const choice = prompt(
       `OPTIONS POUR "${productName}"\n\n` +
       `1 - Supprimer (tenter suppression complète)\n` +
@@ -160,7 +175,6 @@ export class ProductDetailComponent implements OnInit {
 
     console.log(`🔧 Désactivation du produit ID: ${this.product.id}`);
 
-    // Création d'un objet produit mis à jour
     const updatedProduct: Product = {
       ...this.product,
       actif: false
@@ -170,14 +184,12 @@ export class ProductDetailComponent implements OnInit {
       next: (updated) => {
         this.product = updated;
         
-        // Message de succès
         alert(`✅ SUCCÈS\n\n` +
               `"${productName}" a été DÉSACTIVÉ.\n\n` +
               `• Statut: Masqué du catalogue\n` +
               `• Peut être réactivé ultérieurement\n` +
               `• Redirection dans 3 secondes...`);
         
-        // Redirection après délai
         setTimeout(() => {
           this.router.navigate(['/products']);
         }, 3000);
@@ -193,19 +205,16 @@ export class ProductDetailComponent implements OnInit {
   }
 
   // ========== MÉTHODES AUXILIAIRES ==========
-  
   private tryHardDelete(): void {
     if (!this.product?.id) return;
 
     console.log('Tentative de suppression complète...');
     
-    // Ici on utilise directement http pour voir la vraie réponse
     this.productService.delete(this.product.id).subscribe({
       next: () => {
         this.handleDeleteSuccess();
       },
       error: (error: Error) => {
-        // Si on a une erreur autre que 500 (qui est déjà gérée dans le service)
         alert(`❌ Suppression échouée\n\n` +
               `Message: ${error.message}\n\n` +
               `Essayez la désactivation à la place.`);
@@ -221,7 +230,6 @@ export class ProductDetailComponent implements OnInit {
   private handleDeleteSuccess(): void {
     const productName = this.product?.nom || 'Le produit';
     
-    // Message de succès adapté
     alert(`✅ ACTION RÉUSSIE\n\n` +
           `"${productName}" a été traité avec succès.\n\n` +
           `Deux possibilités :\n` +
@@ -229,7 +237,6 @@ export class ProductDetailComponent implements OnInit {
           `2. Il a été DÉSACTIVÉ (s'il était utilisé)\n\n` +
           `Redirection vers la liste des produits...`);
     
-    // Redirection immédiate
     this.router.navigate(['/products']);
   }
 
@@ -251,7 +258,6 @@ export class ProductDetailComponent implements OnInit {
     const url = `http://localhost:8080/api/products/${this.product.id}`;
     console.log('🔍 Test DELETE direct vers:', url);
     
-    // Test avec fetch pour voir la réponse brute
     fetch(url, {
       method: 'DELETE',
       headers: {
@@ -296,7 +302,6 @@ export class ProductDetailComponent implements OnInit {
   }
 
   // ========== AUTRES MÉTHODES EXISTANTES ==========
-  
   addToCart(): void {
     if (!this.isAdmin && this.product) {
       this.cartService.addProductToCartSimple(this.product.id!, this.quantity).subscribe({
@@ -334,11 +339,6 @@ export class ProductDetailComponent implements OnInit {
   }
 
   // ========== GETTERS POUR LE TEMPLATE ==========
-  
-  get productImage(): string {
-    return this.product?.imageUrl || 'assets/images/default-product.jpg';
-  }
-
   get isInStock(): boolean {
     return (this.product?.stock || 0) > 0;
   }
