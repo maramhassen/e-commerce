@@ -128,18 +128,45 @@ export class ProductFormComponent implements OnInit {
            url.startsWith('blob:');
   }
 
-  getDisplayImageUrl(): string {
-    if (this.imagePreview) {
-      return this.imagePreview.toString();
-    }
-    
-    if (this.hasExistingImage && this.currentImageUrl) {
-      return this.productService.getImageUrl(this.currentImageUrl);
-    }
-    
-    return 'assets/images/default-product.jpg';
+ 
+getDisplayImageUrl(): string {
+  console.log('🖼️ getDisplayImageUrl appelé');
+  
+  // 1. Si on a une prévisualisation (fichier sélectionné)
+  if (this.imagePreview) {
+    console.log('📸 Utilisation de la prévisualisation');
+    return this.imagePreview.toString();
   }
-
+  
+  // 2. Si on a une image existante
+  if (this.hasExistingImage && this.currentImageUrl) {
+    console.log('🏞️ Utilisation de l\'image existante:', this.currentImageUrl);
+    
+    // Important: Ne pas stocker l'URL complète dans la BD
+    // Le nom de fichier seul est stocké (ex: "4496a966-6611-40b9-9fe2-1b1267ee23d2.jpg")
+    
+    // Si c'est déjà une URL complète, la retourner
+    if (this.currentImageUrl.includes('http') || 
+        this.currentImageUrl.includes('blob:') || 
+        this.currentImageUrl.includes('data:')) {
+      return this.currentImageUrl;
+    }
+    
+    // Si c'est un nom de fichier, construire l'URL
+    if (!this.currentImageUrl.includes('/') && this.currentImageUrl.includes('.')) {
+      const fullUrl = `http://localhost:8080/api/products/images/${this.currentImageUrl}`;
+      console.log('🔗 URL construite pour formulaire:', fullUrl);
+      return fullUrl;
+    }
+    
+    // Sinon, utiliser le service
+    return this.productService.getImageUrl(this.currentImageUrl);
+  }
+  
+  // 3. Image par défaut
+  console.log('🎭 Utilisation de l\'image par défaut');
+  return 'assets/images/default-product.jpg';
+}
   // ==================== CHARGEMENT DES DONNÉES ====================
 
   private loadCategories(): void {
@@ -172,45 +199,60 @@ export class ProductFormComponent implements OnInit {
   }
 
   private loadProduct(): void {
-    if (!this.productId) return;
-    
-    this.loading = true;
-    
-    this.productService.getById(this.productId).subscribe({
-      next: (product) => {
-        console.log('📦 Produit chargé:', product);
-        
-        // Gérer l'image existante
-        if (product.imageUrl && product.imageUrl !== 'assets/images/default-product.jpg') {
-          this.currentImageUrl = product.imageUrl;
-          this.hasExistingImage = true;
+  if (!this.productId) return;
+  
+  this.loading = true;
+  
+  this.productService.getById(this.productId).subscribe({
+    next: (product) => {
+      console.log('📦 Produit chargé dans formulaire:', {
+        id: product.id,
+        nom: product.nom,
+        imageUrl: product.imageUrl,
+        rawImageUrl: product.imageUrl
+      });
+      
+      // Extraire le nom de fichier depuis l'URL complète
+      if (product.imageUrl && product.imageUrl !== 'assets/images/default-product.jpg') {
+        // Si l'URL contient "/images/", extraire le nom de fichier
+        if (product.imageUrl.includes('/images/')) {
+          const parts = product.imageUrl.split('/');
+          this.existingImageName = parts[parts.length - 1];
+          console.log('📷 Nom de fichier extrait:', this.existingImageName);
+        } else if (!product.imageUrl.includes('/') && product.imageUrl.includes('.')) {
+          // C'est déjà un nom de fichier
+          this.existingImageName = product.imageUrl;
+        } else {
+          // Extraire le nom de fichier avec le service
           this.existingImageName = this.productService.extractFileName(product.imageUrl);
-          
-          // Créer une prévisualisation avec l'URL complète
-          this.imagePreview = this.productService.getImageUrl(product.imageUrl);
-          
-          console.log('📷 Image existante:', this.existingImageName);
         }
         
-        // Remplir le formulaire
-        this.productForm.patchValue({
-          nom: product.nom,
-          description: product.description,
-          prix: product.prix,
-          stock: product.stock,
-          categoryId: product.categoryId?.toString() || product.category?.id?.toString() || '',
-          actif: product.actif !== false
-        });
+        this.hasExistingImage = true;
+        this.currentImageUrl = product.imageUrl;
         
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('❌ Erreur:', err);
-        this.errorMessage = 'Erreur lors du chargement du produit';
-        this.loading = false;
+        // Ne pas créer de preview avec l'URL, laisser le template gérer via getDisplayImageUrl()
+        this.imagePreview = null;
       }
-    });
-  }
+      
+      // Remplir le formulaire
+      this.productForm.patchValue({
+        nom: product.nom,
+        description: product.description,
+        prix: product.prix,
+        stock: product.stock,
+        categoryId: product.categoryId?.toString() || product.category?.id?.toString() || '',
+        actif: product.actif !== false
+      });
+      
+      this.loading = false;
+    },
+    error: (err) => {
+      console.error('❌ Erreur:', err);
+      this.errorMessage = 'Erreur lors du chargement du produit';
+      this.loading = false;
+    }
+  });
+}
 
   // ==================== SOUMISSION DU FORMULAIRE ====================
 

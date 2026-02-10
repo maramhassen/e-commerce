@@ -58,62 +58,58 @@ export class ProductListComponent implements OnInit {
   }
 
   // ========== CHARGEMENT DES PRODUITS ==========
-  loadProducts(): void {
-    this.loading = true;
-    this.errorMessage = '';
-    
-    this.productService.getAll().subscribe({
-      next: (products) => {
-        // S'assurer que toutes les URLs d'images sont formatées
-        this.products = products.map(product => {
-          // Debug: Afficher l'état du produit
-          console.log(`📊 Produit "${product.nom}":`, {
-            id: product.id,
-            imageUrl: product.imageUrl,
-            categoryId: product.categoryId,
-            category: product.category,
-            hasCategory: !!product.category
-          });
-          
-          // S'assurer que l'image a une URL complète
-          if (product.imageUrl) {
-            product.imageUrl = this.getProductImageUrl(product);
-          }
-          
-          return product;
+loadProducts(): void {
+  this.loading = true;
+  this.errorMessage = '';
+  
+  this.productService.getAll().subscribe({
+    next: (products) => {
+      // AJOUTEZ CETTE LIGNE POUR FORMATER LES URLs DES IMAGES
+      this.products = products.map(product => {
+        // Formater l'URL de l'image
+        if (product.imageUrl) {
+          product.imageUrl = this.productService.getImageUrl(product.imageUrl);
+        } else {
+          product.imageUrl = 'assets/images/default-product.jpg';
+        }
+        
+        // Debug
+        console.log(`📊 Produit "${product.nom}":`, {
+          id: product.id,
+          imageUrl: product.imageUrl,
+          categoryId: product.categoryId,
+          category: product.category,
+          hasCategory: !!product.category
         });
         
-        this.filteredProducts = [...this.products];
-        this.totalItems = products.length;
-        
-        console.log('✅ PRODUITS CHARGÉS:', {
-          total: this.products.length,
-          avecImages: this.products.filter(p => p.imageUrl && p.imageUrl !== 'assets/images/default-product.jpg').length,
-          avecCatégories: this.products.filter(p => p.category).length
-        });
-        
-        this.applyFilters();
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('❌ Erreur chargement produits:', err);
-        this.errorMessage = 'Erreur lors du chargement des produits';
-        this.loading = false;
-      }
-    });
-  }
-
-  // ========== MÉTHODE POUR OBTENIR L'URL DE L'IMAGE ==========
-  getProductImageUrl(product: Product): string {
-    return this.productService.getImageUrl(product.imageUrl);
-  }
+        return product;
+      });
+      
+      this.filteredProducts = [...this.products];
+      this.totalItems = products.length;
+      
+      console.log('✅ PRODUITS CHARGÉS:', {
+        total: this.products.length,
+        avecImages: this.products.filter(p => p.imageUrl && p.imageUrl !== 'assets/images/default-product.jpg').length,
+        avecCatégories: this.products.filter(p => p.category).length
+      });
+      
+      this.applyFilters();
+      this.loading = false;
+    },
+    error: (err) => {
+      console.error('❌ Erreur chargement produits:', err);
+      this.errorMessage = 'Erreur lors du chargement des produits';
+      this.loading = false;
+    }
+  });
+}
 
   // ========== GESTION ERREUR IMAGE ==========
   onImageError(event: Event, product: Product): void {
     const img = event.target as HTMLImageElement;
     console.warn(`❌ Image non chargée pour "${product.nom}":`, img.src);
     img.src = 'assets/images/default-product.jpg';
-    product.imageUrl = 'assets/images/default-product.jpg';
   }
 
   loadCategories(): void {

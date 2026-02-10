@@ -18,13 +18,12 @@
       <div class="card shadow">
         <div class="card-body text-center p-4">
           <!-- BALISE IMG CORRIGÉE - AJOUT DU / DE FERMETURE -->
-          <img 
-            [src]="productImage" 
-            [alt]="product.nom"
-            class="img-fluid rounded"
-            style="max-height: 400px; object-fit: contain;"
-            (error)="onImageError($event)"
-          />
+          <img
+  [src]="productImage"
+  (error)="onImageError($event)"
+  alt="{{ product?.nom }}"
+>
+
         </div>
       </div>
     </div>

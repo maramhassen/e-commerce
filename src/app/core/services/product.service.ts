@@ -25,13 +25,34 @@ export class ProductService {
   constructor(private http: HttpClient) {}
   
   // ==================== MÉTHODE POUR OBTENIR L'URL DE L'IMAGE ====================
+// Dans product.service.ts
+getImageUrl(imageUrl?: string | null): string {
+  console.log('🖼️ getImageUrl appelé avec:', imageUrl);
   
-  getImageUrl(imageUrl?: string | null): string {
-  if (!imageUrl) {
-    return 'assets/images/no-image.png';
+  if (!imageUrl || imageUrl === 'null' || imageUrl === 'undefined') {
+    return 'assets/images/default-product.jpg';
   }
-
-  return `${this.apiUrl}/images/${imageUrl}`;
+  
+  // Si c'est déjà une URL complète
+  if (imageUrl.includes('http') || imageUrl.includes('blob:') || imageUrl.includes('data:')) {
+    return imageUrl;
+  }
+  
+  // Si c'est une URL d'assets
+  if (imageUrl.startsWith('assets/')) {
+    return imageUrl;
+  }
+  
+  // IMPORTANT: Utiliser le nouvel endpoint
+  // Si c'est un nom de fichier UUID (ex: "abc123.jpg")
+  if (!imageUrl.includes('/') && imageUrl.includes('.') && imageUrl.length > 20) {
+    const fullUrl = `http://localhost:8080/api/products/images/${imageUrl}`;
+    console.log('🔗 URL construite:', fullUrl);
+    return fullUrl;
+  }
+  
+  // Retourner tel quel (au cas où)
+  return imageUrl;
 }
   // ==================== CRÉATION AVEC IMAGE ====================
   
@@ -138,17 +159,10 @@ export class ProductService {
   
   // ==================== CRUD OPERATIONS ====================
   
-  getAll() {
-  return this.http.get<Product[]>(this.apiUrl).pipe(
-    map(products =>
-      products.map(product => ({
-        ...product,
-        imageUrl: this.getImageUrl(product.imageUrl)
-      }))
-    )
-  );
+  getAll(): Observable<Product[]> {
+  return this.http.get<Product[]>(this.apiUrl);
 }
-  
+
   getById(id: number): Observable<Product> {
     console.log(`🔄 ProductService - Récupération produit ${id}`);
     

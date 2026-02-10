@@ -73,20 +73,14 @@ export class ProductDetailComponent implements OnInit {
   }
 
   // ========== GETTER POUR L'IMAGE ==========
-  get productImage(): string {
-    if (!this.product || !this.product.imageUrl) {
-      return 'assets/images/default-product.jpg';
-    }
-    
-    // Si c'est déjà une URL complète
-    if (this.product.imageUrl.startsWith('http') || this.product.imageUrl.startsWith('data:')) {
-      return this.product.imageUrl;
-    }
-    
-    // Construire l'URL via le service
-    return this.productService.getImageUrl(this.product.imageUrl);
-  }
 
+get productImage(): string {
+  console.log('🖼️ productImage appelé, imageUrl du produit:', this.product?.imageUrl);
+  
+  const imageUrl = this.productService.getImageUrl(this.product?.imageUrl);
+  console.log('🔗 URL finale:', imageUrl);
+  return imageUrl;
+}
   // ========== MÉTHODE PRINCIPALE DE SUPPRESSION ==========
   deleteProduct(): void {
     if (!this.product?.id) {
