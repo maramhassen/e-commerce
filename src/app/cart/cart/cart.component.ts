@@ -6,6 +6,7 @@ import { CartItem } from '../../models/cart-item';
 import { Product } from '../../models/product';
 import { AuthService } from '../../core/services/auth.service';
 import { Subscription } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';  // ← AJOUTER CET IMPORT
 
 @Component({
   selector: 'app-cart',
@@ -25,6 +26,8 @@ export class CartComponent implements OnInit, OnDestroy {
   errorMessage = '';
   userId: number | null = null;
   
+  // AJOUT: Flag pour éviter les chargements multiples
+  private isLoadingCart = false;
   private cartSubscription!: Subscription;
 
   constructor(
@@ -38,11 +41,13 @@ export class CartComponent implements OnInit, OnDestroy {
     console.log('CartComponent ngOnInit');
     this.checkAuthAndLoadCart();
     
-    // S'abonner aux mises à jour du panier
-    this.cartSubscription = this.cartService.cartUpdated$.subscribe(() => {
-      console.log('Notification reçue: panier mis à jour');
-      this.loadCartByUser();
-    });
+    // SOLUTION: AJOUT DE debounceTime POUR ÉVITER LES DOUBLES CHARGEMENTS
+    this.cartSubscription = this.cartService.cartUpdated$
+      .pipe(debounceTime(300)) // Attend 300ms avant de recharger
+      .subscribe(() => {
+        console.log('🔔 Notification reçue: panier mis à jour (après debounce)');
+        this.loadCartByUser();
+      });
   }
 
   // =============================
@@ -74,29 +79,44 @@ export class CartComponent implements OnInit, OnDestroy {
   }
 
   private loadCartByUser(): void {
-    console.log('Chargement panier pour userId:', this.userId);
+    // AJOUT: ÉVITER LES CHARGEMENTS MULTIPLES SIMULTANÉS
+    if (this.isLoadingCart) {
+      console.log('⏳ Chargement déjà en cours, ignoré');
+      return;
+    }
+    
+    console.log('🔄 Chargement panier pour userId:', this.userId);
     this.loading = true;
     this.errorMessage = '';
+    this.isLoadingCart = true;
     
-    // Utilisez getOrCreateCart au lieu de getCartByUser
     this.cartService.getOrCreateCart().subscribe({
-      next: (data) => {
-        console.log('Panier chargé avec succès:', data);
+      next: (data: Cart) => {  // AJOUT DU TYPE
+        console.log('✅ Panier chargé avec succès:', data);
+        console.log('📊 NOMBRE D\'ITEMS:', data.items?.length);
+        
+        // VÉRIFICATION DES DOUBLONS
+        if (data.items) {
+          const uniqueIds = new Set(data.items.map(item => item.id));
+          if (uniqueIds.size !== data.items.length) {
+            console.warn('⚠️ DOUBLONS DÉTECTÉS!', data.items);
+          }
+        }
+        
         this.cart = data;
         
-        // S'assurer que le total est bien calculé
         if (!this.cart.total || this.cart.total === 0) {
           this.cart.total = this.cartService.calculateTotal(this.cart.items);
         }
         
         this.loading = false;
+        this.isLoadingCart = false;
         console.log('Panier final:', this.cart);
       },
       error: (err: any) => {
-        console.error('Erreur chargement panier:', err);
+        console.error('❌ Erreur chargement panier:', err);
         
         if (err.status === 404) {
-          // Si le panier n'existe pas, créer un panier vide
           console.log('Panier non trouvé, création panier vide');
           this.cart = {
             id: 0,
@@ -110,6 +130,7 @@ export class CartComponent implements OnInit, OnDestroy {
         }
         
         this.loading = false;
+        this.isLoadingCart = false;
       }
     });
   }
@@ -125,18 +146,18 @@ export class CartComponent implements OnInit, OnDestroy {
 
     if (!confirm(`Supprimer "${this.getProductName(item)}" du panier ?`)) return;
 
-    console.log('Suppression item ID:', item.id);
+    console.log('🗑️ Suppression item ID:', item.id);
     
     this.cartService.removeItem(item.id).subscribe({
       next: () => {
-        console.log('Item supprimé avec succès');
+        console.log('✅ Item supprimé avec succès');
         this.cart.items = this.cart.items.filter(i => i.id !== item.id);
         this.updateCartTotal();
         this.cartService.notifyCartUpdate();
         alert('Article supprimé du panier');
       },
       error: (err: any) => {
-        console.error('Erreur suppression:', err);
+        console.error('❌ Erreur suppression:', err);
         alert('Erreur lors de la suppression de l\'article: ' + err.message);
       }
     });
@@ -151,7 +172,7 @@ export class CartComponent implements OnInit, OnDestroy {
       quantity = qty;
     }
     
-    console.log('Mise à jour quantité - Item:', item.id, 'Nouvelle quantité:', quantity);
+    console.log('📝 Mise à jour quantité - Item:', item.id, 'Nouvelle quantité:', quantity);
     
     if (isNaN(quantity) || quantity < 1) {
       console.log('Quantité invalide, suppression item');
@@ -159,7 +180,6 @@ export class CartComponent implements OnInit, OnDestroy {
       return;
     }
     
-    // Vérifier le stock disponible
     const productStock = item.product?.stock;
     if (productStock !== undefined && quantity > productStock) {
       alert(`Stock insuffisant. Maximum disponible: ${productStock}`);
@@ -177,9 +197,8 @@ export class CartComponent implements OnInit, OnDestroy {
     }
     
     this.cartService.updateItem(updatedItem.id, updatedItem).subscribe({
-      next: (updatedCartItem) => {
-        console.log('Quantité mise à jour:', updatedCartItem);
-        // Mettre à jour l'item avec la réponse du serveur
+      next: (updatedCartItem: CartItem) => {  // AJOUT DU TYPE
+        console.log('✅ Quantité mise à jour:', updatedCartItem);
         const index = this.cart.items.findIndex(i => i.id === item.id);
         if (index !== -1) {
           this.cart.items[index] = updatedCartItem;
@@ -188,7 +207,7 @@ export class CartComponent implements OnInit, OnDestroy {
         this.cartService.notifyCartUpdate();
       },
       error: (err: any) => {
-        console.error('Erreur mise à jour quantité:', err);
+        console.error('❌ Erreur mise à jour quantité:', err);
         alert('Erreur lors de la mise à jour de la quantité: ' + err.message);
       }
     });
@@ -205,10 +224,9 @@ export class CartComponent implements OnInit, OnDestroy {
     
     if (!confirm('Voulez-vous vider tout votre panier ?')) return;
 
-    console.log('Vidage du panier...');
+    console.log('🧹 Vidage du panier...');
     this.loading = true;
     
-    // Supprimer chaque item individuellement
     const deletePromises = this.cart.items.map(item => {
       if (item.id) {
         return this.cartService.removeItem(item.id).toPromise();
@@ -218,14 +236,14 @@ export class CartComponent implements OnInit, OnDestroy {
     
     Promise.all(deletePromises)
       .then(() => {
-        console.log('Panier vidé avec succès');
+        console.log('✅ Panier vidé avec succès');
         this.cart.items = [];
         this.updateCartTotal();
         this.cartService.notifyCartUpdate();
         alert('Panier vidé avec succès');
       })
       .catch((err: any) => {
-        console.error('Erreur lors du vidage du panier:', err);
+        console.error('❌ Erreur lors du vidage du panier:', err);
         alert('Erreur lors du vidage du panier: ' + err.message);
       })
       .finally(() => {
@@ -245,9 +263,7 @@ export class CartComponent implements OnInit, OnDestroy {
     }
 
     console.log('Passage à la commande...');
-    // Ici, redirigez vers la page de commande
     alert('Redirection vers la page de paiement...');
-    // Exemple: this.router.navigate(['/checkout']);
   }
 
   // =============================
@@ -255,7 +271,7 @@ export class CartComponent implements OnInit, OnDestroy {
   // =============================
   private updateCartTotal(): void {
     this.cart.total = this.cartService.calculateTotal(this.cart.items);
-    console.log('Total panier mis à jour:', this.cart.total);
+    console.log('💰 Total panier mis à jour:', this.cart.total);
   }
 
   getProductName(item: CartItem): string {
@@ -282,18 +298,21 @@ export class CartComponent implements OnInit, OnDestroy {
     return this.cartService.calculateTotalItems(this.cart.items);
   }
 
+  // AJOUT: trackBy pour optimiser le rendu
+  trackByItemId(index: number, item: CartItem): number {
+    return item.id || index;
+  }
+
   // =============================
   // Navigation et autres
   // =============================
   continueShopping(): void {
     console.log('Continuer les achats');
-    // Rediriger vers la liste des produits
-    // this.router.navigate(['/products']);
     alert('Continuer les achats - Redirection vers la boutique');
   }
 
   reloadCart(): void {
-    console.log('Rechargement panier...');
+    console.log('🔄 Rechargement manuel panier...');
     if (this.userId) {
       this.loadCartByUser();
     }
@@ -317,7 +336,6 @@ export class CartComponent implements OnInit, OnDestroy {
   }
 
   testAddProduct(): void {
-    // Méthode de test
     const testProduct: Product = {
       id: 1,
       nom: 'Produit test',
@@ -328,11 +346,11 @@ export class CartComponent implements OnInit, OnDestroy {
     };
     
     this.cartService.addProductToCart(testProduct, 2).subscribe({
-      next: (item) => {
+      next: (item: CartItem) => {  // AJOUT DU TYPE
         console.log('Test réussi:', item);
         alert('Produit test ajouté!');
       },
-      error: (error) => {
+      error: (error: any) => {  // AJOUT DU TYPE
         console.error('Test échoué:', error);
         alert('Erreur test: ' + error.message);
       }

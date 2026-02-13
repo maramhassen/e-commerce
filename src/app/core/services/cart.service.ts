@@ -2,11 +2,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
-import { map, switchMap, catchError, tap } from 'rxjs/operators';
+import { map, switchMap, catchError, tap, share } from 'rxjs/operators';
 import { Cart } from '../../models/cart';
 import { CartItem } from '../../models/cart-item';
 import { Product } from '../../models/product';
-import { User } from '../../models/user'; // AJOUTEZ CET IMPORT
+import { User } from '../../models/user';
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
 
@@ -21,6 +21,7 @@ export class CartService {
   cartUpdated$ = this.cartUpdatedSource.asObservable();
 
   private currentCartId: number | null = null;
+  private pendingRequests = new Map<string, Observable<any>>();
 
   constructor(
     private http: HttpClient,
@@ -41,23 +42,22 @@ export class CartService {
         id: 0,
         total: 0, 
         items: [], 
-        dateCreation: new Date() // ← RETOUR À Date, PAS string
+        dateCreation: new Date()
       } as Cart);
     }
 
     console.log('Récupération panier pour utilisateur ID:', user.id);
     
     return this.getCartByUser(user.id).pipe(
-      tap(cart => {
+      tap((cart: Cart) => {
         console.log('Panier existant trouvé:', cart);
       }),
-      catchError((error) => {
+      catchError((error: any) => {
         console.log('Erreur récupération panier:', error);
         
         if (error.status === 404) {
           console.log('Création nouveau panier pour utilisateur:', user.id);
           
-          // Créer un user partiel pour le panier
           const partialUser: Partial<User> = {
             id: user.id,
             nom: user.nom,
@@ -69,12 +69,12 @@ export class CartService {
           const newCart: Cart = {
             total: 0,
             items: [],
-            dateCreation: new Date(), // ← Date, PAS string
+            dateCreation: new Date(),
             user: partialUser as User
           };
           
           return this.createCart(newCart).pipe(
-            tap(cart => {
+            tap((cart: Cart) => {
               console.log('Nouveau panier créé:', cart);
             })
           );
@@ -94,61 +94,76 @@ export class CartService {
   }
 
   // ================= MÉTHODE ADD TO CART =================
-addToCart(productId: number, quantity: number, userId: number): Observable<CartItem> {
-  console.log(`addToCart - Produit: ${productId}, Quantité: ${quantity}, User: ${userId}`);
-  
-  return this.getCartByUser(userId).pipe(
-    switchMap((cart: Cart) => {
-      console.log('Panier trouvé:', cart);
-      
-      // CHANGEMENT ICI : Format simplifié
-      const requestBody = {
-        productId: productId,
-        quantite: quantity
-      };
-      
-      console.log('Envoi requête simplifiée à API:', requestBody);
-      
-      // CHANGEMENT ICI : Utiliser la nouvelle endpoint
-      return this.http.post<CartItem>(
-        `${this.cartUrl}/${cart.id}/add-item-simple`, 
-        requestBody
-      );
-    }),
-    catchError(error => {
-      console.log('Erreur récupération panier:', error);
-      
-      if (error.status === 404) {
-        console.log('Création nouveau panier pour user:', userId);
+  addToCart(productId: number, quantity: number, userId: number): Observable<CartItem> {
+    console.log(`addToCart - Produit: ${productId}, Quantité: ${quantity}, User: ${userId}`);
+    
+    const requestKey = `addToCart_${productId}_${userId}`;
+    
+    if (this.pendingRequests.has(requestKey)) {
+      console.log('⏳ Requête déjà en cours pour ce produit, retourne la même observable');
+      return this.pendingRequests.get(requestKey)!;
+    }
+    
+    const request = this.getCartByUser(userId).pipe(
+      switchMap((cart: Cart) => {
+        console.log('Panier trouvé:', cart);
         
-        return this.findOrCreateCartForUser(userId).pipe(
-          switchMap((cart: Cart) => {
-            const requestBody = {
-              productId: productId,
-              quantite: quantity
-            };
-            
-            return this.http.post<CartItem>(
-              `${this.cartUrl}/${cart.id}/add-item-simple`, 
-              requestBody
-            );
-          })
+        const requestBody = {
+          productId: productId,
+          quantite: quantity
+        };
+        
+        console.log('Envoi requête simplifiée à API:', requestBody);
+        
+        return this.http.post<CartItem>(
+          `${this.cartUrl}/${cart.id}/add-item-simple`, 
+          requestBody
         );
-      }
-      return throwError(() => error);
-    })
-  );
-}
+      }),
+      catchError((error: any) => {
+        console.log('Erreur récupération panier:', error);
+        
+        if (error.status === 404) {
+          console.log('Création nouveau panier pour user:', userId);
+          
+          return this.findOrCreateCartForUser(userId).pipe(
+            switchMap((cart: Cart) => {
+              const requestBody = {
+                productId: productId,
+                quantite: quantity
+              };
+              
+              return this.http.post<CartItem>(
+                `${this.cartUrl}/${cart.id}/add-item-simple`, 
+                requestBody
+              );
+            })
+          );
+        }
+        return throwError(() => error);
+      }),
+      tap(() => {
+        this.pendingRequests.delete(requestKey);
+      }),
+      catchError((error: any) => {
+        this.pendingRequests.delete(requestKey);
+        return throwError(() => error);
+      }),
+      share()
+    );
+    
+    this.pendingRequests.set(requestKey, request);
+    
+    return request;
+  }
 
-// ET AJOUTEZ CETTE MÉTHODE (si elle n'existe pas) :
-findOrCreateCartForUser(userId: number): Observable<Cart> {
-  console.log('findOrCreateCartForUser - UserId:', userId);
-  return this.http.get<Cart>(`${this.cartUrl}/user/${userId}/find-or-create`);
-}
+  findOrCreateCartForUser(userId: number): Observable<Cart> {
+    console.log('findOrCreateCartForUser - UserId:', userId);
+    return this.http.get<Cart>(`${this.cartUrl}/user/${userId}/find-or-create`);
+  }
 
-  // ================= MÉTHODE SIMPLIFIÉE =================
   addProductToCartSimple(productId: number, quantity: number = 1): Observable<CartItem> {
-    console.log(`addProductToCartSimple - Produit: ${productId}, Quantité: ${quantity}`);
+    console.log(`🛒 addProductToCartSimple - Produit: ${productId}, Quantité: ${quantity}, Timestamp: ${Date.now()}`);
     
     const user = this.authService.getCurrentUser();
     
@@ -163,27 +178,18 @@ findOrCreateCartForUser(userId: number): Observable<Cart> {
     return this.addToCart(productId, quantity, user.id).pipe(
       tap((cartItem: CartItem) => {
         console.log('✅ Produit ajouté avec succès:', cartItem);
-        this.notifyCartUpdate();
+        setTimeout(() => {
+          this.notifyCartUpdate();
+        }, 100);
       })
     );
   }
 
-  // ================= MÉTHODE POUR AJOUTER UN PRODUIT COMPLET =================
   addProductToCart(product: Product, quantity: number = 1): Observable<CartItem> {
     console.log('addProductToCart appelé - Produit:', product.nom);
-    
-    const user = this.authService.getCurrentUser();
-    
-    if (!user || !user.id) {
-      return throwError(() => new Error('Utilisateur non connecté'));
-    }
-    
-    // CORRECTION : NE PAS appeler addToCart avec 3 arguments
-    // Utiliser plutôt la méthode simplifiée
     return this.addProductToCartSimple(product.id!, quantity);
   }
 
-  // ================= MÉTHODE GET CART BY USER =================
   getCartByUser(userId: number): Observable<Cart> {
     console.log('getCartByUser appelé - UserId:', userId);
     
@@ -197,14 +203,13 @@ findOrCreateCartForUser(userId: number): Observable<Cart> {
         }
         return cart;
       }),
-      catchError((error) => {
+      catchError((error: any) => {
         console.error('Erreur récupération panier user:', error);
         return throwError(() => error);
       })
     );
   }
 
-  // ================= AUTRES MÉTHODES =================
   getCart(cartId: number): Observable<Cart> {
     console.log('getCart appelé - CartId:', cartId);
     return this.http.get<Cart>(`${this.cartUrl}/${cartId}`);
@@ -240,17 +245,15 @@ findOrCreateCartForUser(userId: number): Observable<Cart> {
     return this.http.delete<void>(`${this.cartItemUrl}/${itemId}`);
   }
 
-  // Notifier que le panier a été mis à jour
   notifyCartUpdate(): void {
-    console.log('Notification mise à jour panier');
+    console.log('🔔 Notification mise à jour panier');
     this.cartUpdatedSource.next();
   }
 
-  // Méthode pour calculer le total des items
   calculateTotal(items: CartItem[]): number {
     if (!items || items.length === 0) return 0;
     
-    return items.reduce((total, item) => {
+    return items.reduce((total: number, item: CartItem) => {
       return total + (item.quantite * item.prixUnitaire);
     }, 0);
   }
@@ -258,7 +261,7 @@ findOrCreateCartForUser(userId: number): Observable<Cart> {
   calculateTotalItems(items: CartItem[]): number {
     if (!items || items.length === 0) return 0;
     
-    return items.reduce((total, item) => total + item.quantite, 0);
+    return items.reduce((total: number, item: CartItem) => total + item.quantite, 0);
   }
 
   getCurrentCartId(): number | null {
@@ -278,7 +281,7 @@ findOrCreateCartForUser(userId: number): Observable<Cart> {
         console.log('Cart count calculé:', count);
         return count;
       }),
-      catchError((error) => {
+      catchError((error: any) => {
         console.error('Erreur calcul cart count:', error);
         return of(0);
       })
