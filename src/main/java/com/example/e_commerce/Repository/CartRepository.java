@@ -2,7 +2,7 @@ package com.example.e_commerce.Repository;
 import com.example.e_commerce.Entities.Cart;
 import com.example.e_commerce.Entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-
+import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 public interface CartRepository extends JpaRepository<Cart,Long> {

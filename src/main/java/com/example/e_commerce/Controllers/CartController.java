@@ -62,31 +62,33 @@ public class CartController {
         return cartService.addProductToCart(cartId, productId, quantity);
     }
 
-    //  AJOUTER UN ITEM AU PANIER DE L'UTILISATEUR
+    // AJOUTER UN ITEM AU PANIER DE L'UTILISATEUR
     @PostMapping("/user/{userId}/add-item")
     public CartItem addItemToUserCart(@PathVariable Long userId, @RequestBody CartItem cartItem) {
         return cartService.addItemToUserCart(userId, cartItem);
     }
 
-    //  RÉCUPÉRER LE PANIER DE L'UTILISATEUR
+    // ========== MÉTHODE CORRIGÉE ==========
+    // RÉCUPÉRER LE PANIER DE L'UTILISATEUR - UTILISE findOrCreateCartForUser
     @GetMapping("/user/{userId}")
     public Cart getCartByUserId(@PathVariable Long userId) {
-        return cartService.getCartByUserId(userId);
+        // Cette méthode crée automatiquement le panier s'il n'existe pas
+        return cartService.findOrCreateCartForUser(userId);
     }
 
-    //  SUPPRIMER UN ITEM DU PANIER
+    // SUPPRIMER UN ITEM DU PANIER
     @DeleteMapping("/{cartId}/remove-item/{itemId}")
     public void removeItemFromCart(@PathVariable Long cartId, @PathVariable Long itemId) {
         cartService.removeItemFromCart(cartId, itemId);
     }
 
-    //  VIDER LE PANIER DE L'UTILISATEUR
+    // VIDER LE PANIER DE L'UTILISATEUR
     @DeleteMapping("/user/{userId}/clear")
     public void clearUserCart(@PathVariable Long userId) {
         cartService.clearUserCart(userId);
     }
 
-    //  METTRE À JOUR LA QUANTITÉ D'UN ITEM
+    // METTRE À JOUR LA QUANTITÉ D'UN ITEM
     @PutMapping("/{cartId}/update-item/{itemId}")
     public CartItem updateCartItemQuantity(
             @PathVariable Long cartId,
@@ -95,7 +97,7 @@ public class CartController {
         return cartService.updateCartItemQuantity(cartId, itemId, quantity);
     }
 
-    //  CALCULER LE TOTAL DU PANIER
+    // CALCULER LE TOTAL DU PANIER
     @GetMapping("/{cartId}/total")
     public double calculateCartTotal(@PathVariable Long cartId) {
         return cartService.calculateCartTotal(cartId);
@@ -107,12 +109,10 @@ public class CartController {
         return cartService.findOrCreateCartForUser(userId);
     }
 
-    // Dans CartController.java, ajoutez cette méthode :
+    // AJOUT SIMPLE (utilisé par le frontend)
     @PostMapping("/{cartId}/add-item-simple")
     public CartItem addItemToCartSimple(@PathVariable Long cartId,
                                         @RequestBody CartItemRequest request) {
         return cartService.addProductToCart(cartId, request.getProductId(), request.getQuantite());
     }
-
-
 }

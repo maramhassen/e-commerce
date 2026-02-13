@@ -5,6 +5,7 @@ import com.example.e_commerce.Repository.CartItemRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 @Service
 public class CartItemServiceImpl implements ICartItemService {
     private final CartItemRepository cartItemRepository;
@@ -21,7 +22,7 @@ public class CartItemServiceImpl implements ICartItemService {
     @Override
     public CartItem updateCartItem(Long id, CartItem cartItem) {
         CartItem existingItem = cartItemRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("CartItem not found"));
+                .orElseThrow(() -> new RuntimeException("CartItem not found with id: " + id));
 
         existingItem.setQuantite(cartItem.getQuantite());
         existingItem.setPrixUnitaire(cartItem.getPrixUnitaire());
@@ -34,7 +35,7 @@ public class CartItemServiceImpl implements ICartItemService {
     @Override
     public CartItem getCartItemById(Long id) {
         return cartItemRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("CartItem not found"));
+                .orElseThrow(() -> new RuntimeException("CartItem not found with id: " + id));
     }
 
     @Override
