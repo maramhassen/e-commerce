@@ -1,121 +1,127 @@
-<div class="order-list-container">
-  <!-- En-tête -->
-  <div class="header">
-    <div class="header-title">
-      <h1>
-        <i class="fas fa-shopping-bag me-2"></i>
-        {{ isAdmin ? 'Gestion des Commandes' : 'Mes Commandes' }}
-      </h1>
-      <p class="subtitle">
-        {{ isAdmin ? 'Gérez toutes les commandes du système' : 'Consultez l\'historique de vos commandes' }}
-      </p>
-    </div>
-    
-    <div class="header-actions">
+<div class="orders-page">
+  <div class="orders-container">
+    <div class="orders-card">
       
-      <button (click)="loadOrders()" 
-              [disabled]="loading"
-              class="btn btn-primary">
-        <i class="fas fa-sync me-2" [class.fa-spin]="loading"></i> Actualiser
-      </button>
-    </div>
-  </div>
+      <!-- ===== EN-TÊTE ===== -->
+      <div class="orders-header">
+        <div class="header-icon">
+          <i class="fas fa-shopping-bag"></i>
+        </div>
+        <div class="header-title">
+          <h1>{{ isAdmin ? 'Gestion des Commandes' : 'Mes Commandes' }}</h1>
+          <p class="subtitle">
+            {{ isAdmin ? 'Gérez toutes les commandes du système' : 'Consultez l\'historique de vos commandes' }}
+          </p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-refresh" (click)="loadOrders()" [disabled]="loading">
+            <i class="fas fa-sync" [class.fa-spin]="loading"></i>
+            Actualiser
+          </button>
+        </div>
+      </div>
 
-  <!-- Statistiques -->
-  <div class="stats-section">
-    <div class="row">
-      <div class="col-md-3 mb-3">
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fas fa-box"></i>
-          </div>
-          <div class="stat-content">
-            <div class="stat-number">{{ filteredOrders?.length || 0 }}</div>
-            <div class="stat-label">Commandes{{ filterStatut ? ' filtrées' : '' }}</div>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3 mb-3">
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fas fa-coins"></i>
-          </div>
-          <div class="stat-content">
-            <div class="stat-number">{{ getFilteredTotalAmount() }} DT</div>
-            <div class="stat-label">Montant total{{ filterStatut ? ' filtré' : '' }}</div>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-3 mb-3">
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fas fa-user-tie"></i>
-          </div>
-          <div class="stat-content">
-            <div class="stat-number">{{ currentUser?.prenom || 'Utilisateur' }}</div>
-            <div class="stat-label">{{ isAdmin ? 'Administrateur' : 'Client' }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Filtres -->
-  <div class="filters-section">
-    <div class="card">
-      <div class="card-body">
-        <div class="row align-items-center">
-          <div class="col-md-4">
-            <label for="statutFilter" class="form-label">
-              <i class="fas fa-filter me-2"></i>Filtrer par statut
-            </label>
-            <select id="statutFilter" 
-                    [(ngModel)]="filterStatut" 
-                    class="form-select"
-                    (change)="onFilterChange()">
-              <option value="">Tous les statuts</option>
-              <option value="EN_ATTENTE">En attente</option>
-              <option value="CONFIRMEE">Confirmée</option>
-              <option value="EXPEDIEE">Expédiée</option>
-              <option value="LIVREE">Livrée</option>
-              <option value="ANNULEE">Annulée</option>
-            </select>
-            
-            <!-- Indicateur de filtre actif -->
-            <div *ngIf="filterStatut" class="mt-2">
-              <span class="badge bg-info">
-                <i class="fas fa-filter me-1"></i>
-                Filtre: {{ getStatutText(filterStatut) }}
-              </span>
+      <!-- ===== STATISTIQUES ===== -->
+      <div class="stats-section">
+        <div class="stats-grid">
+          <!-- Total commandes -->
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-box"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-number">{{ filteredOrders?.length || 0 }}</div>
+              <div class="stat-label">Commandes{{ filterStatut ? ' filtrées' : '' }}</div>
             </div>
           </div>
           
-          <div class="col-md-8">
-            <div class="statut-filter-buttons">
-              <button *ngFor="let statut of getStatutList()"
-                      (click)="filterStatut = statut; onFilterChange()"
-                      [class.active]="filterStatut === statut"
-                      class="btn btn-sm statut-btn"
-                      [ngClass]="getStatutClass(statut)">
-                <i class="fas fa-circle me-1" [ngClass]="getStatutIconClass(statut)"></i>
-                {{ getStatutText(statut) }}
-                <span class="badge bg-dark ms-1">
-                  {{ getOrderCountByStatut(statut) }}
-                </span>
-              </button>
+          <!-- Montant total -->
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-coins"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-number">{{ getFilteredTotalAmount() }} DT</div>
+              <div class="stat-label">Montant total{{ filterStatut ? ' filtré' : '' }}</div>
+            </div>
+          </div>
+          
+          <!-- Utilisateur -->
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-user-tie"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-number">{{ currentUser?.prenom || 'Utilisateur' }}</div>
+              <div class="stat-label">{{ isAdmin ? 'Administrateur' : 'Client' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== FILTRES ===== -->
+      <div class="filters-section">        
+        <div class="filters-content">
+          <div class="filters-grid">
+            <!-- Filtre par statut -->
+            <div class="filter-group">
+              <label class="filter-label">
+                <i class="fas fa-tag"></i>
+                Statut de la commande
+              </label>
+              <select class="filter-select" 
+                      [(ngModel)]="filterStatut" 
+                      (change)="onFilterChange()">
+                <option value="">Tous les statuts</option>
+                <option value="EN_ATTENTE">En attente</option>
+                <option value="CONFIRMEE">Confirmée</option>
+                <option value="EXPEDIEE">Expédiée</option>
+                <option value="LIVREE">Livrée</option>
+                <option value="ANNULEE">Annulée</option>
+              </select>
               
-              <button (click)="clearFilter()"
-                      [disabled]="!filterStatut"
-                      class="btn btn-sm btn-outline-secondary">
-                <i class="fas fa-times me-1"></i> Effacer filtre
-              </button>
+              <!-- Indicateur de filtre actif -->
+              <div *ngIf="filterStatut" class="filter-active">
+                <span class="badge-active">
+                  <i class="fas fa-check-circle"></i>
+                  Filtre: {{ getStatutText(filterStatut) }}
+                </span>
+              </div>
             </div>
             
-            <!-- Résumé du filtre -->
-            <div *ngIf="filterStatut && filteredOrders" class="mt-3">
-              <div class="alert alert-info py-2 mb-0">
-                <i class="fas fa-info-circle me-2"></i>
-                Affichage de <strong>{{ filteredOrders.length }}</strong> commande(s) 
+            <!-- Boutons de filtre rapide -->
+            <div class="filter-group quick-filters">
+              <label class="filter-label">Filtres rapides</label>
+              <div class="quick-filter-buttons">
+                <button *ngFor="let statut of getStatutList()"
+                        (click)="filterStatut = statut; onFilterChange()"
+                        class="btn-quick-filter"
+                        [class.active]="filterStatut === statut"
+                        [ngClass]="'statut-' + statut.toLowerCase()">
+                  <i class="fas fa-circle"></i>
+                  {{ getStatutText(statut) }}
+                  <span class="count-badge">{{ getOrderCountByStatut(statut) }}</span>
+                </button>
+              </div>
+            </div>
+            
+            <!-- Effacer le filtre -->
+            <div class="filter-group reset-group">
+              <button class="btn-reset" 
+                      (click)="clearFilter()"
+                      [disabled]="!filterStatut">
+                <i class="fas fa-times"></i>
+                Effacer le filtre
+              </button>
+            </div>
+          </div>
+          
+          <!-- Résumé du filtre -->
+          <div *ngIf="filterStatut && filteredOrders" class="filter-summary">
+            <div class="summary-alert">
+              <i class="fas fa-info-circle"></i>
+              <div class="summary-text">
+                Affichage de <strong>{{ filteredOrders.length }}</strong> commande(s)
                 <span *ngIf="filteredOrders.length !== orders.length">
                   sur <strong>{{ orders.length }}</strong> au total
                 </span>
@@ -127,196 +133,213 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Tableau des commandes -->
-  <div class="orders-section">
-    <div class="card">
-      <div class="card-body">
-        <div *ngIf="!loading && filteredOrders && filteredOrders.length > 0; else emptyState">
-          <div class="table-responsive">
-            <table class="table table-hover align-middle">
-              <thead class="table-light">
-                <tr>
-                  <th>N° Commande</th>
-                  <th>Date</th>
-                  <th *ngIf="isAdmin">Client</th>
-                  <th>Articles</th>
-                  <th>Total</th>
-                  <th>Statut</th>
-                  <th class="text-end">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let order of filteredOrders" 
-                    class="order-row"
-                    [class.clickable]="true"
-                    (click)="viewOrderDetails(order.id)">
-                  <td>
-                    <div class="order-id">
-                      <strong>#{{ order.id }}</strong>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="order-date">
-                      {{ formatDate(order.dateCommande) }}
-                    </div>
-                  </td>
-                  <td *ngIf="isAdmin">
-                    <div class="customer-info">
-                      <div class="customer-name">
-                        {{ order.user?.prenom }} {{ order.user?.nom }}
-                      </div>
-                      <small class="text-muted">{{ order.user?.email }}</small>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="order-items">
-                      <span class="badge" 
-                            [ngClass]="{'bg-success': (order.items?.length || 0) > 0, 
-                                       'bg-secondary': (order.items?.length || 0) === 0}">
-                        {{ (order.items?.length || 0) }} article(s)
-                      </span>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="order-total">
-                      <span class="price">{{ order.total | number:'1.2-2' }} DT</span>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="badge statut-badge" 
-                          [ngClass]="getStatutClass(order.statut)">
-                      <i class="fas fa-circle me-1 small" [ngClass]="getStatutIconClass(order.statut)"></i>
-                      {{ getStatutText(order.statut) }}
-                    </span>
-                  </td>
-                  <td class="text-end">
-                    <div class="btn-group" role="group">
-                      <button (click)="viewOrderDetails(order.id); $event.stopPropagation()" 
-                              class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-eye"></i> Détails
-                      </button>
-                      
-                      <div class="btn-group" *ngIf="isAdmin">
-                        <button type="button" 
-                                class="btn btn-sm btn-outline-secondary dropdown-toggle" 
-                                data-bs-toggle="dropdown"
-                                (click)="$event.stopPropagation()">
-                          <i class="fas fa-cog"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                          <li><h6 class="dropdown-header">Changer statut</h6></li>
-                          <li *ngFor="let statut of getStatutList()">
-                            <a class="dropdown-item" 
-                               href="#"
-                               (click)="updateOrderStatut(order.id, statut); $event.stopPropagation(); $event.preventDefault()">
-                              <i class="fas fa-circle me-2" [ngClass]="getStatutClass(statut)"></i>
-                              {{ getStatutText(statut) }}
-                            </a>
-                          </li>
-                          <li><hr class="dropdown-divider"></li>
-                          <li>
-                            <a class="dropdown-item text-danger" 
-                               href="#"
-                               (click)="deleteOrder(order.id); $event.stopPropagation(); $event.preventDefault()">
-                              <i class="fas fa-trash me-2"></i> Supprimer
-                            </a>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          
-          <!-- Pagination et informations -->
-          <div class="d-flex justify-content-between align-items-center mt-3">
-            <div class="text-muted">
-              <span *ngIf="filterStatut">
-                <i class="fas fa-filter me-1"></i>
-                Filtre actif: <strong>{{ getStatutText(filterStatut) }}</strong> |
-              </span>
-              Affichage de <strong>{{ filteredOrders.length }}</strong> commande(s)
-              <span *ngIf="filterStatut && filteredOrders.length !== orders.length" 
-                    class="ms-1">
-                (sur {{ orders.length }} au total)
-              </span>
-            </div>
-            <div class="pagination-info">
-              <div class="btn-group btn-group-sm">
-                <button class="btn btn-outline-secondary" disabled>
-                  <i class="fas fa-chevron-left"></i>
-                </button>
-                <button class="btn btn-outline-secondary active">1</button>
-                <button class="btn btn-outline-secondary" disabled>
-                  <i class="fas fa-chevron-right"></i>
-                </button>
-              </div>
-            </div>
+      <!-- ===== MESSAGE D'ERREUR ===== -->
+      <div *ngIf="errorMessage" class="alert alert-error">
+        <div class="alert-content">
+          <i class="fas fa-exclamation-triangle"></i>
+          <div>
+            <strong>Erreur</strong>
+            <p>{{ errorMessage }}</p>
           </div>
         </div>
+        <button class="btn-close" (click)="errorMessage = ''">×</button>
+      </div>
+
+      <!-- ===== LOADING ===== -->
+      <div *ngIf="loading" class="loading-container">
+        <div class="spinner"></div>
+        <p>Chargement des commandes...</p>
+      </div>
+
+      <!-- ===== TABLEAU DES COMMANDES ===== -->
+      <div *ngIf="!loading && filteredOrders && filteredOrders.length > 0" class="orders-section">
+        <div class="table-responsive">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>N° Commande</th>
+                <th>Date</th>
+                <th *ngIf="isAdmin">Client</th>
+                <th>Articles</th>
+                <th>Total</th>
+                <th>Statut</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let order of filteredOrders" 
+                  class="order-row"
+                  (click)="viewOrderDetails(order.id!)"> <!-- Ajout du ! pour indiquer que id n'est pas undefined -->
+                <td>
+                  <span class="order-id">#{{ order.id }}</span>
+                </td>
+                <td>
+                  <span class="order-date">
+                    <i class="fas fa-calendar-alt"></i>
+                    {{ formatDate(order.dateCommande) }}
+                  </span>
+                </td>
+                <td *ngIf="isAdmin">
+                  <div class="customer-info">
+                    <span class="customer-name">{{ order.user?.prenom }} {{ order.user?.nom }}</span>
+                    <span class="customer-email">{{ order.user?.email }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge-items" 
+                        [ngClass]="{'has-items': (order.items?.length || 0) > 0}">
+                    <i class="fas fa-box"></i>
+                    {{ (order.items?.length || 0) }} article(s)
+                  </span>
+                </td>
+                <td>
+                  <span class="order-total">{{ order.total | number:'1.2-2' }} DT</span>
+                </td>
+                <td>
+                  <span class="statut-badge" 
+                        [ngClass]="'statut-' + (order.statut || 'en_attente').toLowerCase()">
+                    <i class="fas fa-circle"></i>
+                    {{ getStatutText(order.statut) }}
+                  </span>
+                </td>
+                <td class="text-end">
+                  <div class="actions-group">
+                    <!-- Bouton Détails -->
+                    <button class="btn-details" 
+                            (click)="viewOrderDetails(order.id!); $event.stopPropagation()"
+                            title="Voir les détails">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    
+                    <!-- Actions Admin - Version avec vérification de l'ID -->
+                    <div class="admin-actions-simple" *ngIf="isAdmin">
+                      <!-- Menu déroulant avec select pour changer le statut - CORRIGÉ -->
+                      <select class="admin-statut-select" 
+                              (change)="onStatutChange($event, order.id!)"
+                              (click)="$event.stopPropagation()">
+                        <option value="" disabled selected>Changer statut</option>
+                        <option *ngFor="let statut of getStatutList()" [value]="statut">
+                          {{ getStatutText(statut) }}
+                        </option>
+                      </select>
+                      
+                      <!-- Bouton suppression -->
+                      <button class="btn-delete-simple" 
+                              (click)="deleteOrder(order.id!); $event.stopPropagation()"
+                              title="Supprimer">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         
-        <!-- État vide / Chargement -->
-        <ng-template #emptyState>
-          <div class="empty-state text-center py-5">
-            <div *ngIf="loading; else noOrders">
-              <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Chargement...</span>
-              </div>
-              <p class="mt-3">Chargement des commandes...</p>
-            </div>
+        <!-- Pagination -->
+        <div class="pagination-section">
+          <div class="pagination-info">
+            <span class="filter-summary-text">
+              <i class="fas fa-filter" *ngIf="filterStatut"></i>
+              <span *ngIf="filterStatut">
+                Filtre: <strong>{{ getStatutText(filterStatut) }}</strong> |
+              </span>
+              Affichage de <strong>{{ filteredOrders.length }}</strong> commande(s)
+              <span *ngIf="filterStatut && filteredOrders.length !== orders.length">
+                (sur {{ orders.length }} au total)
+              </span>
+            </span>
+          </div>
+          
+          <div class="pagination-controls">
+            <button class="page-btn" disabled>
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn" disabled>
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== ÉTAT VIDE ===== -->
+      <div *ngIf="!loading && (!filteredOrders || filteredOrders.length === 0)" class="empty-state">
+        <div *ngIf="!loading; else noOrders">
+          <div class="empty-icon">
+            <i class="fas fa-shopping-bag"></i>
+          </div>
+          
+          <div *ngIf="!filterStatut; else filterEmpty">
+            <h3>Aucune commande trouvée</h3>
+            <p class="empty-description">
+              {{ isAdmin 
+                ? 'Aucune commande dans le système pour le moment.' 
+                : 'Vous n\'avez pas encore passé de commande.' 
+              }}
+            </p>
             
-            <ng-template #noOrders>
-              <div class="empty-icon mb-4">
-                <i class="fas fa-box-open fa-4x text-muted"></i>
-              </div>
-              <h3 class="mb-3">
-                {{ filterStatut ? 'Aucune commande avec ce statut' : 'Aucune commande trouvée' }}
-              </h3>
-              <p class="text-muted mb-4">
-                {{ isAdmin 
-                  ? (filterStatut ? 'Aucune commande avec le statut "' + getStatutText(filterStatut) + '".' : 'Aucune commande dans le système.') 
-                  : (filterStatut ? 'Vous n\'avez pas de commande avec le statut "' + getStatutText(filterStatut) + '".' : 'Vous n\'avez pas encore passé de commande.') 
-                }}
-              </p>
-              <div class="d-flex justify-content-center gap-3 flex-wrap">
-                <button *ngIf="filterStatut" 
-                        (click)="clearFilter()"
-                        class="btn btn-primary">
-                  <i class="fas fa-times me-2"></i> Effacer le filtre
-                </button>
-                <button (click)="loadOrders()" class="btn btn-primary">
-                  <i class="fas fa-sync me-2"></i> Actualiser
-                </button>
-                <button *ngIf="!isAdmin" 
-                        (click)="createOrderFromCart()" 
-                        class="btn btn-success">
-                  <i class="fas fa-cart-plus me-2"></i> Créer ma première commande
-                </button>
-                <a *ngIf="!isAdmin" routerLink="/products" class="btn btn-outline-primary">
-                  <i class="fas fa-store me-2"></i> Voir les produits
-                </a>
-              </div>
-            </ng-template>
+            <div class="empty-actions">
+              <button *ngIf="!isAdmin" 
+                      (click)="createOrderFromCart()" 
+                      class="btn-primary">
+                <i class="fas fa-cart-plus"></i>
+                Créer ma première commande
+              </button>
+              
+              <button (click)="loadOrders()" class="btn-outline">
+                <i class="fas fa-sync"></i>
+                Actualiser
+              </button>
+              
+              <a *ngIf="!isAdmin" routerLink="/products" class="btn-outline">
+                <i class="fas fa-store"></i>
+                Voir les produits
+              </a>
+            </div>
+          </div>
+          
+          <ng-template #filterEmpty>
+            <div class="empty-icon">
+              <i class="fas fa-filter"></i>
+            </div>
+            <h3>Aucune commande avec ce statut</h3>
+            <p class="empty-description">
+              {{ isAdmin 
+                ? 'Aucune commande avec le statut "' + getStatutText(filterStatut) + '".' 
+                : 'Vous n\'avez pas de commande avec le statut "' + getStatutText(filterStatut) + '".' 
+              }}
+            </p>
+            <div class="empty-actions">
+              <button class="btn-primary" (click)="clearFilter()">
+                <i class="fas fa-times"></i>
+                Effacer le filtre
+              </button>
+              <button class="btn-outline" (click)="loadOrders()">
+                <i class="fas fa-sync"></i>
+                Actualiser
+              </button>
+            </div>
+          </ng-template>
+        </div>
+        
+        <ng-template #noOrders>
+          <div class="empty-icon">
+            <i class="fas fa-box-open"></i>
+          </div>
+          <h3>Aucune commande trouvée</h3>
+          <p class="empty-description">Le chargement est terminé mais aucune commande n'est disponible.</p>
+          <div class="empty-actions">
+            <button class="btn-primary" (click)="loadOrders()">
+              <i class="fas fa-sync"></i>
+              Réessayer
+            </button>
           </div>
         </ng-template>
       </div>
-    </div>
-  </div>
 
-  <!-- Message d'erreur -->
-  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show mt-4" role="alert">
-    <div class="d-flex">
-      <i class="fas fa-exclamation-triangle me-3 mt-1"></i>
-      <div>
-        <h5 class="alert-heading mb-2">Erreur</h5>
-        <p class="mb-0">{{ errorMessage }}</p>
-      </div>
     </div>
-    <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
   </div>
 </div>

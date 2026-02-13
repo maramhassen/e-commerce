@@ -17,6 +17,7 @@ import { OrderListComponent } from './orders/order-list/order-list.component';
 import { OrderDetailComponent } from './orders/order-detail/order-detail.component';
 import { SharedModule } from './shared/shared.module';
 import { UserListComponent } from './users/user-list/user-list.component';
+import { HomeComponent } from './shared/home/home.component';
 
 @NgModule({
   declarations: [

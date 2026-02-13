@@ -1,51 +1,91 @@
-<div class="container mt-4">
-  <!-- Titre et bouton -->
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Liste des catégories</h2>
-    <button class="btn btn-primary" (click)="goToAdd()">
-      <i class="bi bi-plus-circle me-1"></i> Ajouter catégorie
-    </button>
-  </div>
+<div class="category-list-page">
+  <div class="category-list-container">
+    <div class="category-list-card">
+      
+      <!-- Header -->
+      <div class="category-list-header text-center">
+        <div class="icon-circle">
+          <i class="fas fa-folder icon-main"></i>
+        </div>
+        <h2 class="category-list-title">Liste des catégories</h2>
+        <p class="subtitle">Gérez les catégories de produits</p>
+      </div>
 
-  <!-- Message d'erreur -->
-  <div *ngIf="errorMessage" class="alert alert-danger">
-    {{ errorMessage }}
-  </div>
+      <!-- Bouton Ajouter -->
+      <div class="add-section text-center mb-4">
+        <button class="btn-add" (click)="goToAdd()">
+          <i class="fas fa-plus-circle"></i>
+          Ajouter une catégorie
+        </button>
+      </div>
 
-  <!-- Tableau -->
-  <div class="table-responsive">
-    <table class="table table-bordered table-hover">
-      <thead class="table-dark">
-        <tr>
-          
-          <th>Nom</th>
-          <th>Description</th>
-          <th width="200" class="text-center">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let c of categories">
-          
-          <td>{{ c.nom }}</td>
-          <td>{{ getDescription(c.description) }}</td>
-          <td class="text-center">
-            <button class="btn btn-sm btn-outline-primary me-2" 
-                    (click)="goToEdit(c.id)">
-              <i class="bi bi-pencil"></i> Modifier
-            </button>
-            <button class="btn btn-sm btn-outline-danger" 
-                    (click)="deleteCategory(c.id)">
-              <i class="bi bi-trash"></i> Supprimer
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+      <!-- Message d'erreur -->
+      <div *ngIf="errorMessage" class="alert alert-error">
+        <div class="alert-content">
+          <i class="fas fa-exclamation-circle"></i>
+          <span>{{ errorMessage }}</span>
+        </div>
+      </div>
 
-  <!-- Message si aucune catégorie -->
-  <div *ngIf="categories.length === 0 && !errorMessage" class="alert alert-info mt-3">
-    <i class="bi bi-info-circle me-2"></i>
-    Aucune catégorie disponible.
+      <!-- Tableau des catégories -->
+      <div *ngIf="categories.length > 0" class="table-wrapper">
+        <table class="category-table">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Description</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of categories">
+              <td class="category-info-cell">
+                <div class="category-icon">
+                  <i class="fas fa-folder"></i>
+                </div>
+                <div class="category-details">
+                  <span class="category-name">{{ c.nom }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="category-description">{{ getDescription(c.description) }}</span>
+              </td>
+              <td class="text-center actions-cell">
+                <button class="btn-edit" (click)="goToEdit(c.id)">
+                  <i class="fas fa-pencil-alt"></i>
+                  Modifier
+                </button>
+                <button class="btn-delete" (click)="deleteCategory(c.id)">
+                  <i class="fas fa-trash-alt"></i>
+                  Supprimer
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Message aucune catégorie -->
+      <div *ngIf="categories.length === 0 && !errorMessage" class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-folder-open"></i>
+        </div>
+        <h3>Aucune catégorie trouvée</h3>
+        <p>Vous n'avez pas encore créé de catégorie.</p>
+        <button class="btn-add-empty" (click)="goToAdd()">
+          <i class="fas fa-plus-circle"></i>
+          Ajouter une catégorie
+        </button>
+      </div>
+
+      <!-- Bouton retour -->
+      <div class="back-section text-center">
+        <a class="back-link" routerLink="/">
+          <i class="fas fa-arrow-left"></i>
+          Retour à l'accueil
+        </a>
+      </div>
+
+    </div>
   </div>
 </div>

@@ -1,301 +1,296 @@
-<div class="container mt-4">
-  <!-- En-tête -->
-  <div class="row mb-4 align-items-center">
-    <div class="col-md-6">
-      <h1 class="mb-2">📦 Nos Produits</h1>
-      <p class="text-muted mb-0">Découvrez notre sélection exclusive de produits de qualité</p>
+<!-- NE PAS AJOUTER de background-image ici - elle est déjà dans app.component -->
+<div class="products-container">
+  <div class="products-card">
+    
+    <!-- Header -->
+    <div class="products-header text-center">
+      <div class="icon-circle mb-3">
+        <i class="fas fa-boxes icon-main"></i>
+      </div>
+      <h2 class="products-title">📦 Nos Produits</h2>
+      <p class="subtitle">Découvrez notre sélection exclusive de produits de qualité</p>
     </div>
-    <div class="col-md-6">
-      <div class="input-group">
-        <input type="text" 
-               class="form-control" 
-               placeholder="Rechercher un produit..."
-               [(ngModel)]="searchKeyword"
-               (keyup.enter)="applyFilters()"
-               [disabled]="loading">
-        <button class="btn btn-primary" 
-                type="button" 
-                (click)="applyFilters()"
-                [disabled]="loading">
-          <i class="bi bi-search"></i> Rechercher
+
+    <!-- Barre de recherche -->
+    <div class="search-section">
+      <div class="search-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Rechercher un produit..."
+          [(ngModel)]="searchKeyword"
+          (keyup.enter)="applyFilters()"
+          [disabled]="loading"
+        />
+        <button 
+          class="btn-search"
+          (click)="applyFilters()"
+          [disabled]="loading"
+        >
+          Rechercher
         </button>
       </div>
     </div>
-  </div>
 
-  
-  <!-- Bouton Ajouter un produit (Admin seulement) -->
-  <div *ngIf="isAdmin && !loading" class="mb-4">
-    <button class="btn btn-success" (click)="goToAddProduct()">
-      <i class="bi bi-plus-circle me-2"></i> Ajouter un nouveau produit
-    </button>
-  </div>
+    <!-- Bouton Ajouter (Admin seulement) -->
+    <div *ngIf="isAdmin && !loading" class="admin-actions">
+      <button class="btn-add" (click)="goToAddProduct()">
+        <i class="fas fa-plus-circle"></i>
+        Ajouter un nouveau produit
+      </button>
+    </div>
 
-  <!-- Filtres -->
-  <div *ngIf="!loading" class="card mb-4 border-0 shadow-sm">
-    <div class="card-body">
-    
-      <div class="row g-3">
-        <!-- Catégorie -->
-        <div class="col-md-3 col-sm-6">
-          <label class="form-label">Catégorie</label>
-          <select class="form-select" 
-                  [(ngModel)]="selectedCategoryId" 
-                  (change)="applyFilters()">
-            <option [value]="null">Toutes les catégories</option>
-            <option *ngFor="let cat of categories" [value]="cat.id">
-              {{ cat.nom }}
-            </option>
-          </select>
-          <small class="text-muted" *ngIf="selectedCategoryId">
-            Catégorie sélectionnée: {{ getCategoryName(selectedCategoryId) }}
-          </small>
-        </div>
+    <!-- Filtres -->
+    <div *ngIf="!loading" class="filters-section">
+      <div class="filters-header">
+        <i class="fas fa-filter"></i>
+        <span>Filtres</span>
+      </div>
 
-        <!-- Prix min -->
-        <div class="col-md-2 col-sm-6">
-          <label class="form-label">Prix min (€)</label>
-          <input type="number" 
-                 class="form-control" 
-                 [(ngModel)]="minPrice" 
-                 (change)="applyFilters()"
-                 min="0"
-                 placeholder="Min"
-                 step="0.01">
-        </div>
+      <div class="filters-content">
+        <div class="filters-grid">
+          <!-- Catégorie -->
+          <div class="filter-group">
+            <label class="filter-label">Catégorie</label>
+            <select class="filter-select" [(ngModel)]="selectedCategoryId" (change)="applyFilters()">
+              <option [value]="null">Toutes les catégories</option>
+              <option *ngFor="let cat of categories" [value]="cat.id">
+                {{ cat.nom }}
+              </option>
+            </select>
+            <small class="filter-hint" *ngIf="selectedCategoryId">
+              Catégorie sélectionnée: {{ getCategoryName(selectedCategoryId) }}
+            </small>
+          </div>
 
-        <!-- Prix max -->
-        <div class="col-md-2 col-sm-6">
-          <label class="form-label">Prix max (€)</label>
-          <input type="number" 
-                 class="form-control" 
-                 [(ngModel)]="maxPrice" 
-                 (change)="applyFilters()"
-                 min="0"
-                 placeholder="Max"
-                 step="0.01">
-        </div>
+          <!-- Prix min -->
+          <div class="filter-group">
+            <label class="filter-label">Prix min (€)</label>
+            <input 
+              type="number" 
+              class="filter-input"
+              [(ngModel)]="minPrice"
+              (change)="applyFilters()"
+              min="0"
+              placeholder="Min"
+              step="0.01"
+            />
+          </div>
 
-        <!-- En stock seulement -->
-        <div class="col-md-3 col-sm-6 d-flex align-items-end">
-          <div class="form-check">
-            <input class="form-check-input" 
-                   type="checkbox" 
-                   id="inStockOnly"
-                   [(ngModel)]="inStockOnly"
-                   (change)="applyFilters()">
-            <label class="form-check-label" for="inStockOnly">
-              <i class="bi bi-check-circle me-1"></i> En stock seulement
+          <!-- Prix max -->
+          <div class="filter-group">
+            <label class="filter-label">Prix max (€)</label>
+            <input 
+              type="number" 
+              class="filter-input"
+              [(ngModel)]="maxPrice"
+              (change)="applyFilters()"
+              min="0"
+              placeholder="Max"
+              step="0.01"
+            />
+          </div>
+
+          <!-- En stock seulement -->
+          <div class="filter-group checkbox-group">
+            <label class="checkbox-container">
+              <input 
+                type="checkbox"
+                [(ngModel)]="inStockOnly"
+                (change)="applyFilters()"
+              />
+              <span class="checkmark"></span>
+              <span class="checkbox-label">En stock seulement</span>
             </label>
           </div>
-        </div>
 
-        <!-- Bouton réinitialiser -->
-        <div class="col-md-2 col-sm-6 d-flex align-items-end">
-          <button class="btn btn-outline-secondary w-100" (click)="clearFilters()">
-            <i class="bi bi-arrow-clockwise me-1"></i> Réinitialiser
-          </button>
+          <!-- Réinitialiser -->
+          <div class="filter-group reset-group">
+            <button class="btn-reset" (click)="clearFilters()">
+              <i class="fas fa-redo-alt"></i>
+              Réinitialiser
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Message d'erreur -->
-  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
-    <i class="bi bi-exclamation-triangle me-2"></i>
-    {{ errorMessage }}
-    <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
-  </div>
-
-  <!-- Loading -->
-  <div *ngIf="loading" class="text-center py-5">
-    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-      <span class="visually-hidden">Chargement...</span>
+    <!-- Message d'erreur -->
+    <div *ngIf="errorMessage" class="alert alert-error">
+      <i class="fas fa-exclamation-circle"></i>
+      {{ errorMessage }}
+      <button class="btn-close" (click)="errorMessage = ''">×</button>
     </div>
-    <p class="mt-3 text-muted fs-5">Chargement des produits...</p>
-  </div>
 
-  <!-- Résumé des filtres -->
-  <div *ngIf="!loading && filteredProducts.length > 0" class="mb-3">
-    <p class="text-muted mb-0">
-      <i class="bi bi-info-circle me-1"></i>
-      Affichage de <strong>{{ getPaginatedProducts().length }}</strong> produit(s) sur <strong>{{ totalItems }}</strong> 
-      <span *ngIf="selectedCategoryId || searchKeyword || minPrice || maxPrice || inStockOnly">
-        (filtres appliqués)
-      </span>
-    </p>
-  </div>
+    <!-- Loading -->
+    <div *ngIf="loading" class="loading-container">
+      <div class="spinner"></div>
+      <p>Chargement des produits...</p>
+    </div>
 
-  <!-- Liste des produits -->
-  <div *ngIf="!loading" class="row">
-    <div class="col-xl-3 col-lg-4 col-md-6 mb-4" *ngFor="let product of getPaginatedProducts()">
-      <div class="card h-100 product-card border-0 shadow-sm">
+    <!-- Résumé des filtres -->
+    <div *ngIf="!loading && filteredProducts.length > 0" class="summary-section">
+      <p class="summary-text">
+        <i class="fas fa-info-circle"></i>
+        Affichage de <strong>{{ getPaginatedProducts().length }}</strong> produit(s) 
+        sur <strong>{{ totalItems }}</strong>
+      </p>
+    </div>
+
+    <!-- Liste des produits -->
+    <div *ngIf="!loading && filteredProducts.length > 0" class="products-grid">
+      <div class="product-card" *ngFor="let product of getPaginatedProducts()">
         
         <!-- Image du produit -->
-        <div class="product-image position-relative overflow-hidden" 
-             style="height: 220px; cursor: pointer;"
-             (click)="goToProductDetail(product.id!)">
-          <img [src]="product.imageUrl || 'assets/default-product.jpg'" 
-               [alt]="product.nom"
-               class="w-100 h-100"
-               style="object-fit: cover;">
+        <div class="product-image" (click)="goToProductDetail(product.id!)">
+          <img 
+            [src]="product.imageUrl || 'assets/default-product.jpg'"
+            [alt]="product.nom"
+          />
           
-          <!-- Badge statut -->
-          <div class="position-absolute top-0 start-0 end-0 p-2">
-            <div class="d-flex justify-content-between">
-              <!-- Badge catégorie -->
-              <span class="badge bg-dark bg-opacity-75 text-white">
-                {{ product.category?.nom || 'Non catégorisé' }}
-              </span>
-              
-              <!-- Badge stock -->
-              <span class="badge" 
-                    [style.background-color]="getStockStatus(product).color"
-                    [style.color]="product.stock <= 5 ? '#000' : '#fff'">
-                {{ getStockStatus(product).text }}
-              </span>
-            </div>
+          <!-- Badges -->
+          <div class="product-badges">
+            <span class="badge-category">
+              {{ product.category?.nom || 'Non catégorisé' }}
+            </span>
+            <span 
+              class="badge-stock"
+              [ngClass]="{
+                'stock-high': product.stock > 10,
+                'stock-medium': product.stock <= 10 && product.stock > 5,
+                'stock-low': product.stock <= 5 && product.stock > 0,
+                'stock-out': product.stock === 0
+              }"
+            >
+              {{ getStockStatus(product).text }}
+            </span>
           </div>
         </div>
 
-        <!-- Contenu de la carte -->
-        <div class="card-body d-flex flex-column">
-          <!-- Nom du produit -->
-          <h5 class="card-title mb-2" style="cursor: pointer;" (click)="goToProductDetail(product.id!)">
+        <!-- Contenu -->
+        <div class="product-content">
+          <h3 class="product-title" (click)="goToProductDetail(product.id!)">
             {{ product.nom }}
-          </h5>
+          </h3>
           
-          <!-- Description -->
-          <p class="card-text text-muted small flex-grow-1 mb-3">
+          <p class="product-description">
             {{ (product.description || 'Pas de description') | slice:0:100 }}
             {{ product.description && product.description.length > 100 ? '...' : '' }}
           </p>
-          
-          <!-- Prix -->
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <span class="h4 text-primary fw-bold mb-0">
-              {{ product.prix | number:'1.2-2' }} €
-            </span>
-            <span *ngIf="!product.actif" class="badge bg-danger">
-              <i class="bi bi-ban me-1"></i> Inactif
+
+          <div class="product-price">
+            <span class="current-price">{{ product.prix | number:'1.2-2' }} €</span>
+            <span *ngIf="!product.actif" class="badge-inactive">
+              <i class="fas fa-ban"></i> Inactif
             </span>
           </div>
 
-          <!-- Boutons principales -->
-          <div class="d-grid gap-2 mb-3">
-            <!-- Bouton Ajouter au panier (UNIQUEMENT pour les clients non-admins) -->
-            <button *ngIf="canShowAddToCartButton()"
-                    class="btn btn-primary"
-                    (click)="addToCart(product)"
-                    [disabled]="!isProductAvailable(product)">
-              <i class="bi bi-cart-plus me-2"></i>
-              {{ isProductAvailable(product) ? 'Ajouter au panier' : 'Indisponible' }}
+          <!-- Boutons d'action -->
+          <div class="product-actions">
+            <button 
+              *ngIf="canShowAddToCartButton() && isProductAvailable(product)"
+              class="btn-add-cart"
+              (click)="addToCart(product)"
+            >
+              <i class="fas fa-shopping-cart"></i>
+              Ajouter au panier
             </button>
-            
-            <!-- Message pour les utilisateurs non connectés -->
-            <button *ngIf="!isAuthenticated"
-                    class="btn btn-outline-primary"
-                    (click)="goToLogin()">
-              <i class="bi bi-box-arrow-in-right me-2"></i>
-              Connectez-vous pour acheter
+
+            <button 
+              *ngIf="!isAuthenticated"
+              class="btn-login"
+              (click)="goToLogin()"
+            >
+              <i class="fas fa-sign-in-alt"></i>
+              Connectez-vous
             </button>
-            
-            <!-- Bouton Voir détails (pour tous) -->
-            <button class="btn btn-outline-secondary"
-                    (click)="goToProductDetail(product.id!)">
-              <i class="bi bi-eye me-2"></i> Voir détails
+
+            <button 
+              class="btn-details"
+              (click)="goToProductDetail(product.id!)"
+            >
+              <i class="fas fa-eye"></i>
+              Voir détails
             </button>
           </div>
 
-          <!-- Boutons admin (seulement pour les admins) -->
-          <div *ngIf="isAdmin" class="mt-auto">
-            <hr class="my-2">
-            <div class="d-flex justify-content-center gap-2">
-              <button class="btn btn-warning btn-sm"
-                      (click)="goToEditProduct(product.id!)"
-                      title="Modifier ce produit">
-                <i class="bi bi-pencil"></i> Modifier
-              </button>
-              
-              <button class="btn btn-danger btn-sm"
-                      (click)="deleteProduct(product.id!)"
-                      title="Supprimer ce produit">
-                <i class="bi bi-trash"></i> Supprimer
-              </button>
-            </div>
+          <!-- Actions Admin -->
+          <div *ngIf="isAdmin" class="admin-actions-buttons">
+            <button class="btn-edit" (click)="goToEditProduct(product.id!)">
+              <i class="fas fa-pencil-alt"></i>
+              Modifier
+            </button>
+            <button class="btn-delete" (click)="deleteProduct(product.id!)">
+              <i class="fas fa-trash-alt"></i>
+              Supprimer
+            </button>
           </div>
-        </div>
 
-        <!-- Footer de la carte -->
-        <div class="card-footer bg-transparent border-top-0 pt-0">
-          <div class="d-flex justify-content-between align-items-center text-muted small">
-            <!-- Date d'ajout -->
-            <span *ngIf="product.dateAjout" class="d-flex align-items-center">
-              <i class="bi bi-calendar3 me-1"></i>
+          <!-- Footer -->
+          <div class="product-footer">
+            <span class="product-date">
+              <i class="fas fa-calendar-alt"></i>
               {{ product.dateAjout | date:'dd/MM/yyyy' }}
             </span>
-            
-            <!-- Indicateur de bonne affaire -->
-            <span *ngIf="product.prix < 50" class="badge bg-success">
-              <i class="bi bi-tag me-1"></i> Bonne affaire !
+            <span *ngIf="product.prix < 50" class="badge-good-deal">
+              <i class="fas fa-tag"></i>
+              Bonne affaire !
             </span>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Message aucun produit -->
-  <div *ngIf="!loading && filteredProducts.length === 0" class="text-center py-5">
-    <div class="alert alert-info border-0 shadow-sm">
-      <div class="d-flex flex-column align-items-center">
-        <i class="bi bi-inbox fs-1 mb-3 text-primary"></i>
-        <h4 class="alert-heading">Aucun produit trouvé</h4>
-        <p class="mb-3">
-          Aucun produit ne correspond à vos critères de recherche.
-        </p>
-        <button class="btn btn-primary" (click)="clearFilters()">
-          <i class="bi bi-arrow-clockwise me-2"></i> Réinitialiser les filtres
+    <!-- Message aucun produit -->
+    <div *ngIf="!loading && filteredProducts.length === 0" class="empty-state">
+      <div class="empty-icon">
+        <i class="fas fa-box-open"></i>
+      </div>
+      <h3>Aucun produit trouvé</h3>
+      <p>Aucun produit ne correspond à vos critères de recherche.</p>
+      <button class="btn-reset-empty" (click)="clearFilters()">
+        <i class="fas fa-redo-alt"></i>
+        Réinitialiser les filtres
+      </button>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="!loading && totalPages > 1" class="pagination-section">
+      <div class="pagination">
+        <button 
+          class="page-btn"
+          [class.disabled]="currentPage === 1"
+          (click)="changePage(currentPage - 1)"
+          [disabled]="currentPage === 1"
+        >
+          <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <button 
+          *ngFor="let page of getPageNumbers()"
+          class="page-btn"
+          [class.active]="page === currentPage"
+          (click)="changePage(page)"
+        >
+          {{ page }}
+        </button>
+
+        <button 
+          class="page-btn"
+          [class.disabled]="currentPage === totalPages"
+          (click)="changePage(currentPage + 1)"
+          [disabled]="currentPage === totalPages"
+        >
+          <i class="fas fa-chevron-right"></i>
         </button>
       </div>
-    </div>
-  </div>
-
-  <!-- Pagination -->
-  <div *ngIf="!loading && totalPages > 1" class="mt-5">
-    <nav aria-label="Navigation des pages">
-      <ul class="pagination justify-content-center">
-        <!-- Page précédente -->
-        <li class="page-item" [class.disabled]="currentPage === 1">
-          <a class="page-link" (click)="changePage(currentPage - 1)" style="cursor: pointer;">
-            <i class="bi bi-chevron-left"></i>
-          </a>
-        </li>
-
-        <!-- Pages -->
-        <li *ngFor="let page of getPageNumbers()" 
-            class="page-item" 
-            [class.active]="page === currentPage">
-          <a class="page-link" (click)="changePage(page)" style="cursor: pointer;">
-            {{ page }}
-          </a>
-        </li>
-
-        <!-- Page suivante -->
-        <li class="page-item" [class.disabled]="currentPage === totalPages">
-          <a class="page-link" (click)="changePage(currentPage + 1)" style="cursor: pointer;">
-            <i class="bi bi-chevron-right"></i>
-          </a>
-        </li>
-      </ul>
-    </nav>
-    
-    <!-- Informations de pagination -->
-    <div class="text-center mt-2">
-      <p class="text-muted mb-0">
+      
+      <div class="page-info">
         Page <strong>{{ currentPage }}</strong> sur <strong>{{ totalPages }}</strong>
         • {{ totalItems }} produit(s)
-      </p>
+      </div>
     </div>
+
   </div>
 </div>

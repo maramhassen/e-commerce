@@ -1,78 +1,265 @@
-<div class="container mt-4">
-
-  <button class="btn btn-outline-secondary mb-3" (click)="goBack()">
-    <i class="fas fa-arrow-left me-2"></i> Retour
-  </button>
-
-  <!-- Loading -->
-  <div *ngIf="loading" class="text-center">
-    <div class="spinner-border text-primary"></div>
-    <p class="mt-2">Chargement...</p>
-  </div>
-
-  <!-- Error -->
-  <div *ngIf="errorMessage" class="alert alert-danger">
-    {{ errorMessage }}
-  </div>
-
-  <!-- Order details -->
-  <div *ngIf="order && !loading" class="card shadow-sm">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <h4 class="mb-0">
-        Commande #{{ order.id }}
-      </h4>
-      <span [ngClass]="getStatutClass(order.statut)">
-        {{ getStatutText(order.statut) }}
-      </span>
-    </div>
-
-    <div class="card-body">
-
-      <!-- Infos -->
-      <div class="row mb-3">
-        <div class="col-md-6">
-          <strong>Date :</strong> {{ formatDate(order.dateCommande) }}
-        </div>
-        <div class="col-md-6 text-md-end">
-          <strong>Total :</strong> {{ order.total }} DT
-        </div>
+<div class="order-detail-page">
+  <div class="order-detail-container">
+    <div class="order-detail-card">
+      
+      <!-- Bouton retour -->
+      <div class="back-button">
+        <button class="btn-back" (click)="goBack()">
+          <i class="fas fa-arrow-left"></i>
+          Retour
+        </button>
       </div>
 
-      <!-- Client -->
-      <div *ngIf="isAdmin" class="mb-3">
-        <h6>Client</h6>
-        <p class="mb-0">
-          {{ order.user?.prenom }} {{ order.user?.nom }}<br>
-          <small class="text-muted">{{ order.user?.email }}</small>
-        </p>
+      <!-- ===== LOADING ===== -->
+      <div *ngIf="loading" class="loading-container">
+        <div class="spinner"></div>
+        <p>Chargement de la commande...</p>
       </div>
 
-      <hr>
+      <!-- ===== MESSAGE D'ERREUR ===== -->
+      <div *ngIf="errorMessage" class="alert alert-error">
+        <div class="alert-content">
+          <i class="fas fa-exclamation-triangle"></i>
+          <div>
+            <strong>Erreur</strong>
+            <p>{{ errorMessage }}</p>
+          </div>
+        </div>
+        <button class="btn-close" (click)="errorMessage = ''">×</button>
+      </div>
 
-      <!-- Items -->
-      <h5>Articles</h5>
+      <!-- ===== DÉTAIL DE LA COMMANDE ===== -->
+      <div *ngIf="order && !loading" class="order-content">
+        
+        <!-- En-tête de la commande -->
+        <div class="order-header">
+          <div class="header-left">
+            <div class="header-icon">
+              <i class="fas fa-shopping-bag"></i>
+            </div>
+            <div class="header-title">
+              <h1>Commande #{{ order.id }}</h1>
+              <p class="order-date">
+                <i class="fas fa-calendar-alt"></i>
+                {{ formatDate(order.dateCommande) }}
+              </p>
+            </div>
+          </div>
+          <div class="header-right">
+            <span class="statut-badge" 
+                  [ngClass]="getStatutClass(order.statut)">
+              <i class="fas fa-circle"></i>
+              {{ getStatutText(order.statut) }}
+            </span>
+          </div>
+        </div>
 
-      <div class="table-responsive">
-        <table class="table align-middle">
-          <thead>
-            <tr>
-              <th>Produit</th>
-              <th>Prix</th>
-              <th>Quantité</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of order.items">
-              <td>{{ item.product?.nom }}</td>
-              <td>{{ item.prix }} DT</td>
-              <td>{{ item.quantite }}</td>
-              <td>
-                {{ item.prix * item.quantite | number:'1.2-2' }} DT
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <!-- Grille d'informations -->
+        <div class="info-grid">
+          
+          <!-- Informations générales -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <i class="fas fa-info-circle"></i>
+              <h3>Informations générales</h3>
+            </div>
+            <div class="info-card-content">
+              <div class="info-row">
+                <span class="info-label">N° commande :</span>
+                <span class="info-value">#{{ order.id }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Date :</span>
+                <span class="info-value">{{ formatDate(order.dateCommande) }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Total :</span>
+                <span class="info-value total-price">{{ order.total | number:'1.2-2' }} DT</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Statut :</span>
+                <span class="statut-badge-small" 
+                      [ngClass]="getStatutClass(order.statut)">
+                  {{ getStatutText(order.statut) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Informations client (admin seulement) -->
+          <div class="info-card" *ngIf="isAdmin">
+            <div class="info-card-header">
+              <i class="fas fa-user"></i>
+              <h3>Client</h3>
+            </div>
+            <div class="info-card-content">
+              <div class="client-avatar">
+                <i class="fas fa-user-circle"></i>
+              </div>
+              <div class="client-details">
+                <div class="client-name">{{ order.user?.prenom }} {{ order.user?.nom }}</div>
+                <div class="client-email">{{ order.user?.email }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Résumé de la commande -->
+          <div class="info-card summary-card">
+            <div class="info-card-header">
+              <i class="fas fa-boxes"></i>
+              <h3>Résumé</h3>
+            </div>
+            <div class="info-card-content">
+              <div class="summary-item">
+                <span class="summary-label">Articles :</span>
+                <span class="summary-value">{{ order.items?.length || 0 }} produit(s)</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Quantité totale :</span>
+                <span class="summary-value">{{ getTotalQuantity(order) }}</span>
+              </div>
+              <div class="summary-item total">
+                <span class="summary-label">Montant total :</span>
+                <span class="summary-value total-price">{{ order.total | number:'1.2-2' }} DT</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Section des articles -->
+        <div class="items-section">
+          <div class="items-header">
+            <i class="fas fa-box"></i>
+            <h2>Articles commandés</h2>
+            <span class="items-count">{{ order.items?.length || 0 }} article(s)</span>
+          </div>
+
+          <div class="table-responsive">
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th>Produit</th>
+                  <th>Prix unitaire</th>
+                  <th>Quantité</th>
+                  <th class="text-end">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of order.items">
+                  <td class="product-info">
+                    <div class="product-image-placeholder">
+                      <i class="fas fa-box"></i>
+                    </div>
+                    <div class="product-details">
+                      <span class="product-name">{{ item.product?.nom || 'Produit' }}</span>
+                    </div>
+                  </td>
+                  <td class="product-price">
+                    {{ item.prix | number:'1.2-2' }} DT
+                  </td>
+                  <td class="product-quantity">
+                    <span class="quantity-badge">{{ item.quantite }}</span>
+                  </td>
+                  <td class="product-total text-end">
+                    <span class="total-price">{{ item.prix * item.quantite | number:'1.2-2' }} DT</span>
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3" class="text-end fw-bold">Sous-total :</td>
+                  <td class="text-end">{{ order.total | number:'1.2-2' }} DT</td>
+                </tr>
+                <tr class="total-row">
+                  <td colspan="3" class="text-end fw-bold">Total TTC :</td>
+                  <td class="text-end fw-bold total-price">{{ order.total | number:'1.2-2' }} DT</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- Actions admin -->
+        <div class="admin-actions-section" *ngIf="isAdmin">
+          <div class="admin-actions-header">
+            <i class="fas fa-cog"></i>
+            <h3>Administration</h3>
+          </div>
+          
+          <div class="admin-actions-grid">
+            <!-- Changer le statut -->
+            <div class="admin-action-card">
+              <div class="action-icon">
+                <i class="fas fa-tag"></i>
+              </div>
+              <div class="action-content">
+                <h4>Changer le statut</h4>
+                <p>Modifier l'état de la commande</p>
+                <select class="admin-statut-select" 
+                        (change)="updateOrderStatut(order.id!, $any($event.target).value)"
+                        (click)="$event.stopPropagation()">
+                  <option value="" disabled selected>Sélectionner un statut</option>
+                  <option value="EN_ATTENTE">En attente</option>
+                  <option value="CONFIRMEE">Confirmée</option>
+                  <option value="EXPEDIEE">Expédiée</option>
+                  <option value="LIVREE">Livrée</option>
+                  <option value="ANNULEE">Annulée</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Actions supplémentaires -->
+            <div class="admin-action-card">
+              <div class="action-icon">
+                <i class="fas fa-print"></i>
+              </div>
+              <div class="action-content">
+                <h4>Facture</h4>
+                <p>Générer ou télécharger la facture</p>
+                <div class="action-buttons">
+                  <button class="btn-action" (click)="generateInvoice(order.id!)">
+                    <i class="fas fa-file-pdf"></i>
+                    PDF
+                  </button>
+                  <button class="btn-action" (click)="printOrder()">
+                    <i class="fas fa-print"></i>
+                    Imprimer
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Suppression -->
+            <div class="admin-action-card delete-card">
+              <div class="action-icon">
+                <i class="fas fa-trash-alt"></i>
+              </div>
+              <div class="action-content">
+                <h4>Supprimer</h4>
+                <p>Cette action est irréversible</p>
+                <button class="btn-delete-action" (click)="deleteOrder(order.id!)">
+                  <i class="fas fa-trash-alt"></i>
+                  Supprimer la commande
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== COMMANDE NON TROUVÉE ===== -->
+      <div *ngIf="!loading && !order && !errorMessage" class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-box-open"></i>
+        </div>
+        <h3>Commande non trouvée</h3>
+        <p>La commande que vous recherchez n'existe pas ou a été supprimée.</p>
+        <button class="btn-primary" (click)="goBack()">
+          <i class="fas fa-arrow-left"></i>
+          Retour aux commandes
+        </button>
       </div>
 
     </div>

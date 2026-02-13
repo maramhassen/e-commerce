@@ -1,50 +1,97 @@
-<div class="container mt-4">
-  <h2 class="mb-4">Liste des utilisateurs</h2>
+<div class="user-list-page">
 
-  <!-- Chargement -->
-  <div *ngIf="loading" class="alert alert-info">
-    Chargement des utilisateurs...
+  <div class="user-list-container">
+    <div class="user-list-card">
+      
+      <!-- Header -->
+      <div class="user-list-header text-center">
+        <div class="icon-circle">
+          <i class="fas fa-users icon-main"></i>
+        </div>
+        <h2 class="user-list-title">Liste des utilisateurs</h2>
+        <p class="subtitle">Gérez les comptes de votre plateforme</p>
+      </div>
+
+      <!-- Chargement -->
+      <div *ngIf="loading" class="loading-container">
+        <div class="spinner"></div>
+        <p>Chargement des utilisateurs...</p>
+      </div>
+
+      <!-- Erreur -->
+      <div *ngIf="!loading && errorMessage" class="alert alert-error">
+        <div class="alert-content">
+          <i class="fas fa-exclamation-circle"></i>
+          <span>{{ errorMessage }}</span>
+        </div>
+        <button class="btn-retry" (click)="loadUsers()">
+          <i class="fas fa-redo-alt"></i>
+          Réessayer
+        </button>
+      </div>
+
+      <!-- Cas : aucun utilisateur -->
+      <div *ngIf="!loading && !errorMessage && users.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-user-slash"></i>
+        </div>
+        <h3>Aucun utilisateur trouvé</h3>
+        <p>Il n'y a pas encore d'utilisateurs dans la base de données.</p>
+      </div>
+
+      <!-- Tableau des utilisateurs -->
+      <div *ngIf="!loading && !errorMessage && users.length > 0" class="table-wrapper">
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th>Utilisateur</th>
+              <th>Email</th>
+              <th>Rôle</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users">
+              <td class="user-info-cell">
+                <div class="user-avatar">
+                  <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-details">
+                  <span class="user-fullname">{{ user.prenom }} {{ user.nom }}</span>
+                  <span class="user-username">@{{ user.prenom?.toLowerCase() }}{{ user.nom?.toLowerCase() }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="user-email">{{ user.email }}</span>
+              </td>
+              <td>
+                <span class="role-badge" [ngClass]="user.role === 'ADMIN' ? 'role-admin' : 'role-client'">
+                  <i class="fas" [ngClass]="user.role === 'ADMIN' ? 'fa-shield-alt' : 'fa-user'"></i>
+                  {{ user.role || 'CLIENT' }}
+                </span>
+              </td>
+              <td>
+                <button
+                  class="btn-delete"
+                  (click)="deleteUser(user.id!)"
+                >
+                  <i class="fas fa-trash-alt"></i>
+                  Supprimer
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Bouton retour - Version sans goBack -->
+      <div class="back-section text-center">
+        <a class="back-link" routerLink="/">
+          <i class="fas fa-arrow-left"></i>
+          Retour à l'accueil
+        </a>
+      </div>
+
+    </div>
   </div>
-
-  <!-- Erreur -->
-  <div *ngIf="!loading && errorMessage" class="alert alert-danger">
-    {{ errorMessage }}
-  </div>
-
-  <!-- Cas : aucun utilisateur -->
-  <div *ngIf="!loading && !errorMessage && users.length === 0" class="alert alert-info">
-    Aucun utilisateur trouvé.
-  </div>
-
-  <!-- Tableau des utilisateurs -->
-  <table *ngIf="!loading && !errorMessage && users.length > 0" class="table table-striped table-bordered">
-    <thead class="table-dark">
-      <tr>
-        <th>Nom</th>
-        <th>Prénom</th>
-        <th>Email</th>
-        <th>Rôle</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      <tr *ngFor="let u of users">
-        <td>{{ u.nom }}</td>
-        <td>{{ u.prenom }}</td>
-        <td>{{ u.email }}</td>
-        <td>
-          <span>{{ u.role }}</span>
-        </td>
-        <td>
-          <button
-            class="btn btn-danger btn-sm"
-            (click)="deleteUser(u.id!)"
-          >
-            Supprimer
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
 </div>

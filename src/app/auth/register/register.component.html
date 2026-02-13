@@ -1,61 +1,149 @@
-<h2>Inscription</h2>
+<div class="register-page d-flex align-items-center justify-content-center">
+  <div class="register-card shadow-lg">
+    
+    <!-- Background Image (même que login) -->
+    <div class="background-image">
+      <img src="assets/images/ecommerce-bg.jpeg" alt="E-commerce background">
+      <div class="overlay"></div>
+    </div>
 
-<form (ngSubmit)="register()" #registerForm="ngForm" novalidate>
-  <div>
-    <label for="nom">Nom</label>
-    <input
-      id="nom"
-      name="nom"
-      type="text"
-      placeholder="Nom"
-      [(ngModel)]="nom"
-      required
-    />
+    <!-- Header -->
+    <div class="register-header text-center">
+      <div class="icon-circle mb-3">
+        <i class="fas fa-user-plus icon-main"></i>
+      </div>
+      <h2 class="register-title">Créer un compte</h2>
+      <p class="subtitle">Rejoignez MyShop dès maintenant 💕</p>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="alert alert-error text-center">
+      <i class="fas fa-exclamation-circle"></i>
+      {{ errorMessage }}
+    </div>
+
+    <!-- Success Message -->
+    <div *ngIf="successMessage" class="alert alert-success text-center">
+      <i class="fas fa-check-circle"></i>
+      {{ successMessage }}
+    </div>
+
+    <!-- Register Form -->
+    <form (ngSubmit)="register()" #registerForm="ngForm">
+
+      <!-- Row: Nom et Prénom -->
+      <div class="form-row">
+        <!-- Nom -->
+        <div class="form-group">
+          <label class="register-label">Nom</label>
+          <div class="input-group">
+            <span class="input-group-text pink-bg">
+              <i class="fas fa-user pink-icon"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control pink-input"
+              [(ngModel)]="nom"
+              name="nom"
+              required
+              placeholder="Dupont"
+            />
+          </div>
+        </div>
+
+        <!-- Prénom -->
+        <div class="form-group">
+          <label class="register-label">Prénom</label>
+          <div class="input-group">
+            <span class="input-group-text pink-bg">
+              <i class="fas fa-user pink-icon"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control pink-input"
+              [(ngModel)]="prenom"
+              name="prenom"
+              required
+              placeholder="Jean"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label class="register-label">Email</label>
+        <div class="input-group">
+          <span class="input-group-text pink-bg">
+            <i class="fas fa-envelope pink-icon"></i>
+          </span>
+          <input
+            type="email"
+            class="form-control pink-input"
+            [(ngModel)]="email"
+            name="email"
+            required
+            placeholder="jean.dupont@example.com"
+          />
+        </div>
+      </div>
+
+      <!-- Mot de passe -->
+      <div class="form-group">
+        <label class="register-label">Mot de passe</label>
+        <div class="input-group">
+          <span class="input-group-text pink-bg">
+            <i class="fas fa-lock pink-icon"></i>
+          </span>
+          <input
+            type="password"
+            class="form-control pink-input"
+            [(ngModel)]="motDePasse"
+            name="motDePasse"
+            required
+            placeholder="**********"
+          />
+        </div>
+      </div>
+
+      <!-- Confirmer mot de passe -->
+      <div class="form-group">
+        <label class="register-label">Confirmer mot de passe</label>
+        <div class="input-group">
+          <span class="input-group-text pink-bg">
+            <i class="fas fa-lock pink-icon"></i>
+          </span>
+          <input
+            type="password"
+            class="form-control pink-input"
+            [(ngModel)]="confirmPassword"
+            name="confirmPassword"
+            required
+            placeholder="**********"
+          />
+        </div>
+      </div>
+
+      <!-- Bouton S'inscrire -->
+      <button
+        type="submit"
+        class="btn-register w-100"
+        [disabled]="!registerForm.valid || loading"
+      >
+        <i class="fas fa-heart me-2"></i>
+        <span *ngIf="!loading">S'inscrire</span>
+        <span *ngIf="loading" class="spinner"></span>
+      </button>
+
+    </form>
+
+    <!-- Login Link -->
+    <div class="text-center mt-4">
+      <p class="register-text">Déjà un compte ?</p>
+      <a class="login-link" (click)="goToLogin()">
+        Se connecter
+        <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
   </div>
-
-  <div>
-    <label for="prenom">Prénom</label>
-    <input
-      id="prenom"
-      name="prenom"
-      type="text"
-      placeholder="Prénom"
-      [(ngModel)]="prenom"
-      required
-    />
-  </div>
-
-  <div>
-    <label for="email">Email</label>
-    <input
-      id="email"
-      name="email"
-      type="email"
-      placeholder="Email"
-      [(ngModel)]="email"
-      required
-    />
-  </div>
-
-  <div>
-    <label for="motDePasse">Mot de passe</label>
-    <input
-      id="motDePasse"
-      name="motDePasse"
-      type="password"
-      placeholder="Mot de passe"
-      [(ngModel)]="motDePasse"
-      required
-      minlength="6"
-    />
-  </div>
-
-  <button type="submit" [disabled]="!registerForm.form.valid">
-    S'inscrire
-  </button>
-</form>
-
-<p>
-  Déjà un compte ?
-  <a routerLink="/login">Se connecter</a>
-</p>
+</div>

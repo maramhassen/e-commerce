@@ -1,63 +1,117 @@
-<div class="container mt-4">
-  <div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
-      <div class="card">
-        <div class="card-header">
-          <h4 class="mb-0">{{ isEditMode ? 'Modifier la catégorie' : 'Nouvelle catégorie' }}</h4>
+<div class="form-container">
+  <div class="form-card">
+    
+    <!-- Header avec icône -->
+    <div class="form-header">
+      <div class="header-icon">
+        <i class="fas fa-folder-plus"></i>
+      </div>
+      <h2 class="form-title">Nouvelle catégorie</h2>
+      <p class="form-subtitle">Ajoutez une nouvelle catégorie pour organiser vos produits</p>
+    </div>
+
+    <!-- Message d'erreur -->
+    <div *ngIf="errorMessage" class="error-alert">
+      <i class="fas fa-exclamation-circle"></i>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <!-- Formulaire -->
+    <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()" class="modern-form">
+      
+      <!-- Champ Nom -->
+      <div class="form-field">
+        <label for="nom" class="field-label">
+          <i class="fas fa-tag"></i>
+          Nom <span class="required-badge">obligatoire</span>
+        </label>
+        
+        <div class="input-wrapper" 
+             [class.error]="nom?.invalid && nom?.touched"
+             [class.success]="nom?.valid && nom?.touched">
+          <i class="fas fa-folder input-icon"></i>
+          <input type="text" 
+                 id="nom"
+                 formControlName="nom"
+                 placeholder="ex: Vêtements, Électronique, Livres..."
+                 class="form-input">
+          <span class="input-status" *ngIf="nom?.touched">
+            <i class="fas" [ngClass]="nom?.valid ? 'fa-check-circle' : 'fa-exclamation-circle'"></i>
+          </span>
         </div>
         
-        <div class="card-body">
-          <!-- Message d'erreur -->
-          <div *ngIf="errorMessage" class="alert alert-danger">
-            {{ errorMessage }}
+        <!-- Messages dynamiques -->
+        <div class="field-messages">
+          <div class="hint-text" *ngIf="!nom?.touched">
+            <i class="fas fa-info-circle"></i>
+            Donnez un nom clair et unique à votre catégorie
           </div>
-
-          <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()">
-            <!-- Nom -->
-            <div class="mb-3">
-              <label for="nom" class="form-label">Nom *</label>
-              <input type="text" 
-                     class="form-control" 
-                     id="nom"
-                     formControlName="nom"
-                     placeholder="Entrez le nom de la catégorie"
-                     [class.is-invalid]="nom?.invalid && nom?.touched">
-              
-              <div *ngIf="nom?.invalid && nom?.touched" class="invalid-feedback">
-                <div *ngIf="nom?.errors?.['required']">Le nom est obligatoire</div>
-                <div *ngIf="nom?.errors?.['minlength']">Minimum 2 caractères</div>
-              </div>
-            </div>
-
-            <!-- Description -->
-            <div class="mb-4">
-              <label for="description" class="form-label">Description</label>
-              <textarea class="form-control" 
-                        id="description"
-                        formControlName="description"
-                        rows="3"
-                        placeholder="Description de la catégorie (optionnel)"></textarea>
-            </div>
-
-            <!-- Boutons -->
-            <div class="d-flex justify-content-between">
-              <button type="button" 
-                      class="btn btn-secondary"
-                      (click)="onCancel()"
-                      [disabled]="loading">
-                Annuler
-              </button>
-              
-              <button type="submit" 
-                      class="btn btn-primary"
-                      [disabled]="categoryForm.invalid || loading">
-                <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"></span>
-                {{ isEditMode ? 'Modifier' : 'Créer' }}
-              </button>
-            </div>
-          </form>
+          <div class="error-text" *ngIf="nom?.invalid && nom?.touched">
+            <i class="fas fa-exclamation-circle"></i>
+            <span *ngIf="nom?.errors?.['required']">Le nom est obligatoire</span>
+            <span *ngIf="nom?.errors?.['minlength']">Minimum 2 caractères</span>
+          </div>
+          <div class="success-text" *ngIf="nom?.valid && nom?.touched">
+            <i class="fas fa-check-circle"></i>
+            Nom parfait !
+          </div>
         </div>
       </div>
+
+      <!-- Champ Description -->
+      <div class="form-field">
+        <label for="description" class="field-label">
+          <i class="fas fa-align-left"></i>
+          Description
+          <span class="optional-badge">optionnel</span>
+        </label>
+        
+        <div class="input-wrapper textarea-wrapper">
+          <i class="fas fa-pencil-alt input-icon"></i>
+          <textarea id="description"
+                    formControlName="description"
+                    rows="4"
+                    placeholder="Décrivez cette catégorie... (ex: Tous les vêtements pour homme, femme et enfant)"
+                    class="form-input"></textarea>
+        </div>
+        
+        <!-- Compteur de caractères -->
+        <div class="field-counter">
+          <span>{{ description?.value?.length || 0 }} caractères</span>
+          <span class="counter-limit">(max 500)</span>
+        </div>
+      </div>
+
+      <!-- Boutons d'action -->
+      <div class="form-actions">
+        <button type="button" 
+                class="btn-secondary"
+                (click)="onCancel()"
+                [disabled]="loading">
+          <i class="fas fa-times"></i>
+          Annuler
+        </button>
+        
+        <button type="submit" 
+                class="btn-primary"
+                [disabled]="categoryForm.invalid || loading">
+          <span *ngIf="loading" class="spinner"></span>
+          <span *ngIf="!loading">
+            <i class="fas fa-plus-circle"></i>
+            Créer la catégorie
+          </span>
+        </button>
+      </div>
+
+    </form>
+
+    <!-- Lien retour -->
+    <div class="back-link-container">
+      <a class="back-link" (click)="onCancel()">
+        <i class="fas fa-arrow-left"></i>
+        Retour à la liste
+      </a>
     </div>
+
   </div>
 </div>

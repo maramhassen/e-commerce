@@ -1,177 +1,183 @@
-<div class="container mt-4" *ngIf="!loading && product; else loadingTemplate">
-  
-  <!-- Bouton retour -->
-  <div class="mb-3">
-    <button class="btn btn-outline-secondary" (click)="goBack()">
-      <i class="fas fa-arrow-left me-2"></i>Retour aux produits
-    </button>
-  </div>
-
-  <!-- Messages d'erreur -->
-  <div *ngIf="errorMessage" class="alert alert-danger">
-    <i class="fas fa-exclamation-triangle me-2"></i>{{ errorMessage }}
-  </div>
-
-  <div class="row">
-    <!-- Colonne image -->
-    <div class="col-md-6 mb-4">
-      <div class="card shadow">
-        <div class="card-body text-center p-4">
-          <!-- BALISE IMG CORRIGÉE - AJOUT DU / DE FERMETURE -->
-          <img
-  [src]="productImage"
-  (error)="onImageError($event)"
-  alt="{{ product?.nom }}"
->
-
-        </div>
+<div class="product-detail-page">
+  <div class="product-detail-container">
+    <div class="product-detail-card">
+      
+      <!-- Bouton retour -->
+      <div class="back-button">
+        <button class="btn-back" (click)="goBack()">
+          <i class="fas fa-arrow-left"></i>
+          Retour aux produits
+        </button>
       </div>
-    </div>
 
-    <!-- Colonne informations -->
-    <div class="col-md-6">
-      <div class="card shadow">
-        <div class="card-body">
+      <!-- Messages d'erreur -->
+      <div *ngIf="errorMessage" class="alert alert-error">
+        <i class="fas fa-exclamation-triangle"></i>
+        {{ errorMessage }}
+        <button class="btn-close" (click)="errorMessage = ''">×</button>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="loading" class="loading-container">
+        <div class="spinner"></div>
+        <p>Chargement du produit...</p>
+      </div>
+
+      <!-- Contenu produit -->
+      <div *ngIf="!loading && product" class="product-content-wrapper">
+        <div class="product-grid">
           
-          <!-- En-tête avec nom et catégorie -->
-          <div class="mb-3">
-            <h2 class="card-title text-primary">{{ product.nom }}</h2>
-            <div class="d-flex align-items-center">
-              <span class="badge bg-secondary me-2">
-                {{ product.category?.nom || 'Non catégorisé' }}
-              </span>
-              <span *ngIf="!product.actif" class="badge bg-warning">
-                <i class="fas fa-eye-slash me-1"></i>Désactivé
-              </span>
+          <!-- Colonne image -->
+          <div class="product-image-column">
+            <div class="product-image-card">
+              <div class="product-image-container">
+                <img
+                  [src]="productImage"
+                  (error)="onImageError($event)"
+                  alt="{{ product.nom }}"
+                  class="product-image"
+                />
+              </div>
             </div>
           </div>
 
-          <!-- Prix -->
-          <div class="mb-4">
-            <h3 class="text-success">{{ product.prix }} €</h3>
-          </div>
+          <!-- Colonne informations -->
+          <div class="product-info-column">
+            <div class="product-info-card">
+              
+              <!-- En-tête -->
+              <div class="product-header">
+                <h1 class="product-title">{{ product.nom }}</h1>
+                <div class="product-badges">
+                  <span class="badge-category">
+                    <i class="fas fa-tag"></i>
+                    {{ product.category?.nom || 'Non catégorisé' }}
+                  </span>
+                  <span *ngIf="!product.actif" class="badge-inactive">
+                    <i class="fas fa-eye-slash"></i>
+                    Désactivé
+                  </span>
+                </div>
+              </div>
 
-          <!-- Statut stock -->
-          <div class="mb-4">
-            <span class="badge" [class]="'bg-' + stockStatusColor">
-              {{ stockStatus }}
-            </span>
-            <small class="text-muted ms-2">
-              <i class="fas fa-info-circle"></i> 
-              Référence: #{{ product.id }}
-            </small>
-          </div>
+              <!-- Prix -->
+              <div class="product-price-section">
+                <span class="product-price">{{ product.prix | number:'1.2-2' }} €</span>
+              </div>
 
-          <!-- Description -->
-          <div class="mb-4">
-            <h5>Description</h5>
-            <p class="card-text">{{ product.description }}</p>
-          </div>
+              <!-- Statut stock - UTILISE VOTRE PROPRIÉTÉ EXISTANTE -->
+              <div class="product-stock">
+                <span class="stock-badge" [ngClass]="{
+                  'stock-high': product.stock > 10,
+                  'stock-medium': product.stock <= 10 && product.stock > 5,
+                  'stock-low': product.stock <= 5 && product.stock > 0,
+                  'stock-out': product.stock === 0
+                }">
+                  <i class="fas" [ngClass]="{
+                    'fa-check-circle': product.stock > 0,
+                    'fa-times-circle': product.stock === 0
+                  }"></i>
+                  {{ stockStatus }}
+                </span>
+                <span class="product-reference">
+                  <i class="fas fa-barcode"></i>
+                  Référence: #{{ product.id }}
+                </span>
+              </div>
 
-          <!-- Quantité (pour clients seulement) -->
-          <div *ngIf="!isAdmin && isInStock" class="mb-4">
-            <label class="form-label">Quantité</label>
-            <div class="d-flex align-items-center">
-              <button class="btn btn-outline-secondary" 
-                      (click)="decreaseQuantity()"
-                      [disabled]="quantity <= 1">
-                <i class="fas fa-minus"></i>
-              </button>
-              <span class="mx-3 fs-5">{{ quantity }}</span>
-              <button class="btn btn-outline-secondary" 
-                      (click)="increaseQuantity()"
-                      [disabled]="quantity >= product.stock">
-                <i class="fas fa-plus"></i>
-              </button>
-              <span class="ms-3 text-muted">
-                Max: {{ product.stock }}
-              </span>
-            </div>
-          </div>
+              <!-- Description -->
+              <div class="product-description-section">
+                <h3 class="section-title">Description</h3>
+                <p class="product-description">{{ product.description || 'Aucune description disponible pour ce produit.' }}</p>
+              </div>
 
-          <!-- Boutons actions principales -->
-          <div class="d-grid gap-2 mb-4">
-            <!-- Bouton panier (clients seulement) -->
-            <button *ngIf="!isAdmin && isInStock" 
-                    class="btn btn-primary btn-lg"
-                    (click)="addToCart()"
-                    [disabled]="!canAddToCart">
-              <i class="fas fa-shopping-cart me-2"></i>
-              Ajouter au panier
-            </button>
+              <!-- Quantité (pour clients seulement) -->
+              <div *ngIf="!isAdmin && isInStock" class="product-quantity">
+                <h3 class="section-title">Quantité</h3>
+                <div class="quantity-selector">
+                  <button class="btn-quantity" 
+                          (click)="decreaseQuantity()"
+                          [disabled]="quantity <= 1">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                  <span class="quantity-value">{{ quantity }}</span>
+                  <button class="btn-quantity" 
+                          (click)="increaseQuantity()"
+                          [disabled]="quantity >= product.stock">
+                    <i class="fas fa-plus"></i>
+                  </button>
+                  <span class="stock-max">
+                    Max: {{ product.stock }}
+                  </span>
+                </div>
+              </div>
 
-            <!-- Bouton rupture de stock -->
-            <button *ngIf="!isAdmin && !isInStock" 
-                    class="btn btn-secondary btn-lg"
-                    disabled>
-              <i class="fas fa-times-circle me-2"></i>
-              Rupture de stock
-            </button>
-          </div>
+              <!-- Boutons actions principales -->
+              <div class="product-actions">
+                <!-- Bouton panier (clients seulement) -->
+                <button *ngIf="!isAdmin && isInStock" 
+                        class="btn-add-cart"
+                        (click)="addToCart()"
+                        [disabled]="!canAddToCart">
+                  <i class="fas fa-shopping-cart"></i>
+                  Ajouter au panier
+                </button>
 
-          <!-- ========== SECTION ADMINISTRATEUR ========== -->
-          <div *ngIf="isAdmin" class="mt-4 pt-4 border-top">
-            
-            
-
-            <!-- Actions admin -->
-            <div class="row g-2">
-              <!-- Bouton modifier -->
-              <div class="col-md-6">
-                <button class="btn btn-warning w-100" 
-                        (click)="editProduct()">
-                  <i class="fas fa-edit me-2"></i>
-                  Modifier
+                <!-- Bouton rupture de stock -->
+                <button *ngIf="!isAdmin && !isInStock" 
+                        class="btn-out-of-stock"
+                        disabled>
+                  <i class="fas fa-times-circle"></i>
+                  Rupture de stock
                 </button>
               </div>
 
-              <!-- Bouton suppression principale -->
-              <div class="col-md-6">
-                <button class="btn btn-danger w-100" 
-                        (click)="deleteProduct()">
-                  <i class="fas fa-trash-alt me-2"></i>
-                  Supprimer/Désactiver
-                </button>
+              <!-- ========== SECTION ADMINISTRATEUR ========== -->
+              <div *ngIf="isAdmin" class="admin-section">
+                <h3 class="section-title">Administration</h3>
+                <div class="admin-actions-grid">
+                  <!-- Bouton modifier -->
+                  <button class="btn-edit" (click)="editProduct()">
+                    <i class="fas fa-edit"></i>
+                    Modifier le produit
+                  </button>
+
+                  <!-- Bouton suppression -->
+                  <button class="btn-delete" (click)="deleteProduct()">
+                    <i class="fas fa-trash-alt"></i>
+                    Supprimer / Désactiver
+                  </button>
+                </div>
               </div>
+              <!-- ========== FIN SECTION ADMIN ========== -->
 
-            </div>
-
-          </div>
-          <!-- ========== FIN SECTION ADMIN ========== -->
-
-          <!-- Informations supplémentaires -->
-          <div class="mt-4 pt-3 border-top">
-            <div class="row">
-              <div class="col-6">
-                <small class="text-muted">
-                  <i class="fas fa-calendar me-1"></i>
+              <!-- Informations supplémentaires -->
+              <div class="product-footer">
+                <div class="product-date">
+                  <i class="fas fa-calendar-alt"></i>
                   Ajouté le {{ product.dateAjout | date:'dd/MM/yyyy' }}
-                </small>
+                </div>
+                <!-- SUPPRIMÉ: product.vues n'existe pas -->
               </div>
-              <div class="col-6 text-end">
-               
-              </div>
+
             </div>
           </div>
-
         </div>
       </div>
+
+      <!-- Message produit non trouvé -->
+      <div *ngIf="!loading && !product" class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-box-open"></i>
+        </div>
+        <h3>Produit non trouvé</h3>
+        <p>Le produit que vous recherchez n'existe pas ou a été supprimé.</p>
+        <button class="btn-reset-empty" (click)="goBack()">
+          <i class="fas fa-arrow-left"></i>
+          Retour aux produits
+        </button>
+      </div>
+
     </div>
   </div>
-
 </div>
-
-<!-- Template de chargement -->
-<ng-template #loadingTemplate>
-  <div class="container mt-5">
-    <div class="row justify-content-center">
-      <div class="col-md-8 text-center">
-        <div class="spinner-border text-primary" style="width: 4rem; height: 4rem;" role="status">
-          <span class="visually-hidden">Chargement...</span>
-        </div>
-        <h4 class="mt-4 text-primary">Chargement du produit...</h4>
-        <p class="text-muted">Veuillez patienter pendant la récupération des informations.</p>
-      </div>
-    </div>
-  </div>
-</ng-template>

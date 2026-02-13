@@ -83,4 +83,36 @@ export class OrderDetailComponent implements OnInit {
   goBack(): void {
     this.router.navigate(['/orders']);
   }
+
+
+// Méthode pour calculer la quantité totale
+getTotalQuantity(order: any): number {
+  if (!order || !order.items) return 0;
+  return order.items.reduce((total: number, item: any) => total + (item.quantite || 0), 0);
+}
+
+// Méthodes pour les actions supplémentaires
+generateInvoice(orderId: number): void {
+  console.log('Générer facture pour commande #', orderId);
+  // Implémentez votre logique ici
+}
+
+printOrder(): void {
+  window.print();
+}
+
+// Méthode pour mettre à jour le statut (si elle n'existe pas déjà)
+updateOrderStatut(orderId: number, statut: string): void {
+  if (!statut) return;
+  console.log('Mise à jour du statut', orderId, statut);
+  // Implémentez votre logique ici
+}
+
+// Méthode pour supprimer la commande (si elle n'existe pas déjà)
+deleteOrder(orderId: number): void {
+  if (confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) {
+    console.log('Suppression commande #', orderId);
+    // Implémentez votre logique ici
+  }
+}
 }

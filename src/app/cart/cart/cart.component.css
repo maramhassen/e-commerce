@@ -1,0 +1,395 @@
+/* ===== GLOBAL ===== */
+.cart-page {
+  min-height: 100vh;
+  padding: 40px 20px;
+  position: relative;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f8fafc;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ===== TITRE ===== */
+h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #9cbae1;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ===== TABLEAU ===== */
+.table {
+  width: 100%;
+  background: white;
+  border-radius: 16px;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+  margin-bottom: 30px;
+}
+
+.table thead {
+  background: #9cbae1;
+}
+
+.table thead th {
+  padding: 18px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+  text-align: left;
+  border: none;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+  transition: background 0.2s;
+}
+
+.table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.table tbody td {
+  padding: 20px 16px;
+  font-size: 15px;
+  color: #1e293b;
+  vertical-align: middle;
+  border: none;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ===== PRODUIT ===== */
+.table tbody td:first-child {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+/* ===== PRIX ===== */
+.table tbody td:nth-child(2) {
+  font-weight: 600;
+  color: #9cbae1;
+}
+
+/* ===== INPUT QUANTITÉ ===== */
+.form-control {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1e293b;
+  text-align: center;
+  transition: all 0.2s;
+  background: white;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #9cbae1;
+  box-shadow: 0 0 0 3px rgba(156, 186, 225, 0.2);
+}
+
+.form-control::-webkit-inner-spin-button,
+.form-control::-webkit-outer-spin-button {
+  opacity: 0.6;
+  height: 24px;
+}
+
+/* ===== TOTAL LIGNE ===== */
+.table tbody td:nth-child(4) {
+  font-weight: 700;
+  color: #9cbae1;
+}
+
+/* ===== BOUTON SUPPRIMER ===== */
+.btn-danger {
+  padding: 10px 20px;
+  background: #fee2e2;
+  border: none;
+  border-radius: 10px;
+  color: #b91c1c;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid #fecaca;
+}
+
+.btn-danger:hover {
+  background: #b91c1c;
+  color: white;
+  border-color: #b91c1c;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(185, 28, 28, 0.2);
+}
+
+.btn-danger:active {
+  transform: translateY(0);
+}
+
+.btn-danger i {
+  font-size: 14px;
+}
+
+/* ===== TOTAL GÉNÉRAL ===== */
+.text-end {
+  text-align: right;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #e2e8f0;
+}
+
+.text-end h4 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.text-end h4 span {
+  color: #9cbae1;
+  font-size: 28px;
+  margin-left: 10px;
+}
+
+/* ===== PANIER VIDE ===== */
+.empty-cart {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+}
+
+.empty-cart i {
+  font-size: 60px;
+  color: #9cbae1;
+  margin-bottom: 20px;
+  opacity: 0.7;
+}
+
+.empty-cart h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 12px;
+}
+
+.empty-cart p {
+  font-size: 16px;
+  color: #64748b;
+  margin-bottom: 25px;
+}
+
+.btn-shop {
+  padding: 14px 32px;
+  background: #9cbae1;
+  border: none;
+  border-radius: 50px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+}
+
+.btn-shop:hover {
+  background: #8aa9d1;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(156, 186, 225, 0.3);
+}
+
+/* ===== LOADING ===== */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 0;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(156, 186, 225, 0.2);
+  border-radius: 50%;
+  border-top-color: #9cbae1;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+.loading-container p {
+  font-size: 16px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ===== ALERT ERROR ===== */
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  color: #b91c1c;
+}
+
+.alert i {
+  font-size: 18px;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .cart-page {
+    padding: 20px 15px;
+  }
+  
+  h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .table {
+    display: block;
+  }
+  
+  .table thead {
+    display: none;
+  }
+  
+  .table tbody {
+    display: block;
+  }
+  
+  .table tbody tr {
+    display: block;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    background: white;
+  }
+  
+  .table tbody tr:hover {
+    background: white;
+  }
+  
+  .table tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .table tbody td:last-child {
+    border-bottom: none;
+  }
+  
+  .table tbody td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #475569;
+    margin-right: 20px;
+  }
+  
+  .table tbody td:first-child::before {
+    content: "Produit";
+  }
+  
+  .table tbody td:nth-child(2)::before {
+    content: "Prix";
+  }
+  
+  .table tbody td:nth-child(3)::before {
+    content: "Quantité";
+  }
+  
+  .table tbody td:nth-child(4)::before {
+    content: "Total";
+  }
+  
+  .table tbody td:nth-child(5)::before {
+    content: "Action";
+  }
+  
+  td[style*="width:120px"] {
+    width: 100% !important;
+  }
+  
+  .form-control {
+    max-width: 100px;
+  }
+  
+  .text-end h4 {
+    font-size: 20px;
+  }
+  
+  .text-end h4 span {
+    font-size: 24px;
+  }
+  
+  .btn-danger {
+    width: 100%;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 576px) {
+  h2 {
+    font-size: 22px;
+  }
+  
+  .table tbody tr {
+    padding: 15px;
+  }
+  
+  .form-control {
+    max-width: 80px;
+    padding: 8px 10px;
+  }
+  
+  .text-end h4 {
+    font-size: 18px;
+  }
+  
+  .text-end h4 span {
+    font-size: 22px;
+  }
+}

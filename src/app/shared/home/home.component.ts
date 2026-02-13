@@ -7,7 +7,7 @@ import { CartService } from '../../core/services/cart.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Product } from '../../models/product';
 import { Category } from '../../models/category';
-import { CartItem } from '../../models/cart-item'; // AJOUTER CET IMPORT
+import { CartItem } from '../../models/cart-item';
 
 @Component({
   selector: 'app-home',
@@ -33,48 +33,72 @@ export class HomeComponent implements OnInit {
     this.loadFeaturedProducts();
     this.loadCategories();
     this.checkAuthStatus();
-    this.isAuthenticated = this.authService.isAuthenticated()
+    this.isAuthenticated = this.authService.isAuthenticated();
   }
 
+  // ========== CHARGEMENT DES PRODUITS AVEC FORMATAGE DES IMAGES ==========
   private loadFeaturedProducts(): void {
     this.productService.getAll().subscribe({
       next: (products) => {
-        // Filtrez et triez les produits (sans les propriétés problématiques)
+        // FORMATER LES URLs DES IMAGES COMME DANS PRODUCT-LIST
         this.featuredProducts = products
-          .filter(product => product.stock > 0)
-          .slice(0, 8); // Prenez simplement les 8 premiers
+          .filter(product => product.stock > 0) // Garder seulement les produits en stock
+          .map(product => {
+            // Formater l'URL de l'image
+            if (product.imageUrl) {
+              product.imageUrl = this.productService.getImageUrl(product.imageUrl);
+            } else {
+              product.imageUrl = 'assets/images/default-product.jpg';
+            }
+            
+            // Debug - à supprimer en production
+            console.log(`📸 Produit "${product.nom}":`, {
+              id: product.id,
+              imageUrl: product.imageUrl,
+              prix: product.prix,
+              stock: product.stock
+            });
+            
+            return product;
+          })
+          .slice(0, 8); // Prendre seulement les 8 premiers
         
         this.loading = false;
+        console.log('✅ Produits vedettes chargés:', this.featuredProducts.length);
       },
       error: (error) => {
-        console.error('Erreur lors du chargement des produits:', error);
+        console.error('❌ Erreur lors du chargement des produits:', error);
         this.loading = false;
       }
     });
   }
 
+  // ========== CHARGEMENT DES CATÉGORIES ==========
   private loadCategories(): void {
     this.categoryService.getAll().subscribe({
       next: (categories) => {
-        this.categories = categories.slice(0, 4); // Prenez simplement les 4 premiers
+        this.categories = categories.slice(0, 4); // Prendre seulement les 4 premières
+        console.log('✅ Catégories chargées:', this.categories.length);
       },
       error: (error) => {
-        console.error('Erreur lors du chargement des catégories:', error);
+        console.error('❌ Erreur lors du chargement des catégories:', error);
       }
     });
   }
 
+  // ========== VÉRIFICATION DU STATUT D'AUTHENTIFICATION ==========
   private checkAuthStatus(): void {
     this.isAuthenticated = this.authService.isAuthenticated();
   }
 
+  // ========== NAVIGATION VERS LE DÉTAIL DU PRODUIT ==========
   goToProductDetail(productId: number | undefined): void {
     if (productId) {
       this.router.navigate(['/products', productId]);
     }
   }
 
-  // ========== MÉTHODE ADD TO CART CORRIGÉE ==========
+  // ========== MÉTHODE ADD TO CART ==========
   addToCart(product: Product): void {
     if (!this.isAuthenticated) {
       this.router.navigate(['/auth/login'], {
@@ -84,30 +108,23 @@ export class HomeComponent implements OnInit {
     }
 
     if (!product.id) {
-      console.error('Produit sans ID');
+      console.error('❌ Produit sans ID');
       return;
     }
 
-    // CORRECTION : Utilisez la méthode SIMPLIFIÉE qui prend seulement productId et quantity
     this.cartService.addProductToCartSimple(product.id, 1).subscribe({
       next: (cartItem: CartItem) => {
         console.log('✅ Produit ajouté au panier:', product.nom, cartItem);
-        
-        // Notifier la mise à jour du panier (déjà fait dans addProductToCartSimple)
-        // this.cartService.notifyCartUpdate(); // ← PLUS BESOIN, déjà fait
-        
-        // Afficher une notification
-        alert(`${product.nom} a été ajouté au panier!`);
+        this.showNotification(`${product.nom} a été ajouté au panier!`, 'success');
       },
       error: (error: any) => {
         console.error('❌ Erreur lors de l\'ajout au panier:', error);
         
-        // Gestion d'erreur améliorée
         if (error.message === 'Utilisateur non connecté') {
-          alert('Veuillez vous reconnecter');
+          this.showNotification('Veuillez vous reconnecter', 'warning');
           this.router.navigate(['/auth/login']);
         } else {
-          alert('Erreur lors de l\'ajout au panier');
+          this.showNotification('Erreur lors de l\'ajout au panier', 'error');
         }
       }
     });
@@ -122,33 +139,44 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    // Utilisation de la méthode avec produit complet
     this.cartService.addProductToCart(product, 1).subscribe({
       next: (cartItem: CartItem) => {
         console.log('✅ Produit ajouté:', cartItem);
-        alert(`${product.nom} ajouté au panier !`);
+        this.showNotification(`${product.nom} ajouté au panier !`, 'success');
       },
       error: (err: any) => {
         console.error('❌ Erreur:', err);
-        alert('Erreur lors de l\'ajout au panier');
+        this.showNotification('Erreur lors de l\'ajout au panier', 'error');
       }
     });
   }
 
+  // ========== FORMATAGE DU PRIX ==========
   formatPrice(price: number | undefined): string {
     if (!price) return '0.00 €';
     return price.toFixed(2) + ' €';
   }
 
-  // ========== MÉTHODE POUR AFFICHER L'IMAGE PAR DÉFAUT ==========
+  // ========== GESTION D'ERREUR DE CHARGEMENT D'IMAGE ==========
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
+    console.warn(`❌ Erreur de chargement d'image:`, img.src);
     img.src = 'assets/images/default-product.jpg';
   }
 
-  // ========== MÉTHODE POUR FILTRER LES PRODUITS EN VEDETTE ==========
+  // ========== OBTENIR L'URL DE L'IMAGE AVEC FORMATAGE ==========
   getProductImage(product: Product): string {
-    return product.imageUrl || 'assets/images/default-product.jpg';
+    // Si l'image a déjà été formatée, on la retourne directement
+    if (product.imageUrl) {
+      // Vérifier si c'est déjà une URL complète
+      if (product.imageUrl.startsWith('http') || product.imageUrl.startsWith('assets/')) {
+        return product.imageUrl;
+      }
+      // Sinon, on la formate via le service
+      return this.productService.getImageUrl(product.imageUrl);
+    }
+    // Image par défaut
+    return 'assets/images/default-product.jpg';
   }
 
   // ========== MÉTHODE POUR TRACKER LES PRODUITS DANS NG FOR ==========
@@ -158,7 +186,6 @@ export class HomeComponent implements OnInit {
 
   // ========== MÉTHODE POUR DÉTERMINER SI UN PRODUIT EST EN PROMOTION ==========
   isOnSale(product: Product): boolean {
-    // Logique de promotion simple (exemple : produits avec prix > 200)
     return (product.prix || 0) > 200;
   }
 
@@ -178,5 +205,74 @@ export class HomeComponent implements OnInit {
   // ========== MÉTHODE POUR NAVIGUER VERS TOUS LES PRODUITS ==========
   goToAllProducts(): void {
     this.router.navigate(['/products']);
+  }
+
+  // ========== MÉTHODE POUR AFFICHER DES NOTIFICATIONS ==========
+  private showNotification(message: string, type: 'success' | 'error' | 'warning' = 'success'): void {
+    const notification = document.createElement('div');
+    
+    const styles: any = {
+      position: 'fixed',
+      top: '20px',
+      right: '20px',
+      padding: '15px 20px',
+      borderRadius: '8px',
+      color: 'white',
+      zIndex: '9999',
+      animation: 'slideIn 0.3s ease',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+      maxWidth: '400px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '10px',
+      fontFamily: 'Inter, sans-serif'
+    };
+    
+    switch (type) {
+      case 'success':
+        styles.backgroundColor = '#10b981';
+        break;
+      case 'error':
+        styles.backgroundColor = '#dc2626';
+        break;
+      case 'warning':
+        styles.backgroundColor = '#f59e0b';
+        break;
+    }
+    
+    Object.keys(styles).forEach(key => {
+      (notification.style as any)[key] = styles[key];
+    });
+    
+    let icon = '';
+    switch (type) {
+      case 'success':
+        icon = '✓';
+        break;
+      case 'error':
+        icon = '✗';
+        break;
+      case 'warning':
+        icon = '⚠';
+        break;
+    }
+    
+    notification.innerHTML = `
+      <span style="font-weight: bold; font-size: 1.2em;">${icon}</span>
+      <span>${message}</span>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+          if (notification.parentNode) {
+            document.body.removeChild(notification);
+          }
+        }, 300);
+      }
+    }, 3000);
   }
 }

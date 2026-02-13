@@ -1,303 +1,275 @@
-<div class="container mt-4 mb-5">
-  <!-- En-tête -->
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">
-      <i class="bi bi-box-seam me-2"></i>
-      {{ isEditMode ? 'Modifier le Produit' : 'Nouveau Produit' }}
-    </h2>
-    <button type="button" class="btn btn-outline-secondary" (click)="onCancel()">
-      <i class="bi bi-arrow-left me-1"></i> Retour
+<div class="product-form-page">
+  <!-- En-tête avec navigation -->
+  <div class="form-header">
+    <div class="header-left">
+      <h1 class="page-title">
+        <i class="fas fa-box"></i>
+        {{ isEditMode ? 'Modifier le Produit' : 'Nouveau Produit' }}
+      </h1>
+      <p class="page-subtitle">
+        {{ isEditMode ? 'Modifiez les informations de votre produit' : 'Ajoutez un nouveau produit à votre catalogue' }}
+      </p>
+    </div>
+    <button type="button" class="btn-back" (click)="onCancel()">
+      <i class="fas fa-arrow-left"></i>
+      Retour
     </button>
   </div>
-  
+
   <!-- Messages d'alerte -->
-  <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
-    <div class="d-flex align-items-center">
-      <i class="bi bi-check-circle-fill me-2"></i>
-      <div>{{ successMessage }}</div>
-    </div>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  <div *ngIf="successMessage" class="alert alert-success">
+    <i class="fas fa-check-circle"></i>
+    <span>{{ successMessage }}</span>
+    <button type="button" class="btn-close" (click)="successMessage = ''">×</button>
   </div>
   
-  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
-    <div class="d-flex align-items-center">
-      <i class="bi bi-exclamation-triangle-fill me-2"></i>
-      <div>{{ errorMessage }}</div>
-    </div>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  <div *ngIf="errorMessage" class="alert alert-error">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span>{{ errorMessage }}</span>
+    <button type="button" class="btn-close" (click)="errorMessage = ''">×</button>
   </div>
-  
+
   <!-- Overlay de chargement -->
   <div *ngIf="loading" class="loading-overlay">
-    <div class="text-center">
-      <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-        <span class="visually-hidden">Chargement...</span>
-      </div>
-      <p class="mt-2 text-white">Chargement en cours...</p>
-    </div>
+    <div class="spinner"></div>
+    <p>Chargement en cours...</p>
   </div>
-  
+
   <!-- Formulaire principal -->
-  <form *ngIf="!loading" [formGroup]="productForm" (ngSubmit)="onSubmit()" class="row g-4">
+  <form *ngIf="!loading" [formGroup]="productForm" (ngSubmit)="onSubmit()" class="modern-form">
     
-    <!-- Section Image (colonne gauche) -->
-    <div class="col-lg-5">
-      <div class="card shadow-sm border-0 h-100">
-        <div class="card-header bg-light border-0">
-          <h5 class="mb-0">
-            <i class="bi bi-image me-2"></i>
-            Image du produit
-          </h5>
+    <!-- SECTION IMAGE -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-image"></i>
         </div>
-        <div class="card-body d-flex flex-column">
+        <div class="section-title">
+          <h2>Image du produit</h2>
+          <p>Ajoutez une photo pour illustrer votre produit</p>
+        </div>
+      </div>
+
+      <div class="image-section">
+        <!-- Prévisualisation -->
+        <div class="image-preview-wrapper">
+          <div class="image-preview-container">
+            <img [src]="getDisplayImageUrl()" 
+                 class="image-preview"
+                 alt="Aperçu du produit">
+            
+            <!-- Badge statut image -->
+            <div *ngIf="selectedFile" class="image-badge new">
+              <i class="fas fa-plus-circle"></i>
+              Nouvelle image
+            </div>
+            <div *ngIf="hasExistingImage && !selectedFile" class="image-badge existing">
+              <i class="fas fa-check-circle"></i>
+              Image actuelle
+            </div>
+          </div>
+        </div>
+
+        <!-- Zone d'upload -->
+        <div class="image-upload-area">
+          <p class="upload-hint">
+            <i class="fas fa-info-circle"></i>
+            Formats acceptés : JPG, PNG, GIF, WebP (max 10 Mo)
+          </p>
           
-          <!-- Zone d'image -->
-          <div class="flex-grow-1 d-flex flex-column align-items-center justify-content-center p-4">
+          <div class="upload-buttons">
+            <input type="file" 
+                   #fileInput
+                   class="file-input"
+                   (change)="onFileSelected($event)"
+                   accept="image/*"
+                   id="file-upload">
             
-            <!-- Prévisualisation -->
-            <div class="image-preview-container mb-4 text-center">
-              <img [src]="getDisplayImageUrl()" 
-                   class="image-preview rounded shadow"
-                   alt="Aperçu de l'image"
-                   style="max-width: 300px; max-height: 300px; object-fit: cover;">
-              
-              <!-- Bouton supprimer -->
-              <div *ngIf="selectedFile || hasExistingImage" class="mt-3">
-                <button type="button" 
-                        class="btn btn-danger btn-sm"
-                        (click)="selectedFile ? removeSelectedImage() : removeExistingImage()">
-                  <i class="bi bi-trash me-1"></i>
-                  {{ selectedFile ? 'Supprimer la nouvelle image' : 'Supprimer l\'image existante' }}
-                </button>
-              </div>
-            </div>
+            <label for="file-upload" class="btn-upload">
+              <i class="fas fa-cloud-upload-alt"></i>
+              {{ selectedFile || hasExistingImage ? 'Changer l\'image' : 'Choisir une image' }}
+            </label>
             
-            <!-- Zone d'upload -->
-            <div class="w-100">
-              <div class="mb-3 text-center">
-                <p class="text-muted mb-3">Format: JPG, PNG, GIF, WebP (max 10MB)</p>
-                
-                <input type="file" 
-                       #fileInput
-                       class="d-none"
-                       (change)="onFileSelected($event)"
-                       accept="image/*">
-                
-                <button type="button" 
-                        class="btn btn-outline-primary"
-                        (click)="triggerFileInput()">
-                  <i class="bi bi-upload me-1"></i>
-                  {{ selectedFile || hasExistingImage ? 'Changer l\'image' : 'Choisir une image' }}
-                </button>
-              </div>
-              
-              <!-- Info image existante -->
-              <div *ngIf="hasExistingImage && !selectedFile" class="alert alert-info mt-3">
-                <div class="d-flex align-items-center">
-                  <i class="bi bi-info-circle me-2"></i>
-                  <div>
-                    <small>Image existante: {{ existingImageName }}</small>
-                    <div class="mt-1">
-                      <button type="button" 
-                              class="btn btn-sm btn-outline-danger"
-                              (click)="removeExistingImage()">
-                        <i class="bi bi-x-circle me-1"></i>
-                        Supprimer
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Info nouvelle image -->
-              <div *ngIf="selectedFile" class="alert alert-success mt-3">
-                <div class="d-flex align-items-center">
-                  <i class="bi bi-check-circle me-2"></i>
-                  <div>
-                    <small>Nouvelle image: {{ selectedFile.name }}</small>
-                    <div class="mt-1">
-                      <button type="button" 
-                              class="btn btn-sm btn-outline-danger"
-                              (click)="removeSelectedImage()">
-                        <i class="bi bi-x-circle me-1"></i>
-                        Annuler
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
+            <button *ngIf="selectedFile || hasExistingImage" 
+                    type="button" 
+                    class="btn-remove"
+                    (click)="selectedFile ? removeSelectedImage() : removeExistingImage()">
+              <i class="fas fa-trash-alt"></i>
+              Supprimer
+            </button>
+          </div>
+
+          <!-- Info fichier sélectionné -->
+          <div *ngIf="selectedFile" class="file-info success">
+            <i class="fas fa-check-circle"></i>
+            <span>{{ selectedFile.name }}</span>
+          </div>
+          <div *ngIf="hasExistingImage && !selectedFile" class="file-info warning">
+            <i class="fas fa-info-circle"></i>
+            <span>Image existante : {{ existingImageName }}</span>
           </div>
         </div>
       </div>
     </div>
-    
-    <!-- Informations du produit (colonne droite) -->
-    <div class="col-lg-7">
-      <div class="card shadow-sm border-0 h-100">
-        <div class="card-header bg-light border-0">
-          <h5 class="mb-0">
-            <i class="bi bi-info-circle me-2"></i>
-            Informations du produit
-          </h5>
+
+    <!-- SECTION INFORMATIONS -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-info-circle"></i>
         </div>
-        <div class="card-body">
+        <div class="section-title">
+          <h2>Informations du produit</h2>
+          <p>Les informations de base de votre produit</p>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <!-- Nom -->
+        <div class="form-field full-width">
+          <label class="field-label">
+            <i class="fas fa-tag"></i>
+            Nom du produit
+            <span class="required-badge">OBLIGATOIRE</span>
+          </label>
           
-          <!-- Nom -->
-          <div class="mb-3">
-            <label for="nom" class="form-label">
-              Nom du produit *
-              <span class="text-danger" *ngIf="nom?.invalid && nom?.touched">(requis)</span>
-            </label>
+          <div class="field-control" 
+               [class.error]="nom?.invalid && nom?.touched"
+               [class.success]="nom?.valid && nom?.touched">
             <input type="text" 
-                   id="nom" 
-                   class="form-control" 
-                   [class.is-invalid]="nom?.invalid && nom?.touched"
                    formControlName="nom"
-                   placeholder="Ex: iPhone 14 Pro">
-            <div *ngIf="nom?.invalid && nom?.touched" class="invalid-feedback">
+                   placeholder="Ex: iPhone 14 Pro"
+                   class="field-input">
+            <span class="field-status" *ngIf="nom?.touched">
+              <i class="fas" [ngClass]="nom?.valid ? 'fa-check-circle' : 'fa-exclamation-circle'"></i>
+            </span>
+          </div>
+          
+          <div class="field-message">
+            <div class="message-hint" *ngIf="!nom?.touched">
+              <i class="fas fa-info-circle"></i>
+              Donnez un nom clair et reconnaissable
+            </div>
+            <div class="message-error" *ngIf="nom?.invalid && nom?.touched">
+              <i class="fas fa-exclamation-circle"></i>
               {{ getValidationMessage('nom') }}
             </div>
           </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-field full-width">
+          <label class="field-label">
+            <i class="fas fa-align-left"></i>
+            Description
+            <span class="optional-badge">OPTIONNEL</span>
+          </label>
           
-          <!-- Description -->
-          <div class="mb-3">
-            <label for="description" class="form-label">
-              Description *
-              <span class="text-danger" *ngIf="description?.invalid && description?.touched">(requis)</span>
-            </label>
-            <textarea id="description" 
-                      class="form-control" 
-                      [class.is-invalid]="description?.invalid && description?.touched"
-                      formControlName="description"
+          <div class="field-control textarea-control">
+            <textarea formControlName="description"
                       rows="4"
-                      placeholder="Décrivez votre produit..."></textarea>
-            <div class="d-flex justify-content-between mt-1">
-              <div *ngIf="description?.invalid && description?.touched" class="invalid-feedback d-block">
-                {{ getValidationMessage('description') }}
-              </div>
-              <div class="ms-auto">
-                <span class="text-muted small">
-                  {{ characterCount }}/{{ maxCharacters }}
-                </span>
-              </div>
-            </div>
+                      placeholder="Décrivez votre produit... (ex: Tous les vêtements pour homme)"
+                      class="field-input"></textarea>
           </div>
           
-          <!-- Prix et Stock -->
-          <div class="row g-3 mb-3">
-            <div class="col-md-6">
-              <label for="prix" class="form-label">
-                Prix (€) *
-                <span class="text-danger" *ngIf="prix?.invalid && prix?.touched">(requis)</span>
-              </label>
-              <div class="input-group">
-                <span class="input-group-text">
-                  <i class="bi bi-currency-euro"></i>
-                </span>
-                <input type="number" 
-                       id="prix" 
-                       class="form-control" 
-                       [class.is-invalid]="prix?.invalid && prix?.touched"
-                       formControlName="prix"
-                       step="0.01"
-                       min="0.01"
-                       placeholder="0.00">
-              </div>
-              <div *ngIf="prix?.invalid && prix?.touched" class="invalid-feedback d-block">
-                {{ getValidationMessage('prix') }}
-              </div>
-            </div>
-            
-            <div class="col-md-6">
-              <label for="stock" class="form-label">
-                Stock *
-                <span class="text-danger" *ngIf="stock?.invalid && stock?.touched">(requis)</span>
-              </label>
-              <div class="input-group">
-                <span class="input-group-text">
-                  <i class="bi bi-box"></i>
-                </span>
-                <input type="number" 
-                       id="stock" 
-                       class="form-control" 
-                       [class.is-invalid]="stock?.invalid && stock?.touched"
-                       formControlName="stock"
-                       min="0"
-                       placeholder="0">
-              </div>
-              <div *ngIf="stock?.invalid && stock?.touched" class="invalid-feedback d-block">
-                {{ getValidationMessage('stock') }}
-              </div>
+          <div class="field-footer">
+            <div class="field-counter">
+              <span>{{ characterCount }}/{{ maxCharacters }}</span>
             </div>
           </div>
+        </div>
+
+        <!-- Prix et Stock -->
+        <div class="form-field half-width">
+          <label class="field-label">
+            <i class="fas fa-euro-sign"></i>
+            Prix (dt)
+            <span class="required-badge">OBLIGATOIRE</span>
+          </label>
           
-          <!-- Catégorie -->
-          <div class="mb-3">
-            <label for="categoryId" class="form-label">
-              Catégorie *
-              <span class="text-danger" *ngIf="categoryId?.invalid && categoryId?.touched">(requis)</span>
-            </label>
-            <select id="categoryId" 
-                    class="form-select" 
-                    [class.is-invalid]="categoryId?.invalid && categoryId?.touched"
-                    formControlName="categoryId">
+          <div class="field-control" 
+               [class.error]="prix?.invalid && prix?.touched"
+               [class.success]="prix?.valid && prix?.touched">
+            <input type="number" 
+                   formControlName="prix"
+                   step="0.01"
+                   min="0.01"
+                   placeholder="0.00"
+                   class="field-input">
+            <span class="field-status" *ngIf="prix?.touched">
+              <i class="fas" [ngClass]="prix?.valid ? 'fa-check-circle' : 'fa-exclamation-circle'"></i>
+            </span>
+          </div>
+        </div>
+
+        <div class="form-field half-width">
+          <label class="field-label">
+            <i class="fas fa-boxes"></i>
+            Stock
+            <span class="required-badge">OBLIGATOIRE</span>
+          </label>
+          
+          <div class="field-control" 
+               [class.error]="stock?.invalid && stock?.touched"
+               [class.success]="stock?.valid && stock?.touched">
+            <input type="number" 
+                   formControlName="stock"
+                   min="0"
+                   placeholder="0"
+                   class="field-input">
+            <span class="field-status" *ngIf="stock?.touched">
+              <i class="fas" [ngClass]="stock?.valid ? 'fa-check-circle' : 'fa-exclamation-circle'"></i>
+            </span>
+          </div>
+        </div>
+
+        <!-- Catégorie -->
+        <div class="form-field full-width">
+          <label class="field-label">
+            <i class="fas fa-folder"></i>
+            Catégorie
+            <span class="required-badge">OBLIGATOIRE</span>
+          </label>
+          
+          <div class="field-control select-control" 
+               [class.error]="categoryId?.invalid && categoryId?.touched"
+               [class.success]="categoryId?.valid && categoryId?.touched">
+            <select formControlName="categoryId" class="field-select">
               <option value="" disabled selected>-- Sélectionnez une catégorie --</option>
               <option *ngFor="let category of categories" [value]="category.id">
                 {{ category.nom }}
               </option>
             </select>
-            <div *ngIf="categoryId?.invalid && categoryId?.touched" class="invalid-feedback">
-              {{ getValidationMessage('categoryId') }}
-            </div>
-            <div *ngIf="categoryId?.value" class="form-text mt-1">
-              <i class="bi bi-check-circle text-success me-1"></i>
-              Sélectionnée: <strong>{{ selectedCategoryName }}</strong>
-            </div>
+            <i class="fas fa-chevron-down select-arrow"></i>
           </div>
           
-          <!-- Statut -->
-          <div class="mb-4">
-            <div class="form-check form-switch">
-              <input type="checkbox" 
-                     id="actif" 
-                     class="form-check-input" 
-                     role="switch"
-                     formControlName="actif">
-              <label for="actif" class="form-check-label">
-                <span class="badge" [class.bg-success]="productForm.get('actif')?.value" 
-                      [class.bg-secondary]="!productForm.get('actif')?.value">
-                  {{ productForm.get('actif')?.value ? 'ACTIF' : 'INACTIF' }}
-                </span>
-                - Produit visible dans le catalogue
-              </label>
-            </div>
+          <div *ngIf="categoryId?.value" class="field-success-message">
+            <i class="fas fa-check-circle"></i>
+            Catégorie sélectionnée : <strong>{{ selectedCategoryName }}</strong>
           </div>
-          
-          <!-- Boutons d'action -->
-          <div class="d-flex justify-content-between pt-3 border-top">
-            <button type="button" 
-                    class="btn btn-outline-danger"
-                    (click)="onCancel()">
-              <i class="bi bi-x-circle me-1"></i>
-              Annuler
-            </button>
-            
-            <button type="submit" 
-                    class="btn btn-primary px-4"
-                    [disabled]="productForm.invalid || loading">
-              <span *ngIf="loading" 
-                    class="spinner-border spinner-border-sm me-2"></span>
-              <i *ngIf="!loading" 
-                 class="bi bi-check-circle me-1"></i>
-              {{ isEditMode ? 'Mettre à jour' : 'Créer le produit' }}
-            </button>
-          </div>
-          
         </div>
       </div>
     </div>
-    
+
+    <!-- Boutons d'action -->
+    <div class="form-actions">
+      <button type="button" 
+              class="btn-secondary"
+              (click)="onCancel()">
+        <i class="fas fa-times"></i>
+        Annuler
+      </button>
+      
+      <button type="submit" 
+              class="btn-primary"
+              [disabled]="productForm.invalid || loading">
+        <span *ngIf="loading" class="spinner"></span>
+        <span *ngIf="!loading">
+          <i class="fas" [ngClass]="isEditMode ? 'fa-save' : 'fa-plus-circle'"></i>
+          {{ isEditMode ? 'Mettre à jour' : 'Créer le produit' }}
+        </span>
+      </button>
+    </div>
+
   </form>
 </div>

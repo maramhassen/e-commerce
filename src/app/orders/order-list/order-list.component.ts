@@ -339,4 +339,10 @@ export class OrderListComponent implements OnInit {
       order.statut && order.statut.toUpperCase() === statutUpper
     ).length;
   }
+  onStatutChange(event: any, orderId: number): void {
+  const newStatut = event.target.value;
+  if (newStatut) {
+    this.updateOrderStatut(orderId, newStatut);
+  }
+}
 }
