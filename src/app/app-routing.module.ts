@@ -34,14 +34,12 @@ const routes: Routes = [
   { 
     path: 'orders', 
     component: OrderListComponent, 
-    canActivate: [AuthGuard], 
-    data: { role: 'CLIENT' } 
+    canActivate: [AuthGuard]
   },
   { 
     path: 'orders/:id', 
     component: OrderDetailComponent, 
-    canActivate: [AuthGuard], 
-    data: { role: 'CLIENT' } 
+    canActivate: [AuthGuard],  
   },
 
   // Admin uniquement

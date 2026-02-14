@@ -1,5 +1,6 @@
 import { CartItem } from './cart-item';
 import { User } from './user';
+import { Order } from './order';
 
 export interface Cart {
   id?: number;
@@ -7,5 +8,5 @@ export interface Cart {
   dateCreation?: Date;
   user?: User;
   items: CartItem[];
-
+  order?: Order;  
 }

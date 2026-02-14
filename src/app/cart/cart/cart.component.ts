@@ -1,12 +1,13 @@
 // src/app/components/cart/cart.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CartService } from '../../core/services/cart.service';
+import { OrderService } from '../../core/services/order.service';
 import { Cart } from '../../models/cart';
 import { CartItem } from '../../models/cart-item';
-import { Product } from '../../models/product';
 import { AuthService } from '../../core/services/auth.service';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';  // ← AJOUTER CET IMPORT
+import { debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'app-cart',
@@ -26,50 +27,65 @@ export class CartComponent implements OnInit, OnDestroy {
   errorMessage = '';
   userId: number | null = null;
   
-  // AJOUT: Flag pour éviter les chargements multiples
   private isLoadingCart = false;
   private cartSubscription!: Subscription;
+  
+  // FLAG POUR ÉVITER LE RECHARGEMENT INUTILE
+  private skipNextReload = false;
 
   constructor(
     private cartService: CartService,
-    private authService: AuthService
+    private orderService: OrderService,
+    private authService: AuthService,
+    private router: Router
   ) {
-    console.log('CartComponent initialisé');
+    console.log('🛒 CartComponent initialisé');
   }
 
   ngOnInit(): void {
-    console.log('CartComponent ngOnInit');
+    console.log('🔄 CartComponent ngOnInit');
     this.checkAuthAndLoadCart();
     
-    // SOLUTION: AJOUT DE debounceTime POUR ÉVITER LES DOUBLES CHARGEMENTS
     this.cartSubscription = this.cartService.cartUpdated$
-      .pipe(debounceTime(300)) // Attend 300ms avant de recharger
+      .pipe(debounceTime(300))
       .subscribe(() => {
-        console.log('🔔 Notification reçue: panier mis à jour (après debounce)');
+        // Ne pas recharger si on a demandé de skipper
+        if (this.skipNextReload) {
+          console.log('⏭️ Rechargement ignoré (modification locale)');
+          this.skipNextReload = false;
+          return;
+        }
+        console.log('🔔 Notification reçue: rechargement du panier');
         this.loadCartByUser();
       });
+  }
+
+  ngOnDestroy(): void {
+    if (this.cartSubscription) {
+      this.cartSubscription.unsubscribe();
+    }
   }
 
   // =============================
   // Authentification et chargement
   // =============================
   private checkAuthAndLoadCart(): void {
-    console.log('Vérification authentification...');
+    console.log('🔍 Vérification authentification...');
     const isAuthenticated = this.authService.isAuthenticated();
     
     if (!isAuthenticated) {
-      console.log('Utilisateur non connecté');
+      console.log('❌ Utilisateur non connecté');
       this.errorMessage = 'Veuillez vous connecter pour voir votre panier';
       this.loading = false;
       return;
     }
 
     const user = this.authService.getCurrentUser();
-    console.log('Utilisateur connecté:', user);
+    console.log('✅ Utilisateur connecté:', user);
     this.userId = user?.id || null;
 
     if (!this.userId) {
-      console.error('ID utilisateur manquant');
+      console.error('❌ ID utilisateur manquant');
       this.errorMessage = 'Utilisateur non identifié';
       this.loading = false;
       return;
@@ -79,7 +95,6 @@ export class CartComponent implements OnInit, OnDestroy {
   }
 
   private loadCartByUser(): void {
-    // AJOUT: ÉVITER LES CHARGEMENTS MULTIPLES SIMULTANÉS
     if (this.isLoadingCart) {
       console.log('⏳ Chargement déjà en cours, ignoré');
       return;
@@ -91,33 +106,29 @@ export class CartComponent implements OnInit, OnDestroy {
     this.isLoadingCart = true;
     
     this.cartService.getOrCreateCart().subscribe({
-      next: (data: Cart) => {  // AJOUT DU TYPE
+      next: (data: Cart) => {
         console.log('✅ Panier chargé avec succès:', data);
-        console.log('📊 NOMBRE D\'ITEMS:', data.items?.length);
-        
-        // VÉRIFICATION DES DOUBLONS
-        if (data.items) {
-          const uniqueIds = new Set(data.items.map(item => item.id));
-          if (uniqueIds.size !== data.items.length) {
-            console.warn('⚠️ DOUBLONS DÉTECTÉS!', data.items);
-          }
-        }
+        console.log('📊 Nombre d\'articles:', data.items?.length);
         
         this.cart = data;
         
-        if (!this.cart.total || this.cart.total === 0) {
-          this.cart.total = this.cartService.calculateTotal(this.cart.items);
+        // Recalculer le total localement pour être sûr
+        if (this.cart.items) {
+          this.cart.total = this.cart.items.reduce(
+            (sum, item) => sum + (item.quantite * item.prixUnitaire), 
+            0
+          );
         }
         
         this.loading = false;
         this.isLoadingCart = false;
-        console.log('Panier final:', this.cart);
+        console.log('📦 Panier final:', this.cart);
       },
       error: (err: any) => {
         console.error('❌ Erreur chargement panier:', err);
         
         if (err.status === 404) {
-          console.log('Panier non trouvé, création panier vide');
+          console.log('📦 Panier non trouvé, création panier vide');
           this.cart = {
             id: 0,
             total: 0,
@@ -136,11 +147,11 @@ export class CartComponent implements OnInit, OnDestroy {
   }
 
   // =============================
-  // Gestion des articles
+  // Gestion des articles - VERSION CORRIGÉE
   // =============================
   removeItem(item: CartItem): void {
     if (!item.id) {
-      console.error('Item ID manquant pour suppression');
+      console.error('❌ Item ID manquant pour suppression');
       return;
     }
 
@@ -148,17 +159,38 @@ export class CartComponent implements OnInit, OnDestroy {
 
     console.log('🗑️ Suppression item ID:', item.id);
     
+    // Sauvegarder l'état avant suppression (pour restauration si erreur)
+    const originalItems = [...this.cart.items];
+    const originalTotal = this.cart.total;
+    
+    // Mise à jour OPTIMISTE (immédiate)
+    this.cart.items = this.cart.items.filter(i => i.id !== item.id);
+    this.cart.total = this.cart.items.reduce(
+      (sum, i) => sum + (i.quantite * i.prixUnitaire), 
+      0
+    );
+    
+    // Dire de ne PAS recharger après cette opération
+    this.skipNextReload = true;
+    
     this.cartService.removeItem(item.id).subscribe({
       next: () => {
-        console.log('✅ Item supprimé avec succès');
-        this.cart.items = this.cart.items.filter(i => i.id !== item.id);
-        this.updateCartTotal();
+        console.log('✅ Item supprimé avec succès (confirmé par serveur)');
+        // Notifier les autres composants (navbar) sans recharger la page
         this.cartService.notifyCartUpdate();
-        alert('Article supprimé du panier');
+        alert('✅ Article supprimé du panier');
       },
       error: (err: any) => {
-        console.error('❌ Erreur suppression:', err);
-        alert('Erreur lors de la suppression de l\'article: ' + err.message);
+        console.error('❌ Erreur suppression, restauration...', err);
+        
+        // Restaurer l'état précédent
+        this.cart.items = originalItems;
+        this.cart.total = originalTotal;
+        
+        // Réactiver le rechargement
+        this.skipNextReload = false;
+        
+        alert('❌ Erreur lors de la suppression: ' + err.message);
       }
     });
   }
@@ -175,46 +207,63 @@ export class CartComponent implements OnInit, OnDestroy {
     console.log('📝 Mise à jour quantité - Item:', item.id, 'Nouvelle quantité:', quantity);
     
     if (isNaN(quantity) || quantity < 1) {
-      console.log('Quantité invalide, suppression item');
+      console.log('📝 Quantité invalide, suppression item');
       this.removeItem(item);
       return;
     }
     
     const productStock = item.product?.stock;
     if (productStock !== undefined && quantity > productStock) {
-      alert(`Stock insuffisant. Maximum disponible: ${productStock}`);
+      alert(`⚠️ Stock insuffisant. Maximum disponible: ${productStock}`);
       quantity = productStock;
     }
     
-    const updatedItem: CartItem = { 
-      ...item, 
-      quantite: quantity 
-    };
+    // Sauvegarder l'ancienne quantité pour restauration
+    const oldQuantity = item.quantite;
     
-    if (!updatedItem.id) {
-      console.error('Item ID manquant pour mise à jour');
-      return;
-    }
+    // Mise à jour optimiste
+    item.quantite = quantity;
+    this.cart.total = this.cart.items.reduce(
+      (sum, i) => sum + (i.quantite * i.prixUnitaire), 
+      0
+    );
     
-    this.cartService.updateItem(updatedItem.id, updatedItem).subscribe({
-      next: (updatedCartItem: CartItem) => {  // AJOUT DU TYPE
-        console.log('✅ Quantité mise à jour:', updatedCartItem);
+    // Dire de ne PAS recharger
+    this.skipNextReload = true;
+    
+    const updatedItem: CartItem = { ...item, quantite: quantity };
+    
+    this.cartService.updateItem(updatedItem.id!, updatedItem).subscribe({
+      next: (updatedCartItem: CartItem) => {
+        console.log('✅ Quantité mise à jour (confirmé)');
         const index = this.cart.items.findIndex(i => i.id === item.id);
         if (index !== -1) {
           this.cart.items[index] = updatedCartItem;
         }
-        this.updateCartTotal();
+        this.cart.total = this.cart.items.reduce(
+          (sum, i) => sum + (i.quantite * i.prixUnitaire), 
+          0
+        );
         this.cartService.notifyCartUpdate();
       },
       error: (err: any) => {
-        console.error('❌ Erreur mise à jour quantité:', err);
-        alert('Erreur lors de la mise à jour de la quantité: ' + err.message);
+        console.error('❌ Erreur mise à jour, restauration...', err);
+        
+        // Restaurer l'ancienne quantité
+        item.quantite = oldQuantity;
+        this.cart.total = this.cart.items.reduce(
+          (sum, i) => sum + (i.quantite * i.prixUnitaire), 
+          0
+        );
+        this.skipNextReload = false;
+        
+        alert('Erreur lors de la mise à jour: ' + err.message);
       }
     });
   }
 
   // =============================
-  // Actions sur le panier
+  // VIDER LE PANIER - VERSION CORRIGÉE
   // =============================
   clearCart(): void {
     if (this.isCartEmpty) {
@@ -225,9 +274,19 @@ export class CartComponent implements OnInit, OnDestroy {
     if (!confirm('Voulez-vous vider tout votre panier ?')) return;
 
     console.log('🧹 Vidage du panier...');
-    this.loading = true;
     
-    const deletePromises = this.cart.items.map(item => {
+    // Sauvegarder l'état
+    const oldItems = [...this.cart.items];
+    const oldTotal = this.cart.total;
+    
+    // Mise à jour optimiste
+    this.cart.items = [];
+    this.cart.total = 0;
+    this.loading = true;
+    this.skipNextReload = true;
+    
+    // Supprimer chaque item un par un
+    const deletePromises = oldItems.map(item => {
       if (item.id) {
         return this.cartService.removeItem(item.id).toPromise();
       }
@@ -237,78 +296,107 @@ export class CartComponent implements OnInit, OnDestroy {
     Promise.all(deletePromises)
       .then(() => {
         console.log('✅ Panier vidé avec succès');
-        this.cart.items = [];
-        this.updateCartTotal();
         this.cartService.notifyCartUpdate();
         alert('Panier vidé avec succès');
+        this.loading = false;
       })
       .catch((err: any) => {
-        console.error('❌ Erreur lors du vidage du panier:', err);
-        alert('Erreur lors du vidage du panier: ' + err.message);
-      })
-      .finally(() => {
+        console.error('❌ Erreur vidage, restauration...', err);
+        
+        // Restaurer
+        this.cart.items = oldItems;
+        this.cart.total = oldTotal;
+        this.skipNextReload = false;
         this.loading = false;
+        
+        alert('Erreur lors du vidage: ' + err.message);
       });
   }
 
+  // =============================
+  // CHECKOUT - Création de commande
+  // =============================
   checkout(): void {
-    if (!this.isAuthenticated) {
-      alert('Veuillez vous connecter pour passer commande');
+    console.log('🛒 Passage à la commande...');
+    
+    if (!this.userId || this.isCartEmpty) {
+      alert('Impossible de passer commande');
       return;
     }
 
-    if (this.isCartEmpty) {
-      alert('Votre panier est vide !');
+    if (!confirm(`Confirmer la commande de ${this.formatPrice(this.cart.total)} ?`)) {
       return;
     }
 
-    console.log('Passage à la commande...');
-    alert('Redirection vers la page de paiement...');
+    this.loading = true;
+    
+    this.orderService.createOrderFromCart(this.userId).subscribe({
+      next: (order) => {
+        alert(`✅ Commande #${order.id} créée !`);
+        this.loading = false;
+        this.cartService.notifyCartUpdate();
+        this.router.navigate(['/orders', order.id]);
+      },
+      error: (error) => {
+        console.error('❌ Erreur:', error);
+        alert('❌ Erreur lors de la création');
+        this.loading = false;
+      }
+    });
   }
 
   // =============================
   // Calculs et utilitaires
   // =============================
-  private updateCartTotal(): void {
-    this.cart.total = this.cartService.calculateTotal(this.cart.items);
-    console.log('💰 Total panier mis à jour:', this.cart.total);
-  }
-
   getProductName(item: CartItem): string {
     return item.product?.nom || 'Produit inconnu';
   }
 
+  getProductImage(item: CartItem): string {
+    if (!item.product?.imageUrl) {
+      return 'assets/images/default-product.jpg';
+    }
+
+    const imageUrl = item.product.imageUrl;
+    const baseUrl = 'http://localhost:8080';
+    
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+    
+    return `${baseUrl}/api/products/images/${imageUrl}`;
+  }
+
   formatPrice(price: number | undefined): string {
-    if (!price) return '0.00 DT';
+    if (price === undefined || price === null) return '0,00 DT';
     return price.toFixed(2).replace('.', ',') + ' DT';
   }
 
   // =============================
-  // Getters pour le template
+  // Getters
   // =============================
   get isAuthenticated(): boolean {
     return this.authService.isAuthenticated();
   }
 
   get isCartEmpty(): boolean {
-    return this.cart.items.length === 0;
+    return !this.cart.items || this.cart.items.length === 0;
   }
 
   getTotalItems(): number {
-    return this.cartService.calculateTotalItems(this.cart.items);
+    return this.cart.items.reduce((sum, item) => sum + item.quantite, 0);
   }
 
-  // AJOUT: trackBy pour optimiser le rendu
   trackByItemId(index: number, item: CartItem): number {
     return item.id || index;
   }
 
   // =============================
-  // Navigation et autres
+  // Navigation
   // =============================
   continueShopping(): void {
-    console.log('Continuer les achats');
-    alert('Continuer les achats - Redirection vers la boutique');
+    console.log('🛍️ Continuer les achats');
+    this.router.navigate(['/products']);
   }
 
   reloadCart(): void {
@@ -319,47 +407,26 @@ export class CartComponent implements OnInit, OnDestroy {
   }
 
   // =============================
-  // Méthodes pour le développement
+  // Débogage
   // =============================
   debugCart(): void {
-    console.log('=== DEBUG PANIER ===');
+    console.log('\n=== DEBUG PANIER ===');
     console.log('État du panier:', {
       cartId: this.cart.id,
       total: this.cart.total,
       itemsCount: this.cart.items.length,
-      items: this.cart.items,
-      userId: this.userId
+      items: this.cart.items.map(i => ({
+        id: i.id,
+        product: i.product?.nom,
+        quantite: i.quantite,
+        prix: i.prixUnitaire,
+        total: i.quantite * i.prixUnitaire,
+        image: i.product?.imageUrl
+      })),
+      userId: this.userId,
+      isAuthenticated: this.isAuthenticated,
+      skipNextReload: this.skipNextReload
     });
-    console.log('Utilisateur actuel:', this.authService.getCurrentUser());
-    console.log('Authentifié:', this.authService.isAuthenticated());
-    console.log('=== FIN DEBUG ===');
-  }
-
-  testAddProduct(): void {
-    const testProduct: Product = {
-      id: 1,
-      nom: 'Produit test',
-      description: 'Description test',
-      prix: 100,
-      stock: 10,
-      actif: true
-    };
-    
-    this.cartService.addProductToCart(testProduct, 2).subscribe({
-      next: (item: CartItem) => {  // AJOUT DU TYPE
-        console.log('Test réussi:', item);
-        alert('Produit test ajouté!');
-      },
-      error: (error: any) => {  // AJOUT DU TYPE
-        console.error('Test échoué:', error);
-        alert('Erreur test: ' + error.message);
-      }
-    });
-  }
-
-  ngOnDestroy(): void {
-    if (this.cartSubscription) {
-      this.cartSubscription.unsubscribe();
-    }
+    console.log('=== FIN DEBUG ===\n');
   }
 }
