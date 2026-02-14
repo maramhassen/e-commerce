@@ -1,5 +1,6 @@
 package com.example.e_commerce.Entities;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.util.Date;
 import java.util.List;
@@ -16,50 +17,44 @@ public class Cart {
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateCreation = new Date();
 
-    @OneToOne
-    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    @JsonIgnoreProperties({"cart", "orders"})
     private User user;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonIgnoreProperties("cart")
     private List<CartItem> items;
 
-    public Long getId() {
-        return id;
-    }
+    @OneToOne(mappedBy = "sourceCart")
+    @JsonIgnoreProperties("sourceCart")
+    private Order order;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    // Constructeurs
+    public Cart() {}
 
-    public double getTotal() {
-        return total;
-    }
-
-    public void setTotal(double total) {
-        this.total = total;
-    }
-
-    public Date getDateCreation() {
-        return dateCreation;
-    }
-
-    public void setDateCreation(Date dateCreation) {
-        this.dateCreation = dateCreation;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
+    public Cart(User user) {
         this.user = user;
+        this.total = 0.0;
+        this.dateCreation = new Date();
     }
 
-    public List<CartItem> getItems() {
-        return items;
-    }
+    // Getters et Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setItems(List<CartItem> items) {
-        this.items = items;
-    }
+    public double getTotal() { return total; }
+    public void setTotal(double total) { this.total = total; }
+
+    public Date getDateCreation() { return dateCreation; }
+    public void setDateCreation(Date dateCreation) { this.dateCreation = dateCreation; }
+
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
+
+    public List<CartItem> getItems() { return items; }
+    public void setItems(List<CartItem> items) { this.items = items; }
+
+    public Order getOrder() { return order; }
+    public void setOrder(Order order) { this.order = order; }
 }
