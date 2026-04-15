@@ -21,14 +21,22 @@ public class FileStorageService {
 
     @Autowired
     public FileStorageService() {
-        this.fileStorageLocation = Paths.get("uploads/images")
-                .toAbsolutePath().normalize();
+        // ✅ Utiliser le chemin absolu correct
+        String uploadDir = System.getenv("FILE_UPLOAD_DIR") != null
+                ? System.getenv("FILE_UPLOAD_DIR")
+                : "/app/uploads/images";
+
+        this.fileStorageLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
 
         try {
-            Files.createDirectories(this.fileStorageLocation);
-            System.out.println("📁 Répertoire créé: " + this.fileStorageLocation);
-        } catch (IOException ex) {
-            throw new RuntimeException("Impossible de créer le répertoire.", ex);
+            if (!Files.exists(this.fileStorageLocation)) {
+                Files.createDirectories(this.fileStorageLocation);
+                System.out.println("📁 Répertoire créé: " + this.fileStorageLocation);
+            } else {
+                System.out.println("📁 Répertoire existant: " + this.fileStorageLocation);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Impossible de créer le répertoire: " + this.fileStorageLocation, e);
         }
     }
 
