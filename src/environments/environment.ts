@@ -6,7 +6,8 @@ export const environment = {
   production: false,
   
   // URL de votre API backend
-  apiUrl: 'http://localhost:8080/api',
+  //apiUrl: 'http://localhost:8080/api',
+  apiUrl: '/api',
   
   // Nom de l'application
   appName: 'MaBoutique - Développement',

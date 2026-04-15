@@ -23,6 +23,8 @@ FROM nginx:stable-alpine
 # Copier les fichiers compilés
 COPY --from=builder /app/dist/site-e-commerce /usr/share/nginx/html
 
+# Copier la configuration Nginx personnalisée
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Exposer le port 80
 EXPOSE 80
 

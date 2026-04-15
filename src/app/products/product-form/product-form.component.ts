@@ -6,6 +6,7 @@ import { CategoryService } from 'src/app/core/services/category.service';
 import { Product } from 'src/app/models/product';
 import { Category } from 'src/app/models/category';
 import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-product-form',
@@ -31,7 +32,7 @@ export class ProductFormComponent implements OnInit {
   hasExistingImage = false;
   existingImageName: string | null = null;
 
-  private apiUrl = 'http://localhost:8080/api/products';
+  private apiUrl = `${environment.apiUrl}/products`;
 
   constructor(
     private fb: FormBuilder,
@@ -154,7 +155,7 @@ getDisplayImageUrl(): string {
     
     // Si c'est un nom de fichier, construire l'URL
     if (!this.currentImageUrl.includes('/') && this.currentImageUrl.includes('.')) {
-      const fullUrl = `http://localhost:8080/api/products/images/${this.currentImageUrl}`;
+      const fullUrl = `${environment.apiUrl}/products/images/${this.currentImageUrl}`;
       console.log('🔗 URL construite pour formulaire:', fullUrl);
       return fullUrl;
     }
@@ -544,7 +545,7 @@ const productForUpload = {
       } else if (error.message.includes('Network Error') || error.message.includes('0 Unknown Error')) {
         errorMsg = 'Impossible de se connecter au serveur. Vérifiez:\n' +
                   '1. Le backend Spring Boot est démarré\n' +
-                  '2. L\'URL est correcte: http://localhost:8080\n' +
+                  `2. L\'URL est correcte: ${environment.apiUrl}\n` +
                   '3. CORS est configuré';
       } else {
         errorMsg = error.message;

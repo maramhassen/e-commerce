@@ -2,15 +2,23 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { User } from 'src/app/models/user';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
 
-  private apiUrl = 'http://localhost:8080/api/users';
+  private apiUrl = `${environment.apiUrl}/users`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    console.log('🌐 API URL utilisée:', this.apiUrl);
+  }
+
+  register(userData: any) {
+    // ✅ Corrigé : suppression du /users en double
+    return this.http.post(this.apiUrl, userData);
+  }
 
   getAll(): Observable<User[]> {
     return this.http.get<User[]>(this.apiUrl);

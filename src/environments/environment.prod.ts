@@ -5,8 +5,8 @@ export const environment = {
   // Indicateur d'environnement de production
   production: true,
   
-  // URL de votre API backend (remplacez par votre URL de production)
-  apiUrl: 'https://api.maboutique.com/api',
+  // URL de votre API backend 
+  apiUrl: '/api',
   
   // Nom de l'application
   appName: 'MaBoutique',

@@ -3,6 +3,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { environment } from 'src/environments/environment';
 import { ViewEncapsulation } from '@angular/core';
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -105,10 +106,10 @@ export class LoginComponent implements OnInit {
         if (err.message === 'Identifiants incorrects') {
           this.errorMessage = 'Email ou mot de passe incorrect';
         } else if (err.status === 0) {
-          this.errorMessage = 'Impossible de se connecter au serveur. Vérifiez que le backend est démarré sur localhost:8080';
+          this.errorMessage = 'Impossible de se connecter au serveur. Vérifiez votre connexion.';
         } else if (err.status === 404) {
           this.errorMessage = 'Endpoint non trouvé. Vérifiez l\'URL du backend.';
-          this.debugInfo = `URL utilisée: http://localhost:8080/api/users`;
+          this.debugInfo = `URL utilisée: ${environment.apiUrl}/users`;
         } else if (err.status === 401) {
           this.errorMessage = 'Identifiants invalides';
         } else {

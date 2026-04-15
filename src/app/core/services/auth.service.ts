@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, map, catchError, throwError, BehaviorSubject } from 'rxjs';
 import { User } from '../../models/user';
 import { Subject } from 'rxjs';
-
+import { environment } from 'src/environments/environment';
 // Interface pour l'utilisateur stocké (sans motDePasse)
 interface StoredUser {
   id?: number;
@@ -18,7 +18,8 @@ interface StoredUser {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8080/api/users';
+  //private apiUrl = 'http://localhost:8080/api/users';
+  private apiUrl = environment.apiUrl;
   
   private authState = new BehaviorSubject<boolean>(this.isAuthenticated());
   public authState$ = this.authState.asObservable();
@@ -34,7 +35,7 @@ export class AuthService {
 
   // ================ MÉTHODES D'AUTHENTIFICATION ================
 
-  login(email: string, motDePasse: string): Observable<any> {
+  /*login(email: string, motDePasse: string): Observable<any> {
     console.log(`Tentative de login pour: ${email}`);
     
     return this.http.get<User[]>(this.apiUrl).pipe(
@@ -74,9 +75,49 @@ export class AuthService {
         return throwError(() => this.handleError(error));
       })
     );
+  }*/
+  login(email: string, motDePasse: string): Observable<any> {
+    console.log(`Tentative de login pour: ${email}`);
+  
+  // CORRECTION : Ajoutez /users à l'URL
+    return this.http.get<User[]>(`${this.apiUrl}/users`).pipe(  
+      map(users => {
+        console.log(`Nombre d'utilisateurs récupérés: ${users.length}`);
+      
+        const user = users.find(u => 
+          u.email.toLowerCase() === email.toLowerCase() && 
+          u.motDePasse === motDePasse
+        );
+      
+        if (!user) {
+          throw new Error('Identifiants incorrects');
+        }
+      
+        const userWithoutPassword: StoredUser = {
+          id: user.id,
+          nom: user.nom,
+          prenom: user.prenom,
+          email: user.email,
+          role: user.role
+        };
+      
+        const response = {
+          token: this.generateMockToken(user),
+          user: userWithoutPassword
+        };
+      
+        this.setAuthData(response.token, response.user);
+      
+        return response;
+      }),
+      catchError(error => {
+        console.error('Erreur lors du login:', error);
+        return throwError(() => this.handleError(error));
+      })
+    );
   }
 
-  register(userData: User): Observable<any> {
+  /*register(userData: User): Observable<any> {
     console.log('Inscription de nouvel utilisateur:', userData);
     
     const newUser: User = {
@@ -105,6 +146,44 @@ export class AuthService {
         // Stocker les données et mettre à jour l'état
         this.setAuthData(response.token, response.user);
         
+        return response;
+      }),
+      catchError(error => {
+        console.error('Erreur lors de l\'inscription:', error);
+        return throwError(() => this.handleError(error));
+      })
+    );
+  }*/
+  register(userData: User): Observable<any> {
+    console.log('Inscription de nouvel utilisateur:', userData);
+  
+    const newUser: User = {
+      ...userData,
+      role: userData.role || 'CLIENT'
+    };
+  
+  // CORRECTION : Ajoutez /users à l'URL
+    return this.http.post<User>(`${this.apiUrl}/users`, newUser).pipe(  // ← Changement ici
+      map((user: User) => {
+        console.log('Utilisateur créé avec succès:', user);
+      
+      // Créer un objet utilisateur sans motDePasse
+        const userWithoutPassword: StoredUser = {
+          id: user.id,
+          nom: user.nom,
+          prenom: user.prenom,
+          email: user.email,
+          role: user.role
+        };
+      
+        const response = {
+          token: this.generateMockToken(user),
+          user: userWithoutPassword
+        };
+      
+      // Stocker les données et mettre à jour l'état
+        this.setAuthData(response.token, response.user);
+      
         return response;
       }),
       catchError(error => {
@@ -219,7 +298,7 @@ export class AuthService {
 
   testBackendConnection(): Observable<any> {
     console.log('Test de connexion au backend...');
-    return this.http.get(this.apiUrl).pipe(
+    return this.http.get(`${this.apiUrl}/users`).pipe(
       map(() => ({ 
         status: 'success', 
         message: 'Backend accessible et répond correctement' 
@@ -236,7 +315,7 @@ export class AuthService {
 
   getAllUsersForDebug(): Observable<User[]> {
     console.log('Récupération de tous les utilisateurs pour débogage');
-    return this.http.get<User[]>(this.apiUrl).pipe(
+        return this.http.get<User[]>(`${this.apiUrl}/users`).pipe(
       catchError(error => {
         console.error('Erreur:', error);
         return throwError(() => error);
@@ -263,7 +342,7 @@ export class AuthService {
     if (error.status === 0) {
       return {
         status: 0,
-        message: 'Impossible de se connecter au serveur. Vérifiez que le backend est démarré sur localhost:8080'
+        message: 'Impossible de se connecter au serveur. Vérifiez votre connexion.'
       };
     } else if (error.status === 404) {
       return {

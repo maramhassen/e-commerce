@@ -4,13 +4,13 @@ import { Observable, throwError } from 'rxjs';
 import { catchError, tap, map } from 'rxjs/operators';
 import { Order } from '../../models/order';
 import { Statut } from '../../models/statut';
-import { environment } from '../../../environments/environment';
-
+import { environment } from 'src/environments/environment';
 @Injectable({
   providedIn: 'root'
 })
 export class OrderService {
   private apiUrl = `${environment.apiUrl}/orders`;
+
   
   private httpOptions = {
     headers: new HttpHeaders({

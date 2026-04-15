@@ -4,6 +4,8 @@ import { ProductService } from '../../core/services/product.service';
 import { CartService } from '../../core/services/cart.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Product } from '../../models/product';
+import { environment } from 'src/environments/environment';
+
 
 @Component({
   selector: 'app-product-detail',
@@ -249,7 +251,7 @@ get productImage(): string {
   testDirectDelete(): void {
     if (!this.product?.id) return;
 
-    const url = `http://localhost:8080/api/products/${this.product.id}`;
+    const url = `${environment.apiUrl}/products/${this.product.id}`;
     console.log('🔍 Test DELETE direct vers:', url);
     
     fetch(url, {

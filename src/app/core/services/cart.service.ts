@@ -16,6 +16,7 @@ import { AuthService } from './auth.service';
 export class CartService {
   private cartUrl = `${environment.apiUrl}/carts`;
   private cartItemUrl = `${environment.apiUrl}/cart-items`;
+  private apiUrl = `${environment.apiUrl}/carts`;
   
   private cartUpdatedSource = new BehaviorSubject<void>(undefined);
   cartUpdated$ = this.cartUpdatedSource.asObservable();

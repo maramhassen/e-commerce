@@ -8,6 +8,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-cart',
@@ -358,7 +359,7 @@ export class CartComponent implements OnInit, OnDestroy {
     }
 
     const imageUrl = item.product.imageUrl;
-    const baseUrl = 'http://localhost:8080';
+    const baseUrl = environment.apiUrl.replace('/api', '');
     
     if (imageUrl.startsWith('http')) {
       return imageUrl;

@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { UserService } from '../../core/services/user.service';
 import { AuthService } from '../../core/services/auth.service';
 import { User } from 'src/app/models/user';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-user-list',
@@ -65,7 +66,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
 
   testDirectApiCall() {
     console.log('=== TEST API DIRECT AVEC FETCH ===');
-    fetch('http://localhost:8080/api/users')
+    fetch(`${environment.apiUrl}/users`)
       .then(response => {
         console.log('Fetch Response Status:', response.status, response.statusText);
         console.log('Fetch Response Headers:', response.headers);
@@ -93,7 +94,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
     this.errorMessage = '';
     
     console.log('=== DÉBUT CHARGEMENT UTILISATEURS ===');
-    console.log('URL utilisée:', 'http://localhost:8080/api/users');
+    console.log('URL utilisée:', `${environment.apiUrl}/users`);
     
     // D'abord tester la connexion au backend
     this.authService.testBackendConnection().subscribe({
@@ -198,8 +199,8 @@ export class UserListComponent implements OnInit, AfterViewInit {
     html += '<ul>';
     html += '<li>Le serveur Spring Boot est démarré</li>';
     html += '<li>Il écoute sur le port 8080</li>';
-    html += '<li>L\'URL <code>http://localhost:8080</code> est accessible</li>';
-    html += '<li>Le CORS est configuré pour autoriser localhost:4200</li>';
+    html += `<li>L\'URL <code>${environment.apiUrl}</code> est accessible</li>`;
+    html += '<li>Le CORS est configuré pour autoriser votre domaine</li>';
     html += '</ul>';
     html += '<p class="mb-0"><strong>Message d\'erreur:</strong> ' + (error.message || 'Inconnu') + '</p>';
     html += '</div>';
@@ -313,7 +314,7 @@ Utilisateur: ${this.currentUser?.prenom} ${this.currentUser?.nom}
 Email: ${this.currentUser?.email}
 Rôle: ${this.currentUser?.role}
 Nombre d'utilisateurs: ${this.users.length}
-URL API: http://localhost:8080/api/users
+URL API: ${environment.apiUrl}/users
 Token présent: ${!!this.authService.getToken()}
 ================
     `;

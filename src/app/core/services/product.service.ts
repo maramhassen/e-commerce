@@ -4,6 +4,7 @@ import { Observable, throwError, of, forkJoin } from 'rxjs';
 import { catchError, map, tap, switchMap, shareReplay } from 'rxjs/operators';
 import { Product } from '../../models/product';
 import { Category } from '../../models/category';
+import { environment } from 'src/environments/environment';
 
 export interface UploadResponse {
   fileName: string;
@@ -17,12 +18,17 @@ export interface UploadResponse {
   providedIn: 'root'
 })
 export class ProductService {
-  private apiUrl = 'http://localhost:8080/api/products';
-  private categoryApiUrl = 'http://localhost:8080/api/categories';
+  //private apiUrl = 'http://localhost:8080/api/products';
+  //private categoryApiUrl = 'http://localhost:8080/api/categories';
+  private apiUrl = `${environment.apiUrl}/products`;  
+  private categoryApiUrl = `${environment.apiUrl}/categories`
   
   private categoriesCache$: Observable<Category[]> | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    console.log('🌐 ProductService API URL:', this.apiUrl);
+    console.log('🌐 CategoryService API URL:', this.categoryApiUrl);
+  }
   
   // ==================== MÉTHODE POUR OBTENIR L'URL DE L'IMAGE ====================
 // Dans product.service.ts
@@ -46,7 +52,7 @@ getImageUrl(imageUrl?: string | null): string {
   // IMPORTANT: Utiliser le nouvel endpoint
   // Si c'est un nom de fichier UUID (ex: "abc123.jpg")
   if (!imageUrl.includes('/') && imageUrl.includes('.') && imageUrl.length > 20) {
-    const fullUrl = `http://localhost:8080/api/products/images/${imageUrl}`;
+    const fullUrl = `${environment.apiUrl}/products/images/${imageUrl}`;
     console.log('🔗 URL construite:', fullUrl);
     return fullUrl;
   }
