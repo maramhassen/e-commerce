@@ -1,0 +1,192 @@
+trigger:
+  branches:
+    include:
+      - backend
+      - front
+
+variables:
+  BACKEND_IMAGE: 'maramhassen/ecommerce-backend'
+  FRONTEND_IMAGE: 'maramhassen/ecommerce-frontend'
+  IMAGE_TAG: '$(Build.BuildId)'
+  SONAR_HOST_URL: 'http://102.141.206.39:9000'
+  K8S_NAMESPACE: 'ecommerce'
+  DOCKER_REGISTRY: 'nexus.rfc.com'  # À adapter avec votre URL Nexus
+
+pool:
+  name: 'Default'
+
+stages:
+
+# ══════════════════════════════════════════
+# STAGE 1 : BUILD BACKEND
+# ══════════════════════════════════════════
+- stage: BuildBackend
+  displayName: '1 - Build Backend Spring Boot'
+  jobs:
+  - job: BackendBuild
+    displayName: 'Maven build'
+    steps:
+    - checkout: none
+    
+    - script: |
+        rm -rf backend-code
+        git clone -b backend https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git backend-code
+        cd backend-code
+        mvn clean package -DskipTests
+      displayName: 'Clone & Maven build'
+    
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'backend-code/target'
+        ArtifactName: 'backend-jar'
+
+# ══════════════════════════════════════════
+# STAGE 2 : BUILD FRONTEND
+# ══════════════════════════════════════════
+- stage: BuildFrontend
+  displayName: '2 - Build Frontend Angular'
+  dependsOn: []
+  jobs:
+  - job: FrontendBuild
+    displayName: 'npm & Angular build'
+    steps:
+    - checkout: none
+    
+    - script: |
+        git clone -b front https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git frontend-code
+        cd frontend-code
+        npm install
+        npm run build -- --configuration production
+      displayName: 'Clone & npm build'
+    
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: 'frontend-code/dist'
+        ArtifactName: 'frontend-dist'
+
+# ══════════════════════════════════════════
+# STAGE 3 : SONARQUBE ANALYSIS
+# ══════════════════════════════════════════
+- stage: CodeQuality
+  displayName: '3 - SonarQube Analysis'
+  dependsOn:
+    - BuildBackend
+    - BuildFrontend
+  jobs:
+  - job: SonarBackend
+    displayName: 'SonarQube Backend'
+    steps:
+    - checkout: none
+    
+    - script: |
+        git clone -b backend https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git backend-code
+        cd backend-code
+        mvn sonar:sonar -Dsonar.host.url=$(SONAR_HOST_URL) -Dsonar.login=$(SONAR_TOKEN)
+      displayName: 'SonarQube scan'
+
+# ══════════════════════════════════════════
+# STAGE 4 : BUILD & PUSH DOCKER IMAGES
+# ══════════════════════════════════════════
+- stage: DockerBuild
+  displayName: '4 - Build & Push Docker Images'
+  dependsOn:
+    - BuildBackend
+    - BuildFrontend
+  jobs:
+  - job: DockerBackend
+    displayName: 'Backend Docker image'
+    steps:
+    - checkout: none
+    
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        artifactName: 'backend-jar'
+        downloadPath: '$(System.ArtifactsDirectory)'
+    
+    - script: |
+        mkdir -p backend-docker
+        cp $(System.ArtifactsDirectory)/backend-jar/*.jar backend-docker/app.jar
+        cp backend-code/Dockerfile backend-docker/
+        cd backend-docker
+        docker build -t $(BACKEND_IMAGE):$(IMAGE_TAG) .
+        docker tag $(BACKEND_IMAGE):$(IMAGE_TAG) $(DOCKER_REGISTRY)/$(BACKEND_IMAGE):$(IMAGE_TAG)
+        docker push $(DOCKER_REGISTRY)/$(BACKEND_IMAGE):$(IMAGE_TAG)
+      displayName: 'Build & Push Backend image'
+  
+  - job: DockerFrontend
+    displayName: 'Frontend Docker image'
+    steps:
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        artifactName: 'frontend-dist'
+        downloadPath: '$(System.ArtifactsDirectory)'
+    
+    - script: |
+        mkdir -p frontend-docker
+        cp -r $(System.ArtifactsDirectory)/frontend-dist/* frontend-docker/
+        cp frontend-code/Dockerfile frontend-docker/
+        cp frontend-code/nginx.conf frontend-docker/
+        cd frontend-docker
+        docker build -t $(FRONTEND_IMAGE):$(IMAGE_TAG) .
+        docker push $(FRONTEND_IMAGE):$(IMAGE_TAG)
+      displayName: 'Build & Push Frontend image'
+
+# ══════════════════════════════════════════
+# STAGE 5 : CLAIR SECURITY SCAN
+# ══════════════════════════════════════════
+- stage: SecurityScan
+  displayName: '5 - Clair Security Scan'
+  dependsOn:
+    - DockerBuild
+  jobs:
+  - job: ClairScan
+    displayName: 'Scan images with Clair'
+    steps:
+    - script: |
+        docker run -d --name clair-db arminc/clair-db:latest
+        docker run -d --name clair --link clair-db:postgres arminc/clair-local-scan:latest
+        sleep 30
+        docker run --rm --link clair:clair -v /var/run/docker.sock:/var/run/docker.sock \
+          arminc/clair-local-scan:latest \
+          --report clair-report.json $(FRONTEND_IMAGE):$(IMAGE_TAG)
+        cat clair-report.json || echo "Scan terminé"
+      displayName: 'Clair vulnerability scan'
+
+# ══════════════════════════════════════════
+# STAGE 6 : DEPLOY TO K8S (seulement sur tag)
+# ══════════════════════════════════════════
+- stage: Deploy
+  displayName: '6 - Déploiement sur AKS Engine'
+  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
+  dependsOn:
+    - SecurityScan
+  jobs:
+  - deployment: K8sDeploy
+    displayName: 'Deploy to Azure Stack Hub K8s'
+    environment: 'production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          
+          - script: |
+              sed -i "s|maramhassen/ecommerce-backend:latest|$(BACKEND_IMAGE):$(IMAGE_TAG)|g" k8s-manifests/backend-deployment.yaml
+              sed -i "s|maramhassen/ecommerce-frontend:latest|$(FRONTEND_IMAGE):$(IMAGE_TAG)|g" k8s-manifests/frontend-deployment.yaml
+            displayName: 'Update image tags'
+          
+          - task: Kubernetes@1
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceEndpoint: 'azure-stack-k8s'
+              namespace: '$(K8S_NAMESPACE)'
+              command: 'apply'
+              useConfigurationFile: true
+              configuration: 'k8s-manifests'
+            displayName: 'Apply Kubernetes manifests'
+          
+          - script: |
+              kubectl rollout status deployment/backend -n $(K8S_NAMESPACE)
+              kubectl rollout status deployment/frontend -n $(K8S_NAMESPACE)
+              kubectl get pods -n $(K8S_NAMESPACE)
+            displayName: 'Verify deployment'
