@@ -66,9 +66,9 @@ stages:
     steps:
     - checkout: none
 
-    - task: NodeTool@0
+    - task: UseNode@1
       inputs:
-        versionSpec: '18.x'
+        version: '18.x'
       displayName: 'Install Node.js 18'
 
     - script: |
