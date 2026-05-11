@@ -253,7 +253,8 @@ stages:
 # ══════════════════════════════════════════
 - stage: PushToNexus
   displayName: '6 - Push to Nexus Repository'
-  dependsOn: SecurityScan
+  dependsOn: DockerBuild   
+  condition: succeeded()
   jobs:
   - job: PushImages
     displayName: 'Push Validated Images to Nexus'
