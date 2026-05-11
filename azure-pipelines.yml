@@ -21,6 +21,16 @@ pool:
   name: 'Default'
 
 stages:
+# ══════════════════════════════════════════
+# STAGE 0 : TEST ( pour debug)
+# ══════════════════════════════════════════
+- stage: Test
+  displayName: '0 - Test Pipeline'
+  jobs:
+    - job: TestJob
+      steps:
+        - script: echo "Hello World - Pipeline fonctionne !"
+          displayName: 'Test simple'
 
 # ══════════════════════════════════════════
 # STAGE 1 : BUILD BACKEND
