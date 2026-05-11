@@ -19,6 +19,5 @@ ENV SERVER_PORT=8080
 ENV FILE_UPLOAD_DIR=/app/uploads/images
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
-  CMD wget -q --spider http://localhost:8080/actuator/health || ex
-  it 1
+  CMD wget -q --spider http://localhost:8080/actuator/health || exit 1
 ENTRYPOINT ["/app/start.sh"]
