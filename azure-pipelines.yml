@@ -213,55 +213,39 @@ stages:
 # STAGE 5 : SECURITY SCAN (TRIVY)
 # ═══════════════════════════════════════════════════════════════════════
 - stage: SecurityScan
-  displayName: '5 - 🔒 Security Scan (Trivy)'
+  displayName: '5 - Security Scan Trivy'
   dependsOn: DockerBuild
   jobs:
   - job: TrivyScan
     displayName: 'Trivy Vulnerability Scan'
     steps:
-    - checkout: none
+    # ⚠️ Important : Récupérer le code pour avoir accès aux images
+    - checkout: self
+      displayName: 'Checkout code'
 
-    # 1. Configuration de Docker pour autoriser Nexus (HTTP)
+    # Vérifier que les images existent localement
     - script: |
-        echo "⚙️ Configuration de Docker pour autoriser Nexus (insecure-registries)..."
-        sudo mkdir -p /etc/docker
-        echo '{
-          "insecure-registries": ["102.141.206.39:8082"]
-        }' | sudo tee /etc/docker/daemon.json
-        sudo systemctl restart docker
-      displayName: 'Configure Docker for Nexus'
+        echo "=== IMAGES DISPONIBLES ==="
+        docker images | grep ecommerce
+      displayName: 'Check Docker images'
 
-    # 2. Installation de Trivy
+    # Installation de Trivy
     - script: |
-        echo "📦 Installation de Trivy..."
-        if ! command -v trivy &> /dev/null; then
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
-        fi
-        echo "✅ Trivy version : $(trivy --version)"
+        echo "=== INSTALLATION TRIVY ==="
+        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
+        trivy --version
       displayName: 'Install Trivy'
 
-    # 3. Scan de l'image Backend
+    # Scan Backend
     - script: |
-        echo "🔍 Scan de l'image BACKEND (maramhassen/ecommerce-backend:$(IMAGE_TAG))..."
-        trivy image \
-          --severity HIGH,CRITICAL \
-          --format table \
-          --exit-code 1 \
-          maramhassen/ecommerce-backend:$(IMAGE_TAG) \
-          || echo "❌ Des vulnérabilités CRITICAL ou HIGH ont été détectées dans le backend !"
-        echo ""
+        echo "=== SCAN BACKEND ==="
+        sudo trivy image --severity HIGH,CRITICAL --format table maramhassen/ecommerce-backend:$(IMAGE_TAG) || true
       displayName: 'Trivy Scan (Backend)'
 
-    # 4. Scan de l'image Frontend
+    # Scan Frontend
     - script: |
-        echo "🔍 Scan de l'image FRONTEND (maramhassen/ecommerce-frontend:$(IMAGE_TAG))..."
-        trivy image \
-          --severity HIGH,CRITICAL \
-          --format table \
-          --exit-code 1 \
-          maramhassen/ecommerce-frontend:$(IMAGE_TAG) \
-          || echo "❌ Des vulnérabilités CRITICAL ou HIGH ont été détectées dans le frontend !"
-        echo "✅ Scan Trivy terminé."
+        echo "=== SCAN FRONTEND ==="
+        sudo trivy image --severity HIGH,CRITICAL --format table maramhassen/ecommerce-frontend:$(IMAGE_TAG) || true
       displayName: 'Trivy Scan (Frontend)'
 
 # ══════════════════════════════════════════
