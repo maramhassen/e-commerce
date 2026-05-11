@@ -243,32 +243,33 @@ stages:
   - job: PushImages
     displayName: 'Push Validated Images to Nexus'
     steps:
-    - checkout: none
-
     - script: |
-        echo "$(NEXUS_PASSWORD)" | docker login \
-          $(NEXUS_REGISTRY) \
+        echo "=== LOGIN TO NEXUS ==="
+        echo $(NEXUS_PASSWORD) | docker login \
+          102.141.206.39:8082 \
           -u $(NEXUS_USERNAME) \
           --password-stdin
 
-        # Tag pour Nexus
+        echo "=== TAGGING IMAGES ==="
         docker tag $(BACKEND_IMAGE):$(IMAGE_TAG) \
-          $(NEXUS_REGISTRY)/ecommerce-backend:$(IMAGE_TAG)
+          102.141.206.39:8082/ecommerce-backend:$(IMAGE_TAG)
         docker tag $(BACKEND_IMAGE):latest \
-          $(NEXUS_REGISTRY)/ecommerce-backend:latest
+          102.141.206.39:8082/ecommerce-backend:latest
 
         docker tag $(FRONTEND_IMAGE):$(IMAGE_TAG) \
-          $(NEXUS_REGISTRY)/ecommerce-frontend:$(IMAGE_TAG)
+          102.141.206.39:8082/ecommerce-frontend:$(IMAGE_TAG)
         docker tag $(FRONTEND_IMAGE):latest \
-          $(NEXUS_REGISTRY)/ecommerce-frontend:latest
+          102.141.206.39:8082/ecommerce-frontend:latest
 
-        # Push vers Nexus
-        docker push $(NEXUS_REGISTRY)/ecommerce-backend:$(IMAGE_TAG)
-        docker push $(NEXUS_REGISTRY)/ecommerce-backend:latest
-        docker push $(NEXUS_REGISTRY)/ecommerce-frontend:$(IMAGE_TAG)
-        docker push $(NEXUS_REGISTRY)/ecommerce-frontend:latest
+        echo "=== PUSHING BACKEND ==="
+        docker push 102.141.206.39:8082/ecommerce-backend:$(IMAGE_TAG)
+        docker push 102.141.206.39:8082/ecommerce-backend:latest
 
-        docker logout $(NEXUS_REGISTRY)
+        echo "=== PUSHING FRONTEND ==="
+        docker push 102.141.206.39:8082/ecommerce-frontend:$(IMAGE_TAG)
+        docker push 102.141.206.39:8082/ecommerce-frontend:latest
+
+        docker logout 102.141.206.39:8082
         echo "✅ Images poussées vers Nexus"
       displayName: 'Push to Nexus'
 
