@@ -211,7 +211,7 @@ stages:
     steps:
     - script: |
         echo "=== INSTALLATION TRIVY ==="
-        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
         
         echo "=== SCAN BACKEND ==="
         /usr/local/bin/trivy image --severity HIGH,CRITICAL --exit-code 0 maramhassen/ecommerce-backend:latest
