@@ -305,14 +305,11 @@ stages:
           steps:
           - checkout: none
 
-          - task: DownloadSecureFile@1
-            name: kubeconfig
-            inputs:
-              secureFile: 'kubeconfig.dc2.json'
-            displayName: 'Download kubeconfig'
-
           - script: |
-              export KUBECONFIG=$(kubeconfig.secureFilePath)
+              export KUBECONFIG=/home/adminuser/k8s-output/kubeconfig/kubeconfig.dc2.json
+
+              echo "=== VÉRIFICATION CONNEXION ==="
+              kubectl get nodes
 
               echo "=== MISE À JOUR DES IMAGES ==="
               kubectl set image deployment/backend \
