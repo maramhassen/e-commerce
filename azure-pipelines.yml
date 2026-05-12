@@ -14,24 +14,17 @@ variables:
     value: 'latest'
   - name: K8S_NAMESPACE
     value: 'ecommerce'
+  # Registre interne Nexus (stockage)
   - name: NEXUS_REGISTRY
     value: '102.141.206.39:8082'
+  # Registre public Docker Hub (distribution)
+  - name: DOCKER_REGISTRY
+    value: 'docker.io'
 
 pool:
   name: 'Default'
 
 stages:
-# ══════════════════════════════════════════
-# STAGE 0 : TEST ( pour debug)
-# ══════════════════════════════════════════
-- stage: Test
-  displayName: '0 - Test Pipeline'
-  jobs:
-    - job: TestJob
-      steps:
-        - script: echo "Hello World - Pipeline fonctionne !"
-          displayName: 'Test simple'
-
 # ══════════════════════════════════════════
 # STAGE 1 : BUILD BACKEND
 # ══════════════════════════════════════════
@@ -249,52 +242,55 @@ stages:
       displayName: 'Trivy Scan (Frontend)'
 
 # ══════════════════════════════════════════
-# STAGE 6 : PUSH TO NEXUS
+# STAGE 6 : PUSH TO NEXUS & DOCKER HUB
 # ══════════════════════════════════════════
-- stage: PushToNexus
-  displayName: '6 - Push to Nexus Repository'
-  dependsOn: DockerBuild   
-  condition: succeeded()
+- stage: PushImages
+  displayName: '6 - Push to Nexus & Docker Hub'
+  dependsOn: SecurityScan
   jobs:
-  - job: PushImages
-    displayName: 'Push Validated Images to Nexus'
+  - job: PushAllImages
+    displayName: 'Push images to both registries'
     steps:
     - script: |
         echo "=== LOGIN TO NEXUS ==="
         echo $(NEXUS_PASSWORD) | docker login \
-          102.141.206.39:8082 \
+          $(NEXUS_REGISTRY) \
           -u $(NEXUS_USERNAME) \
           --password-stdin
 
-        echo "=== TAGGING IMAGES ==="
+        echo "=== LOGIN TO DOCKER HUB ==="
+        echo $(DOCKER_PASSWORD) | docker login \
+          -u $(DOCKER_USERNAME) \
+          --password-stdin
+
+        echo "=== PUSH BACKEND TO NEXUS ==="
         docker tag $(BACKEND_IMAGE):$(IMAGE_TAG) \
-          102.141.206.39:8082/ecommerce-backend:$(IMAGE_TAG)
-        docker tag $(BACKEND_IMAGE):latest \
-          102.141.206.39:8082/ecommerce-backend:latest
+          $(NEXUS_REGISTRY)/ecommerce-backend:$(IMAGE_TAG)
+        docker push $(NEXUS_REGISTRY)/ecommerce-backend:$(IMAGE_TAG)
 
+        echo "=== PUSH FRONTEND TO NEXUS ==="
         docker tag $(FRONTEND_IMAGE):$(IMAGE_TAG) \
-          102.141.206.39:8082/ecommerce-frontend:$(IMAGE_TAG)
-        docker tag $(FRONTEND_IMAGE):latest \
-          102.141.206.39:8082/ecommerce-frontend:latest
+          $(NEXUS_REGISTRY)/ecommerce-frontend:$(IMAGE_TAG)
+        docker push $(NEXUS_REGISTRY)/ecommerce-frontend:$(IMAGE_TAG)
 
-        echo "=== PUSHING BACKEND ==="
-        docker push 102.141.206.39:8082/ecommerce-backend:$(IMAGE_TAG)
-        docker push 102.141.206.39:8082/ecommerce-backend:latest
+        echo "=== PUSH BACKEND TO DOCKER HUB ==="
+        docker push $(BACKEND_IMAGE):$(IMAGE_TAG)
 
-        echo "=== PUSHING FRONTEND ==="
-        docker push 102.141.206.39:8082/ecommerce-frontend:$(IMAGE_TAG)
-        docker push 102.141.206.39:8082/ecommerce-frontend:latest
+        echo "=== PUSH FRONTEND TO DOCKER HUB ==="
+        docker push $(FRONTEND_IMAGE):$(IMAGE_TAG)
 
-        docker logout 102.141.206.39:8082
-        echo "✅ Images poussées vers Nexus"
-      displayName: 'Push to Nexus'
+        docker logout $(NEXUS_REGISTRY)
+        docker logout
+
+        echo "✅ Images poussées vers Nexus et Docker Hub"
+      displayName: 'Push to both registries'
 
 # ══════════════════════════════════════════
 # STAGE 7 : DEPLOY TO KUBERNETES
 # ══════════════════════════════════════════
 - stage: Deploy
   displayName: '7 - Deploy to AKS Engine'
-  dependsOn: PushToNexus
+  dependsOn: PushImages
   jobs:
   - deployment: K8sDeploy
     displayName: 'Deploy to Azure Stack Hub Kubernetes'
@@ -311,20 +307,13 @@ stages:
               echo "=== VÉRIFICATION CONNEXION ==="
               kubectl get nodes
 
-              echo "=== CRÉATION DU SECRET DOCKER REGISTRY ==="
-              kubectl create secret docker-registry nexus-secret \
-                --docker-server=102.141.206.39:8082 \
-                --docker-username=admin \
-                --docker-password='884de71e-5065-4618-a64d-87261ea0f995' \
-                -n $(K8S_NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-
-              echo "=== MISE À JOUR DES IMAGES ==="
+              echo "=== MISE À JOUR DES IMAGES (Docker Hub) ==="
               kubectl set image deployment/backend \
-                backend=$(NEXUS_REGISTRY)/ecommerce-backend:$(IMAGE_TAG) \
+                backend=$(BACKEND_IMAGE):$(IMAGE_TAG) \
                 -n $(K8S_NAMESPACE)
 
               kubectl set image deployment/frontend \
-                frontend=$(NEXUS_REGISTRY)/ecommerce-frontend:$(IMAGE_TAG) \
+                frontend=$(FRONTEND_IMAGE):$(IMAGE_TAG) \
                 -n $(K8S_NAMESPACE)
 
               echo "=== ATTENTE DU DÉPLOIEMENT ==="
