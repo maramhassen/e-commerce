@@ -11,7 +11,7 @@ variables:
   - name: FRONTEND_IMAGE
     value: 'maramhassen/ecommerce-frontend'
   - name: IMAGE_TAG
-    value: '$(Build.BuildId)'
+    value: 'latest'
   - name: K8S_NAMESPACE
     value: 'ecommerce'
   - name: NEXUS_REGISTRY
@@ -310,6 +310,13 @@ stages:
 
               echo "=== VÉRIFICATION CONNEXION ==="
               kubectl get nodes
+
+              echo "=== CRÉATION DU SECRET DOCKER REGISTRY ==="
+              kubectl create secret docker-registry nexus-secret \
+                --docker-server=102.141.206.39:8082 \
+                --docker-username=admin \
+                --docker-password='884de71e-5065-4618-a64d-87261ea0f995' \
+                -n $(K8S_NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
 
               echo "=== MISE À JOUR DES IMAGES ==="
               kubectl set image deployment/backend \
