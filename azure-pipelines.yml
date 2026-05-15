@@ -3,6 +3,10 @@ trigger:
     include:
       - backend
       - front
+      - azure-pipelines
+  paths:
+    exclude:
+      - README.md
 
 variables:
   - group: PFE-secrets
@@ -26,10 +30,35 @@ pool:
 
 stages:
 # ══════════════════════════════════════════
+# STAGE 0 : VÉRIFICATION DU COMMIT
+# ══════════════════════════════════════════
+- stage: CheckCommit
+  displayName: '0 - Vérification du message de commit'
+  jobs:
+  - job: CheckMessage
+    displayName: 'Vérifier que le commit contient all ready'
+    steps:
+    - checkout: none
+
+    - script: |
+        COMMIT_MSG="$(Build.SourceVersionMessage)"
+        echo "Message du commit : $COMMIT_MSG"
+
+        if echo "$COMMIT_MSG" | grep -i "all ready"; then
+          echo "✅ Commit valide - pipeline autorisé"
+        else
+          echo "⛔ Ce commit ne contient pas 'all ready'"
+          echo "Pipeline annulé automatiquement"
+          exit 1
+        fi
+      displayName: 'Vérifier le message du commit'
+
+# ══════════════════════════════════════════
 # STAGE 1 : BUILD BACKEND
 # ══════════════════════════════════════════
 - stage: BuildBackend
   displayName: '1 - Build Backend Spring Boot'
+  dependsOn: CheckCommit
   jobs:
   - job: BackendBuild
     displayName: 'Maven build'
@@ -62,7 +91,7 @@ stages:
 # ══════════════════════════════════════════
 - stage: BuildFrontend
   displayName: '2 - Build Frontend Angular'
-  dependsOn: []
+  dependsOn: CheckCommit
   jobs:
   - job: FrontendBuild
     displayName: 'npm & Angular build'
