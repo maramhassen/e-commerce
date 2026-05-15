@@ -9,6 +9,7 @@ trigger:
       - README.md
 pr: none
 
+
 variables:
   - group: PFE-secrets
   - name: BACKEND_IMAGE
