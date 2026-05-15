@@ -7,6 +7,10 @@ trigger:
   paths:
     exclude:
       - README.md
+pr:
+  branches:
+    include:
+      - azure-pipelines
 
 variables:
   - group: PFE-secrets
