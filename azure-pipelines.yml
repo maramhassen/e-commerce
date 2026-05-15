@@ -91,7 +91,7 @@ stages:
 # ══════════════════════════════════════════
 - stage: BuildFrontend
   displayName: '2 - Build Frontend Angular'
-  dependsOn: CheckCommit
+#  dependsOn: CheckCommit
   jobs:
   - job: FrontendBuild
     displayName: 'npm & Angular build'
