@@ -31,333 +31,368 @@ pool:
   name: 'Default'
 
 stages:
-# ══════════════════════════════════════════
-# STAGE 0 : VÉRIFICATION DU COMMIT
-# ══════════════════════════════════════════
-- stage: CheckCommit
-  displayName: '0 - Vérification du message de commit'
-  jobs:
-  - job: CheckMessage
-    displayName: 'Vérifier que le commit contient all ready'
-    steps:
-    - checkout: none
-
-    - script: |
-        COMMIT_MSG="$(Build.SourceVersionMessage)"
-        echo "Message du commit : $COMMIT_MSG"
-
-        if echo "$COMMIT_MSG" | grep -i "all ready"; then
-          echo "✅ Commit valide - pipeline autorisé"
-        else
-          echo "⛔ Ce commit ne contient pas 'all ready'"
-          echo "Pipeline annulé automatiquement"
-          exit 1
-        fi
-      displayName: 'Vérifier le message du commit'
-
-# ══════════════════════════════════════════
-# STAGE 1 : BUILD BACKEND
-# ══════════════════════════════════════════
-- stage: BuildBackend
-  displayName: '1 - Build Backend Spring Boot'
-  dependsOn: CheckCommit
-  jobs:
-  - job: BackendBuild
-    displayName: 'Maven build'
-    steps:
-    - checkout: none
-
-    - script: |
-        rm -rf backend-code
-        git clone -b backend \
-          https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
-          backend-code
-        cd backend-code
-        if [ ! -f "pom.xml" ]; then
-          echo "❌ pom.xml non trouvé"
-          exit 1
-        fi
-        mvn clean package -DskipTests
-        echo "✅ Build backend réussi"
-        ls -la target/
-      displayName: 'Clone & Maven Build'
-
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: 'backend-code/target'
-        ArtifactName: 'backend-jar'
-      displayName: 'Publish backend artifacts'
-
-# ══════════════════════════════════════════
-# STAGE 2 : BUILD FRONTEND
-# ══════════════════════════════════════════
-- stage: BuildFrontend
-  displayName: '2 - Build Frontend Angular'
-#  dependsOn: CheckCommit
-  jobs:
-  - job: FrontendBuild
-    displayName: 'npm & Angular build'
-    steps:
-    - checkout: none
-
-    - task: UseNode@1
-      inputs:
-        version: '18.x'
-      displayName: 'Install Node.js 18'
-
-    - script: |
-        rm -rf frontend-code
-        git clone -b front \
-          https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
-          frontend-code
-        cd frontend-code
-        if [ ! -f "package.json" ]; then
-          echo "❌ package.json non trouvé"
-          exit 1
-        fi
-        npm install
-        npm run build -- --configuration production
-        echo "✅ Build frontend réussi"
-        ls -la dist/
-      displayName: 'Clone & npm Build'
-
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: 'frontend-code/dist'
-        ArtifactName: 'frontend-dist'
-      displayName: 'Publish frontend artifacts'
-
-# ══════════════════════════════════════════
-# STAGE 3 : SONARQUBE ANALYSIS
-# ══════════════════════════════════════════
-- stage: CodeQuality
-  displayName: '3 - SonarQube Analysis'
-  dependsOn:
-    - BuildBackend
-    - BuildFrontend
-  jobs:
-
-  - job: SonarBackend
-    displayName: 'SonarQube Backend'
-    steps:
-    - checkout: none
-
-    - script: |
-        rm -rf backend-code
-        git clone -b backend \
-          https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
-          backend-code
-        cd backend-code
-        mvn clean compile -DskipTests
-        mvn sonar:sonar \
-          -Dsonar.projectKey=ecommerce-backend \
-          -Dsonar.projectName="E-commerce Backend" \
-          -Dsonar.host.url=$(SONAR_HOST_URL) \
-          -Dsonar.login=$(SONAR_TOKEN) \
-          -Dsonar.java.binaries=target/classes \
-          -Dsonar.sources=src/main/java
-        echo "✅ SonarQube backend terminé"
-      displayName: 'SonarQube Backend Analysis'
-
-  - job: SonarFrontend
-    displayName: 'SonarQube Frontend'
-    steps:
-    - checkout: none
-
-    - script: |
-        rm -rf frontend-code
-        git clone -b front \
-          https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
-          frontend-code
-        cd frontend-code
-        npm install
-        cat > sonar-project.properties << EOF
-        sonar.projectKey=ecommerce-frontend
-        sonar.projectName=E-commerce Frontend
-        sonar.sources=src
-        sonar.exclusions=**/node_modules/**,**/*.spec.ts
-        sonar.host.url=$(SONAR_HOST_URL)
-        sonar.login=$(SONAR_TOKEN)
-        EOF
-        npx sonar-scanner
-        echo "✅ SonarQube frontend terminé"
-      displayName: 'SonarQube Frontend Analysis'
-
-# ══════════════════════════════════════════
-# STAGE 4 : BUILD DOCKER IMAGES
-# ══════════════════════════════════════════
-- stage: DockerBuild
-  displayName: '4 - Build Docker Images'
-  dependsOn: CodeQuality
-  jobs:
-
-  - job: DockerBackend
-    displayName: 'Build Backend Docker Image'
-    steps:
-    - checkout: none
-
-    - script: |
-        rm -rf backend-code
-        git clone -b backend \
-          https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
-          backend-code
-        cd backend-code
-        if [ ! -f "Dockerfile" ]; then
-          echo "❌ Dockerfile backend non trouvé"
-          exit 1
-        fi
-        docker build \
-          -t $(BACKEND_IMAGE):$(IMAGE_TAG) \
-          -t $(BACKEND_IMAGE):latest .
-        echo "✅ Image backend construite"
-      displayName: 'Build Backend Image'
-
-  - job: DockerFrontend
-    displayName: 'Build Frontend Docker Image'
-    steps:
-    - checkout: none
-
-    - script: |
-        rm -rf frontend-code
-        git clone -b front \
-          https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
-          frontend-code
-        cd frontend-code
-        if [ ! -f "Dockerfile" ]; then
-          echo "❌ Dockerfile frontend non trouvé"
-          exit 1
-        fi
-        docker build \
-          -t $(FRONTEND_IMAGE):$(IMAGE_TAG) \
-          -t $(FRONTEND_IMAGE):latest .
-        echo "✅ Image frontend construite"
-      displayName: 'Build Frontend Image'
-
-# ═══════════════════════════════════════════════════════════════════════
-# STAGE 5 : SECURITY SCAN (TRIVY)
-# ═══════════════════════════════════════════════════════════════════════
-- stage: SecurityScan
-  displayName: '5 - Security Scan Trivy'
-  dependsOn: DockerBuild
-  jobs:
-  - job: TrivyScan
-    displayName: 'Trivy Vulnerability Scan'
-    steps:
-    # ⚠️ Important : Récupérer le code pour avoir accès aux images
-    - checkout: self
-      displayName: 'Checkout code'
-
-    # Vérifier que les images existent localement
-    - script: |
-        echo "=== IMAGES DISPONIBLES ==="
-        docker images | grep ecommerce
-      displayName: 'Check Docker images'
-
-    # Installation de Trivy
-    - script: |
-        echo "=== INSTALLATION TRIVY ==="
-        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
-        trivy --version
-      displayName: 'Install Trivy'
-
-    # Scan Backend
-    - script: |
-        echo "=== SCAN BACKEND ==="
-        sudo trivy image --severity HIGH,CRITICAL --format table maramhassen/ecommerce-backend:$(IMAGE_TAG) || true
-      displayName: 'Trivy Scan (Backend)'
-
-    # Scan Frontend
-    - script: |
-        echo "=== SCAN FRONTEND ==="
-        sudo trivy image --severity HIGH,CRITICAL --format table maramhassen/ecommerce-frontend:$(IMAGE_TAG) || true
-      displayName: 'Trivy Scan (Frontend)'
-
-# ══════════════════════════════════════════
-# STAGE 6 : PUSH TO NEXUS & DOCKER HUB
-# ══════════════════════════════════════════
-- stage: PushImages
-  displayName: '6 - Push to Nexus & Docker Hub'
-  dependsOn: SecurityScan
-  jobs:
-  - job: PushAllImages
-    displayName: 'Push images to both registries'
-    steps:
-    - script: |
-        echo "=== LOGIN TO NEXUS ==="
-        echo $(NEXUS_PASSWORD) | docker login \
-          $(NEXUS_REGISTRY) \
-          -u $(NEXUS_USERNAME) \
-          --password-stdin
-
-        echo "=== LOGIN TO DOCKER HUB ==="
-        echo $(DOCKER_PASSWORD) | docker login \
-          -u $(DOCKER_USERNAME) \
-          --password-stdin
-
-        echo "=== PUSH BACKEND TO NEXUS ==="
-        docker tag $(BACKEND_IMAGE):$(IMAGE_TAG) \
-          $(NEXUS_REGISTRY)/ecommerce-backend:$(IMAGE_TAG)
-        docker push $(NEXUS_REGISTRY)/ecommerce-backend:$(IMAGE_TAG)
-
-        echo "=== PUSH FRONTEND TO NEXUS ==="
-        docker tag $(FRONTEND_IMAGE):$(IMAGE_TAG) \
-          $(NEXUS_REGISTRY)/ecommerce-frontend:$(IMAGE_TAG)
-        docker push $(NEXUS_REGISTRY)/ecommerce-frontend:$(IMAGE_TAG)
-
-        echo "=== PUSH BACKEND TO DOCKER HUB ==="
-        docker push $(BACKEND_IMAGE):$(IMAGE_TAG)
-
-        echo "=== PUSH FRONTEND TO DOCKER HUB ==="
-        docker push $(FRONTEND_IMAGE):$(IMAGE_TAG)
-
-        docker logout $(NEXUS_REGISTRY)
-        docker logout
-
-        echo "✅ Images poussées vers Nexus et Docker Hub"
-      displayName: 'Push to both registries'
-
-# ══════════════════════════════════════════
-# STAGE 7 : DEPLOY TO KUBERNETES
-# ══════════════════════════════════════════
-- stage: Deploy
-  displayName: '7 - Deploy to AKS Engine'
-  dependsOn: PushImages
-  jobs:
-  - deployment: K8sDeploy
-    displayName: 'Deploy to Azure Stack Hub Kubernetes'
-    environment: 'production'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
+  # ══════════════════════════════════════════
+  # STAGE 0 : VÉRIFICATION DU COMMIT
+  # ══════════════════════════════════════════
+  - stage: CheckCommit
+    displayName: '0 - Vérification du message de commit'
+    jobs:
+      - job: CheckMessage
+        displayName: 'Vérifier que le commit contient all ready'
+        steps:
           - checkout: none
 
           - script: |
-              export KUBECONFIG=/home/adminuser/k8s-output/kubeconfig/kubeconfig.dc2.json
+              COMMIT_MSG="$(Build.SourceVersionMessage)"
+              echo "Message du commit : $COMMIT_MSG"
+              
+              if echo "$COMMIT_MSG" | grep -i "all ready"; then
+                echo "✅ Commit valide - pipeline autorisé"
+              else
+                echo "⛔ Ce commit ne contient pas 'all ready'"
+                echo "Pipeline annulé automatiquement"
+                exit 1
+              fi
+            displayName: 'Vérifier le message du commit'
 
-              echo "=== VÉRIFICATION CONNEXION ==="
-              kubectl get nodes
+  # ══════════════════════════════════════════
+  # STAGE 1 : BUILD BACKEND
+  # ══════════════════════════════════════════
+  - stage: BuildBackend
+    displayName: '1 - Build Backend Spring Boot'
+    dependsOn: CheckCommit
+    jobs:
+      - job: BackendBuild
+        displayName: 'Maven build'
+        steps:
+          - checkout: none
 
-              echo "=== MISE À JOUR DES IMAGES (Docker Hub) ==="
-              kubectl set image deployment/backend \
-                backend=$(BACKEND_IMAGE):$(IMAGE_TAG) \
-                -n $(K8S_NAMESPACE)
+          - script: |
+              rm -rf backend-code
+              git clone -b backend \
+                https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
+                backend-code
+              cd backend-code
+              if [ ! -f "pom.xml" ]; then
+                echo "❌ pom.xml non trouvé"
+                exit 1
+              fi
+              mvn clean package -DskipTests
+              echo "✅ Build backend réussi"
+              ls -la target/
+            displayName: 'Clone & Maven Build'
 
-              kubectl set image deployment/frontend \
-                frontend=$(FRONTEND_IMAGE):$(IMAGE_TAG) \
-                -n $(K8S_NAMESPACE)
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: 'backend-code/target'
+              ArtifactName: 'backend-jar'
+            displayName: 'Publish backend artifacts'
+  # ══════════════════════════════════════════
+  # STAGE 2 : TESTS BACKEND
+  # ══════════════════════════════════════════
+  - stage: TestBackend
+    displayName: '1.5 - Tests Backend (JUnit + Mockito)'
+    dependsOn: BuildBackend
+    jobs:
+      - job: BackendTests
+        displayName: 'Exécution des tests backend'
+        steps:
+          - checkout: none
+          - script: |
+              rm -rf backend-code
+              git clone -b backend \
+                https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
+                backend-code
+              cd backend-code
+              mvn clean test
+              echo "✅ Tests backend exécutés"
+            displayName: 'Maven Test'
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '**/surefire-reports/*.xml'
+              searchFolder: 'backend-code/target'
+              testRunTitle: 'Backend Unit Tests'
+            displayName: 'Publier les résultats des tests backend'
+            condition: succeededOrFailed()
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: 'JaCoCo'
+              summaryFileLocation: 'backend-code/target/site/jacoco/jacoco.xml'
+              reportDirectory: 'backend-code/target/site/jacoco'
+            displayName: 'Publier la couverture de code backend'
+            condition: succeededOrFailed()
 
-              echo "=== ATTENTE DU DÉPLOIEMENT ==="
-              kubectl rollout status deployment/backend \
-                -n $(K8S_NAMESPACE) --timeout=5m
+  # ══════════════════════════════════════════
+  # STAGE 3 : BUILD FRONTEND
+  # ══════════════════════════════════════════
+  - stage: BuildFrontend
+    displayName: '2 - Build Frontend Angular'
+    #  dependsOn: CheckCommit
+    jobs:
+      - job: FrontendBuild
+        displayName: 'npm & Angular build'
+        steps:
+          - checkout: none
 
-              kubectl rollout status deployment/frontend \
-                -n $(K8S_NAMESPACE) --timeout=5m
+          - task: UseNode@1
+            inputs:
+              version: '18.x'
+            displayName: 'Install Node.js 18'
 
-              echo "=== VÉRIFICATION FINALE ==="
-              kubectl get pods -n $(K8S_NAMESPACE)
-              kubectl get svc -n $(K8S_NAMESPACE)
+          - script: |
+              rm -rf frontend-code
+              git clone -b front \
+                https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
+                frontend-code
+              cd frontend-code
+              if [ ! -f "package.json" ]; then
+                echo "❌ package.json non trouvé"
+                exit 1
+              fi
+              npm install
+              npm run build -- --configuration production
+              echo "✅ Build frontend réussi"
+              ls -la dist/
+            displayName: 'Clone & npm Build'
 
-              echo "✅ Déploiement réussi !"
-              echo "🌐 Application: http://102.141.206.178"
-            displayName: 'kubectl Deploy'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: 'frontend-code/dist'
+              ArtifactName: 'frontend-dist'
+            displayName: 'Publish frontend artifacts'
+
+  # ══════════════════════════════════════════
+  # STAGE 4 : SONARQUBE ANALYSIS
+  # ══════════════════════════════════════════
+  - stage: CodeQuality
+    displayName: '3 - SonarQube Analysis'
+    dependsOn:
+      - BuildBackend
+      - BuildFrontend
+    jobs:
+
+      - job: SonarBackend
+        displayName: 'SonarQube Backend'
+        steps:
+          - checkout: none
+
+          - script: |
+              rm -rf backend-code
+              git clone -b backend \
+                https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
+                backend-code
+              cd backend-code
+              mvn clean compile -DskipTests
+              mvn sonar:sonar \
+                -Dsonar.projectKey=ecommerce-backend \
+                -Dsonar.projectName="E-commerce Backend" \
+                -Dsonar.host.url=$(SONAR_HOST_URL) \
+                -Dsonar.login=$(SONAR_TOKEN) \
+                -Dsonar.java.binaries=target/classes \
+                -Dsonar.sources=src/main/java
+              echo "✅ SonarQube backend terminé"
+            displayName: 'SonarQube Backend Analysis'
+
+      - job: SonarFrontend
+        displayName: 'SonarQube Frontend'
+        steps:
+          - checkout: none
+
+          - script: |
+              rm -rf frontend-code
+              git clone -b front \
+                https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
+                frontend-code
+              cd frontend-code
+              npm install
+              cat > sonar-project.properties << EOF
+              sonar.projectKey=ecommerce-frontend
+              sonar.projectName=E-commerce Frontend
+              sonar.sources=src
+              sonar.exclusions=**/node_modules/**,**/*.spec.ts
+              sonar.host.url=$(SONAR_HOST_URL)
+              sonar.login=$(SONAR_TOKEN)
+              EOF
+              npx sonar-scanner
+              echo "✅ SonarQube frontend terminé"
+            displayName: 'SonarQube Frontend Analysis'
+
+  # ══════════════════════════════════════════
+  # STAGE 5 : BUILD DOCKER IMAGES
+  # ══════════════════════════════════════════
+  - stage: DockerBuild
+    displayName: '4 - Build Docker Images'
+    dependsOn: CodeQuality
+    jobs:
+
+      - job: DockerBackend
+        displayName: 'Build Backend Docker Image'
+        steps:
+          - checkout: none
+
+          - script: |
+              rm -rf backend-code
+              git clone -b backend \
+                https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
+                backend-code
+              cd backend-code
+              if [ ! -f "Dockerfile" ]; then
+                echo "❌ Dockerfile backend non trouvé"
+                exit 1
+              fi
+              docker build \
+                -t $(BACKEND_IMAGE):$(IMAGE_TAG) \
+                -t $(BACKEND_IMAGE):latest .
+              echo "✅ Image backend construite"
+            displayName: 'Build Backend Image'
+
+      - job: DockerFrontend
+        displayName: 'Build Frontend Docker Image'
+        steps:
+          - checkout: none
+
+          - script: |
+              rm -rf frontend-code
+              git clone -b front \
+                https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
+                frontend-code
+              cd frontend-code
+              if [ ! -f "Dockerfile" ]; then
+                echo "❌ Dockerfile frontend non trouvé"
+                exit 1
+              fi
+              docker build \
+                -t $(FRONTEND_IMAGE):$(IMAGE_TAG) \
+                -t $(FRONTEND_IMAGE):latest .
+              echo "✅ Image frontend construite"
+            displayName: 'Build Frontend Image'
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # STAGE 6 : SECURITY SCAN (TRIVY)
+  # ═══════════════════════════════════════════════════════════════════════
+  - stage: SecurityScan
+    displayName: '5 - Security Scan Trivy'
+    dependsOn: DockerBuild
+    jobs:
+      - job: TrivyScan
+        displayName: 'Trivy Vulnerability Scan'
+        steps:
+          # ⚠️ Important : Récupérer le code pour avoir accès aux images
+          - checkout: self
+            displayName: 'Checkout code'
+
+          # Vérifier que les images existent localement
+          - script: |
+              echo "=== IMAGES DISPONIBLES ==="
+              docker images | grep ecommerce
+            displayName: 'Check Docker images'
+
+          # Installation de Trivy
+          - script: |
+              echo "=== INSTALLATION TRIVY ==="
+              curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
+              trivy --version
+            displayName: 'Install Trivy'
+
+          # Scan Backend
+          - script: |
+              echo "=== SCAN BACKEND ==="
+              sudo trivy image --severity HIGH,CRITICAL --format table maramhassen/ecommerce-backend:$(IMAGE_TAG) || true
+            displayName: 'Trivy Scan (Backend)'
+
+          # Scan Frontend
+          - script: |
+              echo "=== SCAN FRONTEND ==="
+              sudo trivy image --severity HIGH,CRITICAL --format table maramhassen/ecommerce-frontend:$(IMAGE_TAG) || true
+            displayName: 'Trivy Scan (Frontend)'
+
+  # ══════════════════════════════════════════
+  # STAGE 7 : PUSH TO NEXUS & DOCKER HUB
+  # ══════════════════════════════════════════
+  - stage: PushImages
+    displayName: '6 - Push to Nexus & Docker Hub'
+    dependsOn: SecurityScan
+    jobs:
+      - job: PushAllImages
+        displayName: 'Push images to both registries'
+        steps:
+          - script: |
+              echo "=== LOGIN TO NEXUS ==="
+              echo $(NEXUS_PASSWORD) | docker login \
+                $(NEXUS_REGISTRY) \
+                -u $(NEXUS_USERNAME) \
+                --password-stdin
+              
+              echo "=== LOGIN TO DOCKER HUB ==="
+              echo $(DOCKER_PASSWORD) | docker login \
+                -u $(DOCKER_USERNAME) \
+                --password-stdin
+              
+              echo "=== PUSH BACKEND TO NEXUS ==="
+              docker tag $(BACKEND_IMAGE):$(IMAGE_TAG) \
+                $(NEXUS_REGISTRY)/ecommerce-backend:$(IMAGE_TAG)
+              docker push $(NEXUS_REGISTRY)/ecommerce-backend:$(IMAGE_TAG)
+              
+              echo "=== PUSH FRONTEND TO NEXUS ==="
+              docker tag $(FRONTEND_IMAGE):$(IMAGE_TAG) \
+                $(NEXUS_REGISTRY)/ecommerce-frontend:$(IMAGE_TAG)
+              docker push $(NEXUS_REGISTRY)/ecommerce-frontend:$(IMAGE_TAG)
+              
+              echo "=== PUSH BACKEND TO DOCKER HUB ==="
+              docker push $(BACKEND_IMAGE):$(IMAGE_TAG)
+              
+              echo "=== PUSH FRONTEND TO DOCKER HUB ==="
+              docker push $(FRONTEND_IMAGE):$(IMAGE_TAG)
+              
+              docker logout $(NEXUS_REGISTRY)
+              docker logout
+              
+              echo "✅ Images poussées vers Nexus et Docker Hub"
+            displayName: 'Push to both registries'
+
+  # ══════════════════════════════════════════
+  # STAGE 8 : DEPLOY TO KUBERNETES
+  # ══════════════════════════════════════════
+  - stage: Deploy
+    displayName: '7 - Deploy to AKS Engine'
+    dependsOn: PushImages
+    jobs:
+      - deployment: K8sDeploy
+        displayName: 'Deploy to Azure Stack Hub Kubernetes'
+        environment: 'production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: none
+
+                - script: |
+                    export KUBECONFIG=/home/adminuser/k8s-output/kubeconfig/kubeconfig.dc2.json
+                    
+                    echo "=== VÉRIFICATION CONNEXION ==="
+                    kubectl get nodes
+                    
+                    echo "=== MISE À JOUR DES IMAGES (Docker Hub) ==="
+                    kubectl set image deployment/backend \
+                      backend=$(BACKEND_IMAGE):$(IMAGE_TAG) \
+                      -n $(K8S_NAMESPACE)
+                    
+                    kubectl set image deployment/frontend \
+                      frontend=$(FRONTEND_IMAGE):$(IMAGE_TAG) \
+                      -n $(K8S_NAMESPACE)
+                    
+                    echo "=== ATTENTE DU DÉPLOIEMENT ==="
+                    kubectl rollout status deployment/backend \
+                      -n $(K8S_NAMESPACE) --timeout=5m
+                    
+                    kubectl rollout status deployment/frontend \
+                      -n $(K8S_NAMESPACE) --timeout=5m
+                    
+                    echo "=== VÉRIFICATION FINALE ==="
+                    kubectl get pods -n $(K8S_NAMESPACE)
+                    kubectl get svc -n $(K8S_NAMESPACE)
+                    
+                    echo "✅ Déploiement réussi !"
+                    echo "🌐 Application: http://102.141.206.178"
+                  displayName: 'kubectl Deploy'
