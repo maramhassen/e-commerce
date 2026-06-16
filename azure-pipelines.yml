@@ -87,9 +87,44 @@ stages:
         PathtoPublish: 'backend-code/target'
         ArtifactName: 'backend-jar'
       displayName: 'Publish backend artifacts'
+# ══════════════════════════════════════════
+# STAGE 2 : TESTS BACKEND
+# ══════════════════════════════════════════
+- stage: TestBackend
+  displayName: '1.5 - Tests Backend (JUnit + Mockito)'
+  dependsOn: BuildBackend
+  jobs:
+  - job: BackendTests
+    displayName: 'Exécution des tests backend'
+    steps:
+    - checkout: none
+    - script: |
+        rm -rf backend-code
+        git clone -b backend \
+          https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
+          backend-code
+        cd backend-code
+        mvn clean test
+        echo "✅ Tests backend exécutés"
+      displayName: 'Maven Test'
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '**/surefire-reports/*.xml'
+        searchFolder: 'backend-code/target'
+        testRunTitle: 'Backend Unit Tests'
+      displayName: 'Publier les résultats des tests backend'
+      condition: succeededOrFailed()
+    - task: PublishCodeCoverageResults@1
+      inputs:
+        codeCoverageTool: 'JaCoCo'
+        summaryFileLocation: 'backend-code/target/site/jacoco/jacoco.xml'
+        reportDirectory: 'backend-code/target/site/jacoco'
+      displayName: 'Publier la couverture de code backend'
+      condition: succeededOrFailed()
 
 # ══════════════════════════════════════════
-# STAGE 2 : BUILD FRONTEND
+# STAGE 3 : BUILD FRONTEND
 # ══════════════════════════════════════════
 - stage: BuildFrontend
   displayName: '2 - Build Frontend Angular'
@@ -128,7 +163,7 @@ stages:
       displayName: 'Publish frontend artifacts'
 
 # ══════════════════════════════════════════
-# STAGE 3 : SONARQUBE ANALYSIS
+# STAGE 4 : SONARQUBE ANALYSIS
 # ══════════════════════════════════════════
 - stage: CodeQuality
   displayName: '3 - SonarQube Analysis'
@@ -184,7 +219,7 @@ stages:
       displayName: 'SonarQube Frontend Analysis'
 
 # ══════════════════════════════════════════
-# STAGE 4 : BUILD DOCKER IMAGES
+# STAGE 5 : BUILD DOCKER IMAGES
 # ══════════════════════════════════════════
 - stage: DockerBuild
   displayName: '4 - Build Docker Images'
@@ -234,7 +269,7 @@ stages:
       displayName: 'Build Frontend Image'
 
 # ═══════════════════════════════════════════════════════════════════════
-# STAGE 5 : SECURITY SCAN (TRIVY)
+# STAGE 6 : SECURITY SCAN (TRIVY)
 # ═══════════════════════════════════════════════════════════════════════
 - stage: SecurityScan
   displayName: '5 - Security Scan Trivy'
@@ -273,7 +308,7 @@ stages:
       displayName: 'Trivy Scan (Frontend)'
 
 # ══════════════════════════════════════════
-# STAGE 6 : PUSH TO NEXUS & DOCKER HUB
+# STAGE 7 : PUSH TO NEXUS & DOCKER HUB
 # ══════════════════════════════════════════
 - stage: PushImages
   displayName: '6 - Push to Nexus & Docker Hub'
@@ -317,7 +352,7 @@ stages:
       displayName: 'Push to both registries'
 
 # ══════════════════════════════════════════
-# STAGE 7 : DEPLOY TO KUBERNETES
+# STAGE 8 : DEPLOY TO KUBERNETES
 # ══════════════════════════════════════════
 - stage: Deploy
   displayName: '7 - Deploy to AKS Engine'
