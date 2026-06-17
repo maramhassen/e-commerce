@@ -161,9 +161,62 @@ stages:
               PathtoPublish: 'frontend-code/dist'
               ArtifactName: 'frontend-dist'
             displayName: 'Publish frontend artifacts'
+  # ══════════════════════════════════════════
+  # STAGE 4 : TESTS FRONTEND
+  # ══════════════════════════════════════════
+  - stage: TestFrontend
+    displayName: '2.5 - Tests Frontend (Karma + Jasmine)'
+    dependsOn: BuildFrontend
+    jobs:
+      - job: FrontendTests
+        displayName: 'Exécution des tests frontend'
+        steps:
+          - checkout: none
+
+          - task: UseNode@1
+            inputs:
+              version: '18.x'
+            displayName: 'Install Node.js 18'
+
+          - script: |
+              rm -rf frontend-code
+              git clone -b front \
+                https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
+                frontend-code
+              cd frontend-code
+              npm install
+              
+              echo "=== EXÉCUTION DES TESTS KARMA/JASMINE ==="
+              npx ng test \
+                --no-watch \
+                --no-progress \
+                --browsers=ChromeHeadless \
+                --code-coverage \
+                --reporters=junit,progress \
+                --coverage-reporters=lcov,html,cobertura
+              
+              echo "✅ Tests frontend exécutés"
+            displayName: 'ng test (Karma)'
+
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '**/test-results/*.xml'
+              searchFolder: 'frontend-code'
+              testRunTitle: 'Frontend Unit Tests (Karma + Jasmine)'
+            displayName: 'Publier les résultats des tests frontend'
+            condition: succeededOrFailed()
+
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: 'Cobertura'
+              summaryFileLocation: 'frontend-code/coverage/**/cobertura-coverage.xml'
+              reportDirectory: 'frontend-code/coverage'
+            displayName: 'Publier la couverture de code frontend'
+            condition: succeededOrFailed()
 
   # ══════════════════════════════════════════
-  # STAGE 4 : SONARQUBE ANALYSIS
+  # STAGE 5 : SONARQUBE ANALYSIS
   # ══════════════════════════════════════════
   - stage: CodeQuality
     displayName: '3 - SonarQube Analysis'
@@ -219,7 +272,7 @@ stages:
             displayName: 'SonarQube Frontend Analysis'
 
   # ══════════════════════════════════════════
-  # STAGE 5 : BUILD DOCKER IMAGES
+  # STAGE 6 : BUILD DOCKER IMAGES
   # ══════════════════════════════════════════
   - stage: DockerBuild
     displayName: '4 - Build Docker Images'
@@ -269,7 +322,7 @@ stages:
             displayName: 'Build Frontend Image'
 
   # ═══════════════════════════════════════════════════════════════════════
-  # STAGE 6 : SECURITY SCAN (TRIVY)
+  # STAGE 7 : SECURITY SCAN (TRIVY)
   # ═══════════════════════════════════════════════════════════════════════
   - stage: SecurityScan
     displayName: '5 - Security Scan Trivy'
@@ -308,7 +361,7 @@ stages:
             displayName: 'Trivy Scan (Frontend)'
 
   # ══════════════════════════════════════════
-  # STAGE 7 : PUSH TO NEXUS & DOCKER HUB
+  # STAGE 8 : PUSH TO NEXUS & DOCKER HUB
   # ══════════════════════════════════════════
   - stage: PushImages
     displayName: '6 - Push to Nexus & Docker Hub'
@@ -352,7 +405,7 @@ stages:
             displayName: 'Push to both registries'
 
   # ══════════════════════════════════════════
-  # STAGE 8 : DEPLOY TO KUBERNETES
+  # STAGE 9 : DEPLOY TO KUBERNETES
   # ══════════════════════════════════════════
   - stage: Deploy
     displayName: '7 - Deploy to AKS Engine'
