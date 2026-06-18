@@ -165,7 +165,7 @@ stages:
   # STAGE 4 : TESTS FRONTEND
   # ══════════════════════════════════════════
   - stage: TestFrontend
-    displayName: '2.5 - Tests Frontend (Karma + Jasmine)'
+    displayName: '3 - Tests Frontend (Karma + Jasmine)'
     dependsOn: BuildFrontend
     jobs:
       - job: FrontendTests
@@ -198,6 +198,9 @@ stages:
               echo "✅ Tests frontend exécutés"
             displayName: 'ng test (Karma)'
 
+          # ═══════════════════════════════════════
+          # PUBLICATION DES RÉSULTATS DES TESTS
+          # ═══════════════════════════════════════
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'JUnit'
@@ -207,6 +210,9 @@ stages:
             displayName: 'Publier les résultats des tests frontend'
             condition: succeededOrFailed()
 
+          # ═══════════════════════════════════════
+          # PUBLICATION DE LA COUVERTURE DE CODE
+          # ═══════════════════════════════════════
           - task: PublishCodeCoverageResults@1
             inputs:
               codeCoverageTool: 'Cobertura'
@@ -215,11 +221,91 @@ stages:
             displayName: 'Publier la couverture de code frontend'
             condition: succeededOrFailed()
 
+          # ═══════════════════════════════════════
+          # AFFICHAGE DU POURCENTAGE DE COUVERTURE DANS LA SORTIE
+          # ═══════════════════════════════════════
+          - script: |
+              cd frontend-code
+              
+              echo ""
+              echo "═══════════════════════════════════════════════════════════════"
+              echo "📊 RÉSULTATS DES TESTS FRONTEND"
+              echo "═══════════════════════════════════════════════════════════════"
+              
+              # Extraire le pourcentage de couverture du fichier cobertura
+              if [ -f "coverage/**/cobertura-coverage.xml" ]; then
+                COVERAGE=$(grep -o 'line-rate="[0-9.]*"' coverage/**/cobertura-coverage.xml | head -1 | cut -d'"' -f2)
+                if [ ! -z "$COVERAGE" ]; then
+                  COVERAGE_PERCENT=$(echo "$COVERAGE * 100" | bc | cut -d'.' -f1)
+                  echo "✅ Taux de couverture: ${COVERAGE_PERCENT}%"
+                else
+                  echo "⚠️ Couverture non trouvée"
+                fi
+              else
+                echo "⚠️ Fichier de couverture non trouvé"
+              fi
+              
+              # Compter les tests réussis/échoués
+              echo ""
+              echo "📈 RÉSUMÉ DES TESTS:"
+              if [ -f "test-results/results.xml" ] || [ -f "test-results/TESTS-*.xml" ]; then
+                TOTAL=$(grep -o 'tests="[0-9]*"' test-results/*.xml 2>/dev/null | head -1 | grep -o '[0-9]*')
+                FAILURES=$(grep -o 'failures="[0-9]*"' test-results/*.xml 2>/dev/null | head -1 | grep -o '[0-9]*')
+                ERRORS=$(grep -o 'errors="[0-9]*"' test-results/*.xml 2>/dev/null | head -1 | grep -o '[0-9]*')
+              
+                if [ ! -z "$TOTAL" ]; then
+                  PASSED=$((TOTAL - FAILURES - ERRORS))
+                  echo "   ✅ Passés: $PASSED"
+                  echo "   ❌ Échoués: $FAILURES"
+                  echo "   ⚠️ Erreurs: $ERRORS"
+                  echo "   📊 Total: $TOTAL"
+              
+                  # Calculer le pourcentage de réussite
+                  if [ $TOTAL -gt 0 ]; then
+                    PASS_PERCENT=$((PASSED * 100 / TOTAL))
+                    echo ""
+                    echo "🏆 TAUX DE RÉUSSITE: ${PASS_PERCENT}%"
+                  fi
+                fi
+              fi
+              
+              echo "═══════════════════════════════════════════════════════════════"
+            displayName: 'Afficher le résumé des tests frontend'
+            condition: succeededOrFailed()
+
+          # ═══════════════════════════════════════
+          # SEUIL DE COUVERTURE MINIMUM (OPTIONNEL)
+          # ═══════════════════════════════════════
+          - script: |
+              cd frontend-code
+              
+              echo "=== VÉRIFICATION DU SEUIL DE COUVERTURE ==="
+              
+              if [ -f "coverage/**/cobertura-coverage.xml" ]; then
+                COVERAGE=$(grep -o 'line-rate="[0-9.]*"' coverage/**/cobertura-coverage.xml | head -1 | cut -d'"' -f2)
+                if [ ! -z "$COVERAGE" ]; then
+                  COVERAGE_PERCENT=$(echo "$COVERAGE * 100" | bc | cut -d'.' -f1)
+                  MIN_COVERAGE=60  # Seuil minimum de 60%
+              
+                  echo "Couverture actuelle: ${COVERAGE_PERCENT}%"
+                  echo "Seuil minimum: ${MIN_COVERAGE}%"
+              
+                  if [ $COVERAGE_PERCENT -lt $MIN_COVERAGE ]; then
+                    echo "❌ ÉCHEC: La couverture (${COVERAGE_PERCENT}%) est inférieure au seuil (${MIN_COVERAGE}%)"
+                    exit 1
+                  else
+                    echo "✅ SUCCÈS: La couverture (${COVERAGE_PERCENT}%) dépasse le seuil (${MIN_COVERAGE}%)"
+                  fi
+                fi
+              fi
+            displayName: 'Vérifier le seuil de couverture (60% minimum)'
+            condition: succeededOrFailed()
+            continueOnError: true  # Ne bloque pas le pipeline si le seuil n'est pas atteint
   # ══════════════════════════════════════════
   # STAGE 5 : SONARQUBE ANALYSIS
   # ══════════════════════════════════════════
   - stage: CodeQuality
-    displayName: '3 - SonarQube Analysis'
+    displayName: '4 - SonarQube Analysis'
     dependsOn:
       - BuildBackend
       - BuildFrontend
@@ -275,7 +361,7 @@ stages:
   # STAGE 6 : BUILD DOCKER IMAGES
   # ══════════════════════════════════════════
   - stage: DockerBuild
-    displayName: '4 - Build Docker Images'
+    displayName: '5 - Build Docker Images'
     dependsOn: CodeQuality
     jobs:
 
@@ -325,7 +411,7 @@ stages:
   # STAGE 7 : SECURITY SCAN (TRIVY)
   # ═══════════════════════════════════════════════════════════════════════
   - stage: SecurityScan
-    displayName: '5 - Security Scan Trivy'
+    displayName: '6 - Security Scan Trivy'
     dependsOn: DockerBuild
     jobs:
       - job: TrivyScan
@@ -364,7 +450,7 @@ stages:
   # STAGE 8 : PUSH TO NEXUS & DOCKER HUB
   # ══════════════════════════════════════════
   - stage: PushImages
-    displayName: '6 - Push to Nexus & Docker Hub'
+    displayName: '7 - Push to Nexus & Docker Hub'
     dependsOn: SecurityScan
     jobs:
       - job: PushAllImages
@@ -408,7 +494,7 @@ stages:
   # STAGE 9 : DEPLOY TO KUBERNETES
   # ══════════════════════════════════════════
   - stage: Deploy
-    displayName: '7 - Deploy to AKS Engine'
+    displayName: '8 - Deploy to AKS Engine'
     dependsOn: PushImages
     jobs:
       - deployment: K8sDeploy
