@@ -1,8 +1,6 @@
-// Karma configuration file
-
 const puppeteer = require('puppeteer');
 
-// Force Puppeteer Chrome (CI safe)
+// Définit CHROME_BIN pour CI
 process.env.CHROME_BIN = puppeteer.executablePath();
 
 module.exports = function (config) {
@@ -50,13 +48,17 @@ module.exports = function (config) {
     reporters: ['progress', 'kjhtml', 'junit'],
 
     port: 9876,
-
     colors: true,
-
     logLevel: config.LOG_INFO,
 
     autoWatch: false,
+    singleRun: true,
+    restartOnFileChange: false,
 
+    // ✅ SOLUTION: Utiliser ChromeHeadless directement (supporté nativement)
+    browsers: ['ChromeHeadless'],
+
+    // ⚠️ OPTIONNEL: Si tu veux garder un custom launcher
     customLaunchers: {
       ChromeHeadlessCI: {
         base: 'ChromeHeadless',
@@ -67,12 +69,6 @@ module.exports = function (config) {
         ]
       }
     },
-
-    browsers: process.env.CI ? ['ChromeHeadlessCI'] : ['Chrome'],
-
-    singleRun: true,
-
-    restartOnFileChange: false,
 
     browserDisconnectTimeout: 20000,
     browserDisconnectTolerance: 2,
