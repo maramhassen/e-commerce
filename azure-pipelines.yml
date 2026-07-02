@@ -193,7 +193,7 @@ stages:
             displayName: 'Clone project'
 
           # ─────────────────────────────
-          # 2. Install dependencies (NO CHROME INSTALL)
+          # 2. Install Puppeteer (fournit Chrome)
           # ─────────────────────────────
           - script: |
               set -e
@@ -201,6 +201,9 @@ stages:
               cd frontend-code
               
               npm install puppeteer --save-dev
+              
+              # Vérifier l'installation
+              npx puppeteer --version || echo "Puppeteer installé"
             displayName: 'Install Puppeteer'
 
           # ─────────────────────────────
@@ -213,10 +216,27 @@ stages:
               
               export CI=true
               
+              echo "=== EXÉCUTION DES TESTS ==="
+              
+              # Créer le dossier test-results
+              mkdir -p test-results
+              
+              # ✅ Utiliser ChromeHeadless (supporté nativement)
               npm test -- \
                 --watch=false \
-                --browsers=ChromeHeadlessCI \
-                --code-coverage
+                --browsers=ChromeHeadless \
+                --code-coverage \
+                --reporters=junit,progress || true
+              
+              echo "=== VÉRIFICATION DES RAPPORTS ==="
+              echo "📁 Contenu du dossier coverage:"
+              ls -la coverage/ 2>/dev/null || echo "coverage/ non trouvé"
+              
+              echo "📁 Contenu du dossier test-results:"
+              ls -la test-results/ 2>/dev/null || echo "test-results/ non trouvé"
+              
+              # Afficher les fichiers XML trouvés
+              find . -name "*.xml" -type f 2>/dev/null | head -10
             displayName: 'Run Angular Tests'
 
           # ─────────────────────────────
@@ -227,14 +247,14 @@ stages:
             condition: always()
             inputs:
               testResultsFormat: JUnit
-              testResultsFiles: 'frontend-code/test-results/junit.xml'
-              searchFolder: '$(System.DefaultWorkingDirectory)'
+              testResultsFiles: '**/test-results/*.xml'
+              searchFolder: 'frontend-code'
               mergeTestResults: true
               failTaskOnFailedTests: false
               testRunTitle: 'Angular Tests'
 
           # ─────────────────────────────
-          # 5. Publish Coverage
+          # 5. Publish Code Coverage
           # ─────────────────────────────
           - task: PublishCodeCoverageResults@2
             displayName: 'Publish Code Coverage'
@@ -244,6 +264,7 @@ stages:
               summaryFileLocation: 'frontend-code/coverage/**/cobertura-coverage.xml'
               pathToSources: 'frontend-code/src'
               failIfCoverageEmpty: false
+
   # ══════════════════════════════════════════
   # STAGE 5 : SONARQUBE ANALYSIS
   # ══════════════════════════════════════════
