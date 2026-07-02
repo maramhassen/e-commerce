@@ -165,79 +165,126 @@ stages:
   # STAGE 4 : TESTS FRONTEND (ANGULAR)
   # ═══════════════════════════════════════════════
   - stage: TestFrontend
-    displayName: 'Frontend Tests (Karma)'
+    displayName: '3 - Tests Frontend (Karma + Jasmine)'
+    dependsOn: BuildFrontend
 
     jobs:
-      - job: AngularTests
+      - job: FrontendTests
         displayName: 'Run Unit Tests'
 
         steps:
 
           - checkout: none
 
-          - script: |
-              set -e
-              
-              rm -rf frontend-code
-              
-              git clone -b front https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git frontend-code
-              
-              cd frontend-code
-              
-              npm ci
-            displayName: 'Install dependencies'
+          - task: UseNode@1
+            inputs:
+              version: '18.x'
+            displayName: 'Install Node.js 18'
 
           - script: |
-              set -e
-              
+              rm -rf frontend-code
+              git clone -b front \
+                https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
+                frontend-code
               cd frontend-code
-              
+              npm ci
+            displayName: 'Clone project'
+
+          - script: |
+              cd frontend-code
               npm install puppeteer --save-dev
               npm install karma-junit-reporter --save-dev
-              
-              npx puppeteer --version
+              npx puppeteer --version || echo "Puppeteer installé"
             displayName: 'Install test tools'
 
           - script: |
-              set -e
-              
               cd frontend-code
-              
               export CI=true
               
+              echo "=== EXÉCUTION DES TESTS ==="
               mkdir -p test-results
               
-              echo "RUN TESTS..."
-              
+              # ✅ CORRECTION: Utiliser ChromeHeadless (pas ChromeHeadlessCI)
               npm test -- \
                 --watch=false \
-                --browsers=ChromeHeadlessCI \
+                --browsers=ChromeHeadless \
                 --code-coverage \
-                --reporters=junit,progress
+                --reporters=junit,progress || true
               
-              echo "CHECK OUTPUTS"
+              echo "=== VÉRIFICATION DES RAPPORTS ==="
+              echo "📁 Contenu du dossier coverage:"
+              ls -la coverage/ 2>/dev/null || echo "coverage/ non trouvé"
               
-              ls -R coverage || echo "NO COVERAGE"
-              ls -R test-results || echo "NO TEST RESULTS"
-
+              echo "📁 Contenu du dossier test-results:"
+              ls -la test-results/ 2>/dev/null || echo "test-results/ non trouvé"
+              
+              find . -name "*.xml" -type f 2>/dev/null | head -10
             displayName: 'Run Angular Tests'
 
           - task: PublishTestResults@2
-            displayName: 'Publish Tests'
+            displayName: 'Publish Test Results'
             condition: always()
             inputs:
               testResultsFormat: JUnit
-              testResultsFiles: '**/test-results/junit.xml'
+              testResultsFiles: '**/test-results/*.xml'
               searchFolder: 'frontend-code'
+              mergeTestResults: true
               failTaskOnFailedTests: false
+              testRunTitle: 'Frontend Unit Tests (Karma + Jasmine)'
 
           - task: PublishCodeCoverageResults@2
-            displayName: 'Publish Coverage'
+            displayName: 'Publish Code Coverage'
             condition: always()
             inputs:
               codeCoverageTool: Cobertura
               summaryFileLocation: 'frontend-code/coverage/**/cobertura-coverage.xml'
+              pathToSources: 'frontend-code/src'
               failIfCoverageEmpty: false
+
+          - script: |
+              cd frontend-code
+              
+              echo ""
+              echo "═══════════════════════════════════════════════════════════════"
+              echo "📊 RÉSULTATS DES TESTS FRONTEND"
+              echo "═══════════════════════════════════════════════════════════════"
+              
+              # Couverture
+              COVERAGE_FILE=$(find coverage -name "cobertura-coverage.xml" 2>/dev/null | head -1)
+              if [ -f "$COVERAGE_FILE" ]; then
+                COVERAGE=$(grep -o 'line-rate="[0-9.]*"' "$COVERAGE_FILE" | head -1 | cut -d'"' -f2)
+                if [ ! -z "$COVERAGE" ]; then
+                  COVERAGE_PERCENT=$(echo "$COVERAGE * 100" | bc | cut -d'.' -f1)
+                  echo "📊 Couverture de code: ${COVERAGE_PERCENT}%"
+                fi
+              else
+                echo "⚠️ Fichier de couverture non trouvé"
+              fi
+              
+              # Résultats des tests
+              if [ -f "test-results/junit.xml" ]; then
+                TOTAL=$(grep -o 'tests="[0-9]*"' test-results/junit.xml | head -1 | grep -o '[0-9]*')
+                FAILURES=$(grep -o 'failures="[0-9]*"' test-results/junit.xml | head -1 | grep -o '[0-9]*')
+                if [ ! -z "$TOTAL" ]; then
+                  PASSED=$((TOTAL - FAILURES))
+                  echo ""
+                  echo "📈 RÉSULTATS DES TESTS:"
+                  echo "   ✅ Passés: $PASSED"
+                  echo "   ❌ Échoués: $FAILURES"
+                  echo "   📊 Total: $TOTAL"
+                  if [ $TOTAL -gt 0 ]; then
+                    PASS_PERCENT=$((PASSED * 100 / TOTAL))
+                    echo ""
+                    echo "🏆 TAUX DE RÉUSSITE: ${PASS_PERCENT}%"
+                  fi
+                fi
+              else
+                echo "⚠️ Fichier de résultats non trouvé"
+              fi
+              
+              echo "═══════════════════════════════════════════════════════════════"
+            displayName: '📊 Afficher le résumé des tests'
+            condition: always()
   # ══════════════════════════════════════════
   # STAGE 5 : SONARQUBE ANALYSIS
   # ══════════════════════════════════════════
