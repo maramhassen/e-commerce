@@ -25,7 +25,7 @@ module.exports = function (config) {
       clearContext: false
     },
 
-    // ✅ Les reporters sont configurés ici (pas besoin de --reporters)
+    // ✅ Reporers configurés
     reporters: ['progress', 'kjhtml', 'junit', 'coverage'],
 
     junitReporter: {
