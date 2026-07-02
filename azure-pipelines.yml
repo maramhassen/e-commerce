@@ -162,7 +162,7 @@ stages:
               ArtifactName: 'frontend-dist'
             displayName: 'Publish frontend artifacts'
   # ═══════════════════════════════════════════════
-  # STAGE 4 : TESTS FRONTEND
+  # STAGE 4 : TESTS FRONTEND (ANGULAR)
   # ═══════════════════════════════════════════════
 
   - stage: TestFrontend
@@ -175,62 +175,87 @@ stages:
 
         steps:
 
+          # ─────────────────────────────
+          # 1. Clone repo
+          # ─────────────────────────────
           - checkout: none
 
-          - task: UseNode@1
-            inputs:
-              version: '18.x'
-
           - script: |
+              set -e
+              
               rm -rf frontend-code
               
-              git clone -b front \
-                https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
-                frontend-code
+              git clone -b front https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git frontend-code
               
               cd frontend-code
-              
               npm ci
 
             displayName: 'Clone project'
 
+          # ─────────────────────────────
+          # 2. Install Chrome (stable CI fix)
+          # ─────────────────────────────
           - script: |
-              sudo apt-get update
-              sudo apt-get install -y chromium-browser
+              set -e
               
-              export CHROME_BIN=/usr/bin/chromium-browser
+              echo "Installing Google Chrome..."
+              
+              sudo apt-get update -y
+              
+              wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+              sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
+              
+              export CHROME_BIN=/usr/bin/google-chrome
+              
+              echo "CHROME_BIN=$CHROME_BIN"
+
+            displayName: 'Install Chrome'
+
+          # ─────────────────────────────
+          # 3. Run Angular tests
+          # ─────────────────────────────
+          - script: |
+              set -e
+              
+              cd frontend-code
+              
+              export CHROME_BIN=/usr/bin/google-chrome
+              export CI=true
               
               npm test -- \
                 --watch=false \
                 --browsers=ChromeHeadlessCI \
                 --code-coverage
 
-            workingDirectory: frontend-code
-
             displayName: 'Run Angular Tests'
 
+          # ─────────────────────────────
+          # 4. Publish Test Results (FIXED PATH)
+          # ─────────────────────────────
           - task: PublishTestResults@2
             displayName: 'Publish Test Results'
+            condition: always()
 
             inputs:
               testResultsFormat: JUnit
-              testResultsFiles: '**/test-results/*.xml'
-              searchFolder: 'frontend-code'
+              testResultsFiles: 'frontend-code/test-results/junit.xml'
+              searchFolder: '$(System.DefaultWorkingDirectory)'
               mergeTestResults: true
               failTaskOnFailedTests: false
               testRunTitle: 'Angular Tests'
 
-            condition: always()
-
+          # ─────────────────────────────
+          # 5. Publish Coverage (FIXED PATH)
+          # ─────────────────────────────
           - task: PublishCodeCoverageResults@2
             displayName: 'Publish Code Coverage'
+            condition: always()
 
             inputs:
+              codeCoverageTool: Cobertura
               summaryFileLocation: 'frontend-code/coverage/**/cobertura-coverage.xml'
               pathToSources: 'frontend-code/src'
               failIfCoverageEmpty: false
-
-            condition: always()
   # ══════════════════════════════════════════
   # STAGE 5 : SONARQUBE ANALYSIS
   # ══════════════════════════════════════════
