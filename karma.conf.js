@@ -25,6 +25,7 @@ module.exports = function (config) {
       clearContext: false
     },
 
+    // ✅ Les reporters sont configurés ici (pas besoin de --reporters)
     reporters: ['progress', 'kjhtml', 'junit', 'coverage'],
 
     junitReporter: {
@@ -44,10 +45,6 @@ module.exports = function (config) {
       ]
     },
 
-    // ✅ CORRECTION: Utiliser ChromeHeadless directement (supporté nativement)
-    browsers: ['ChromeHeadless'],
-
-    // ✅ Garder le custom launcher pour référence
     customLaunchers: {
       ChromeHeadlessCI: {
         base: 'ChromeHeadless',
@@ -58,6 +55,8 @@ module.exports = function (config) {
         ]
       }
     },
+
+    browsers: ['ChromeHeadlessCI'],
 
     singleRun: true,
     restartOnFileChange: false,
