@@ -1,6 +1,6 @@
 const puppeteer = require('puppeteer');
+const path = require('path');
 
-// Définit CHROME_BIN pour CI
 process.env.CHROME_BIN = puppeteer.executablePath();
 
 module.exports = function (config) {
@@ -15,7 +15,7 @@ module.exports = function (config) {
       require('karma-chrome-launcher'),
       require('karma-jasmine-html-reporter'),
       require('karma-coverage'),
-      require('karma-junit-reporter'),
+      require('karma-junit-reporter'), // ✅ IMPORTANT
       require('@angular-devkit/build-angular/plugins/karma')
     ],
 
@@ -24,41 +24,24 @@ module.exports = function (config) {
       clearContext: false
     },
 
-    jasmineHtmlReporter: {
-      suppressAll: true
-    },
-
-    coverageReporter: {
-      dir: require('path').join(__dirname, './coverage'),
-      subdir: '.',
-      reporters: [
-        { type: 'html' },
-        { type: 'text-summary' },
-        { type: 'lcov' },
-        { type: 'cobertura' }
-      ]
-    },
+    reporters: ['progress', 'kjhtml', 'junit'], // ✅ important
 
     junitReporter: {
-      outputDir: require('path').join(__dirname, './test-results'),
+      outputDir: path.join(__dirname, 'test-results'), // ✅ dossier correct
       outputFile: 'junit.xml',
       useBrowserName: false
     },
 
-    reporters: ['progress', 'kjhtml', 'junit'],
+    coverageReporter: {
+      dir: path.join(__dirname, 'coverage'),
+      subdir: '.',
+      reporters: [
+        { type: 'html' },
+        { type: 'text-summary' },
+        { type: 'cobertura' } // ✅ obligatoire pour Azure DevOps
+      ]
+    },
 
-    port: 9876,
-    colors: true,
-    logLevel: config.LOG_INFO,
-
-    autoWatch: false,
-    singleRun: true,
-    restartOnFileChange: false,
-
-    // ✅ SOLUTION: Utiliser ChromeHeadless directement (supporté nativement)
-    browsers: ['ChromeHeadless'],
-
-    // ⚠️ OPTIONNEL: Si tu veux garder un custom launcher
     customLaunchers: {
       ChromeHeadlessCI: {
         base: 'ChromeHeadless',
@@ -70,9 +53,11 @@ module.exports = function (config) {
       }
     },
 
-    browserDisconnectTimeout: 20000,
-    browserDisconnectTolerance: 2,
-    browserNoActivityTimeout: 60000,
-    captureTimeout: 60000
+    browsers: process.env.CI ? ['ChromeHeadlessCI'] : ['Chrome'],
+
+    singleRun: true,
+    restartOnFileChange: false,
+
+    logLevel: config.LOG_INFO
   });
 };
