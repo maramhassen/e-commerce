@@ -314,6 +314,8 @@ stages:
               echo "═══════════════════════════════════════════════════════════════"
             displayName: '📊 Afficher le résumé des tests'
             condition: always()
+
+
   # ══════════════════════════════════════════
   # STAGE 5 : SONARQUBE ANALYSIS
   # ══════════════════════════════════════════
