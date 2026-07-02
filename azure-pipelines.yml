@@ -176,7 +176,7 @@ stages:
         steps:
 
           # ─────────────────────────────
-          # 1. Clone repo
+          # 1. Clone project
           # ─────────────────────────────
           - checkout: none
 
@@ -188,28 +188,20 @@ stages:
               git clone -b front https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git frontend-code
               
               cd frontend-code
+              
               npm ci
-
             displayName: 'Clone project'
 
           # ─────────────────────────────
-          # 2. Install Chrome (stable CI fix)
+          # 2. Install dependencies (NO CHROME INSTALL)
           # ─────────────────────────────
           - script: |
               set -e
               
-              echo "Installing Google Chrome..."
+              cd frontend-code
               
-              sudo apt-get update -y
-              
-              wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-              sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
-              
-              export CHROME_BIN=/usr/bin/google-chrome
-              
-              echo "CHROME_BIN=$CHROME_BIN"
-
-            displayName: 'Install Chrome'
+              npm install puppeteer --save-dev
+            displayName: 'Install Puppeteer'
 
           # ─────────────────────────────
           # 3. Run Angular tests
@@ -219,23 +211,20 @@ stages:
               
               cd frontend-code
               
-              export CHROME_BIN=/usr/bin/google-chrome
               export CI=true
               
               npm test -- \
                 --watch=false \
                 --browsers=ChromeHeadlessCI \
                 --code-coverage
-
             displayName: 'Run Angular Tests'
 
           # ─────────────────────────────
-          # 4. Publish Test Results (FIXED PATH)
+          # 4. Publish Test Results
           # ─────────────────────────────
           - task: PublishTestResults@2
             displayName: 'Publish Test Results'
             condition: always()
-
             inputs:
               testResultsFormat: JUnit
               testResultsFiles: 'frontend-code/test-results/junit.xml'
@@ -245,12 +234,11 @@ stages:
               testRunTitle: 'Angular Tests'
 
           # ─────────────────────────────
-          # 5. Publish Coverage (FIXED PATH)
+          # 5. Publish Coverage
           # ─────────────────────────────
           - task: PublishCodeCoverageResults@2
             displayName: 'Publish Code Coverage'
             condition: always()
-
             inputs:
               codeCoverageTool: Cobertura
               summaryFileLocation: 'frontend-code/coverage/**/cobertura-coverage.xml'
