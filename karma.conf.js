@@ -1,14 +1,17 @@
-// Karma configuration file, see link for more information
-// https://karma-runner.github.io/6.4/config/configuration-file.html
+// Karma configuration file
 
-process.env.CHROME_BIN = require('puppeteer').executablePath
-  ? require('puppeteer').executablePath()
-  : process.env.CHROME_BIN;
+const puppeteer = require('puppeteer');
+
+// Force Puppeteer Chrome (CI safe)
+process.env.CHROME_BIN = puppeteer.executablePath();
 
 module.exports = function (config) {
   config.set({
+
     basePath: '',
+
     frameworks: ['jasmine', '@angular-devkit/build-angular'],
+
     plugins: [
       require('karma-jasmine'),
       require('karma-chrome-launcher'),
@@ -17,18 +20,18 @@ module.exports = function (config) {
       require('karma-junit-reporter'),
       require('@angular-devkit/build-angular/plugins/karma')
     ],
+
     client: {
-      jasmine: {
-        // configuration des options Jasmine, ex: random: false
-        // voir https://jasmine.github.io/api/edge/Configuration.html
-      },
-      clearContext: false // laisse le résultat Jasmine Spec Runner visible
+      jasmine: {},
+      clearContext: false
     },
+
     jasmineHtmlReporter: {
-      suppressAll: true // supprime tous les messages dupliqués dans la console
+      suppressAll: true
     },
+
     coverageReporter: {
-      dir: require('path').join(__dirname, './coverage/site-e-commerce'),
+      dir: require('path').join(__dirname, './coverage'),
       subdir: '.',
       reporters: [
         { type: 'html' },
@@ -37,25 +40,40 @@ module.exports = function (config) {
         { type: 'cobertura' }
       ]
     },
+
     junitReporter: {
       outputDir: require('path').join(__dirname, './test-results'),
       outputFile: 'junit.xml',
       useBrowserName: false
     },
+
     reporters: ['progress', 'kjhtml', 'junit'],
+
     port: 9876,
+
     colors: true,
+
     logLevel: config.LOG_INFO,
-    autoWatch: true,
+
+    autoWatch: false,
+
     customLaunchers: {
       ChromeHeadlessCI: {
         base: 'ChromeHeadless',
-        flags: ['--no-sandbox', '--disable-gpu']
+        flags: [
+          '--no-sandbox',
+          '--disable-gpu',
+          '--disable-dev-shm-usage'
+        ]
       }
     },
+
     browsers: process.env.CI ? ['ChromeHeadlessCI'] : ['Chrome'],
-    singleRun: false,
-    restartOnFileChange: true,
+
+    singleRun: true,
+
+    restartOnFileChange: false,
+
     browserDisconnectTimeout: 20000,
     browserDisconnectTolerance: 2,
     browserNoActivityTimeout: 60000,
