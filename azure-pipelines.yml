@@ -194,7 +194,6 @@ stages:
               cd frontend-code
               npm install puppeteer --save-dev
               npm install karma-junit-reporter --save-dev
-              npx puppeteer --version || echo "Puppeteer installé"
             displayName: 'Install test tools'
 
           - script: |
@@ -204,12 +203,11 @@ stages:
               echo "=== EXÉCUTION DES TESTS ==="
               mkdir -p test-results
               
-              # ✅ CORRECTION: Utiliser ChromeHeadless (pas ChromeHeadlessCI)
+              # ✅ NE PAS UTILISER --reporters=junit,progress
               npm test -- \
                 --watch=false \
-                --browsers=ChromeHeadless \
-                --code-coverage \
-                --reporters=junit,progress || true
+                --browsers=ChromeHeadlessCI \
+                --code-coverage || true
               
               echo "=== VÉRIFICATION DES RAPPORTS ==="
               echo "📁 Contenu du dossier coverage:"
@@ -218,9 +216,11 @@ stages:
               echo "📁 Contenu du dossier test-results:"
               ls -la test-results/ 2>/dev/null || echo "test-results/ non trouvé"
               
+              # ✅ Afficher les fichiers pour debug
               find . -name "*.xml" -type f 2>/dev/null | head -10
             displayName: 'Run Angular Tests'
 
+          # ✅ Publish Test Results (comme pour le backend)
           - task: PublishTestResults@2
             displayName: 'Publish Test Results'
             condition: always()
@@ -232,6 +232,7 @@ stages:
               failTaskOnFailedTests: false
               testRunTitle: 'Frontend Unit Tests (Karma + Jasmine)'
 
+          # ✅ Publish Code Coverage (comme pour le backend)
           - task: PublishCodeCoverageResults@2
             displayName: 'Publish Code Coverage'
             condition: always()
@@ -241,6 +242,7 @@ stages:
               pathToSources: 'frontend-code/src'
               failIfCoverageEmpty: false
 
+          # ✅ Afficher le pourcentage comme pour le backend
           - script: |
               cd frontend-code
               
@@ -249,7 +251,7 @@ stages:
               echo "📊 RÉSULTATS DES TESTS FRONTEND"
               echo "═══════════════════════════════════════════════════════════════"
               
-              # Couverture
+              # Extraire le pourcentage de couverture
               COVERAGE_FILE=$(find coverage -name "cobertura-coverage.xml" 2>/dev/null | head -1)
               if [ -f "$COVERAGE_FILE" ]; then
                 COVERAGE=$(grep -o 'line-rate="[0-9.]*"' "$COVERAGE_FILE" | head -1 | cut -d'"' -f2)
@@ -261,7 +263,7 @@ stages:
                 echo "⚠️ Fichier de couverture non trouvé"
               fi
               
-              # Résultats des tests
+              # Extraire les résultats des tests
               if [ -f "test-results/junit.xml" ]; then
                 TOTAL=$(grep -o 'tests="[0-9]*"' test-results/junit.xml | head -1 | grep -o '[0-9]*')
                 FAILURES=$(grep -o 'failures="[0-9]*"' test-results/junit.xml | head -1 | grep -o '[0-9]*')
