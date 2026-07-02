@@ -196,13 +196,13 @@ stages:
 
           - script: |
               sudo apt-get update
-              sudo apt-get install -y google-chrome-stable
+              sudo apt-get install -y chromium-browser
               
-              export CHROME_BIN=/usr/bin/google-chrome
+              export CHROME_BIN=/usr/bin/chromium-browser
               
               npm test -- \
                 --watch=false \
-                --browsers=ChromeHeadless \
+                --browsers=ChromeHeadlessCI \
                 --code-coverage
 
             workingDirectory: frontend-code
