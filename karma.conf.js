@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const path = require('path');
 
+// Définit CHROME_BIN pour CI
 process.env.CHROME_BIN = puppeteer.executablePath();
 
 module.exports = function (config) {
@@ -15,7 +16,7 @@ module.exports = function (config) {
       require('karma-chrome-launcher'),
       require('karma-jasmine-html-reporter'),
       require('karma-coverage'),
-      require('karma-junit-reporter'), // ✅ IMPORTANT
+      require('karma-junit-reporter'),
       require('@angular-devkit/build-angular/plugins/karma')
     ],
 
@@ -24,10 +25,10 @@ module.exports = function (config) {
       clearContext: false
     },
 
-    reporters: ['progress', 'kjhtml', 'junit'], // ✅ important
+    reporters: ['progress', 'kjhtml', 'junit', 'coverage'],
 
     junitReporter: {
-      outputDir: path.join(__dirname, 'test-results'), // ✅ dossier correct
+      outputDir: path.join(__dirname, 'test-results'),
       outputFile: 'junit.xml',
       useBrowserName: false
     },
@@ -38,10 +39,15 @@ module.exports = function (config) {
       reporters: [
         { type: 'html' },
         { type: 'text-summary' },
-        { type: 'cobertura' } // ✅ obligatoire pour Azure DevOps
+        { type: 'lcov' },
+        { type: 'cobertura' }
       ]
     },
 
+    // ✅ CORRECTION: Utiliser ChromeHeadless directement (supporté nativement)
+    browsers: ['ChromeHeadless'],
+
+    // ✅ Garder le custom launcher pour référence
     customLaunchers: {
       ChromeHeadlessCI: {
         base: 'ChromeHeadless',
@@ -52,8 +58,6 @@ module.exports = function (config) {
         ]
       }
     },
-
-    browsers: process.env.CI ? ['ChromeHeadlessCI'] : ['Chrome'],
 
     singleRun: true,
     restartOnFileChange: false,
