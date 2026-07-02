@@ -39,7 +39,7 @@ module.exports = function (config) {
     },
     junitReporter: {
       outputDir: require('path').join(__dirname, './test-results'),
-      outputFile: 'test-results.xml',
+      outputFile: 'junit.xml',
       useBrowserName: false
     },
     reporters: ['progress', 'kjhtml', 'junit'],
