@@ -164,20 +164,15 @@ stages:
   # ═══════════════════════════════════════════════
   # STAGE 4 : TESTS FRONTEND (ANGULAR)
   # ═══════════════════════════════════════════════
-
   - stage: TestFrontend
-    displayName: '3 - Tests Frontend (Karma + Jasmine)'
-    dependsOn: BuildFrontend
+    displayName: 'Frontend Tests (Karma)'
 
     jobs:
-      - job: FrontendTests
-        displayName: 'Angular Unit Tests'
+      - job: AngularTests
+        displayName: 'Run Unit Tests'
 
         steps:
 
-          # ─────────────────────────────
-          # 1. Clone project
-          # ─────────────────────────────
           - checkout: none
 
           - script: |
@@ -190,25 +185,19 @@ stages:
               cd frontend-code
               
               npm ci
-            displayName: 'Clone project'
+            displayName: 'Install dependencies'
 
-          # ─────────────────────────────
-          # 2. Install Puppeteer (fournit Chrome)
-          # ─────────────────────────────
           - script: |
               set -e
               
               cd frontend-code
               
               npm install puppeteer --save-dev
+              npm install karma-junit-reporter --save-dev
               
-              # Vérifier l'installation
-              npx puppeteer --version || echo "Puppeteer installé"
-            displayName: 'Install Puppeteer'
+              npx puppeteer --version
+            displayName: 'Install test tools'
 
-          # ─────────────────────────────
-          # 3. Run Angular tests
-          # ─────────────────────────────
           - script: |
               set -e
               
@@ -216,55 +205,39 @@ stages:
               
               export CI=true
               
-              echo "=== EXÉCUTION DES TESTS ==="
-              
-              # Créer le dossier test-results
               mkdir -p test-results
               
-              # ✅ Utiliser ChromeHeadless (supporté nativement)
+              echo "RUN TESTS..."
+              
               npm test -- \
                 --watch=false \
-                --browsers=ChromeHeadless \
+                --browsers=ChromeHeadlessCI \
                 --code-coverage \
-                --reporters=junit,progress || true
+                --reporters=junit,progress
               
-              echo "=== VÉRIFICATION DES RAPPORTS ==="
-              echo "📁 Contenu du dossier coverage:"
-              ls -la coverage/ 2>/dev/null || echo "coverage/ non trouvé"
+              echo "CHECK OUTPUTS"
               
-              echo "📁 Contenu du dossier test-results:"
-              ls -la test-results/ 2>/dev/null || echo "test-results/ non trouvé"
-              
-              # Afficher les fichiers XML trouvés
-              find . -name "*.xml" -type f 2>/dev/null | head -10
+              ls -R coverage || echo "NO COVERAGE"
+              ls -R test-results || echo "NO TEST RESULTS"
+
             displayName: 'Run Angular Tests'
 
-          # ─────────────────────────────
-          # 4. Publish Test Results
-          # ─────────────────────────────
           - task: PublishTestResults@2
-            displayName: 'Publish Test Results'
+            displayName: 'Publish Tests'
             condition: always()
             inputs:
               testResultsFormat: JUnit
-              testResultsFiles: '**/test-results/*.xml'
+              testResultsFiles: '**/test-results/junit.xml'
               searchFolder: 'frontend-code'
-              mergeTestResults: true
               failTaskOnFailedTests: false
-              testRunTitle: 'Angular Tests'
 
-          # ─────────────────────────────
-          # 5. Publish Code Coverage
-          # ─────────────────────────────
           - task: PublishCodeCoverageResults@2
-            displayName: 'Publish Code Coverage'
+            displayName: 'Publish Coverage'
             condition: always()
             inputs:
               codeCoverageTool: Cobertura
               summaryFileLocation: 'frontend-code/coverage/**/cobertura-coverage.xml'
-              pathToSources: 'frontend-code/src'
               failIfCoverageEmpty: false
-
   # ══════════════════════════════════════════
   # STAGE 5 : SONARQUBE ANALYSIS
   # ══════════════════════════════════════════
