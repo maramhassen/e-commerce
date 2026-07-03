@@ -165,7 +165,7 @@ stages:
   # STAGE 4 : TESTS FRONTEND (ANGULAR)
   # ═══════════════════════════════════════════════
   - stage: TestFrontend
-    displayName: '3 - Tests Frontend (Karma + Jasmine)'
+    displayName: '2.5 - Tests Frontend (Karma + Jasmine)'
     dependsOn: BuildFrontend
 
     jobs:
@@ -320,7 +320,7 @@ stages:
   # STAGE 5 : SONARQUBE ANALYSIS
   # ══════════════════════════════════════════
   - stage: CodeQuality
-    displayName: '4 - SonarQube Analysis'
+    displayName: '3 - SonarQube Analysis'
     dependsOn:
       - BuildBackend
       - BuildFrontend
@@ -376,7 +376,7 @@ stages:
   # STAGE 6 : BUILD DOCKER IMAGES
   # ══════════════════════════════════════════
   - stage: DockerBuild
-    displayName: '5 - Build Docker Images'
+    displayName: '4 - Build Docker Images'
     dependsOn: CodeQuality
     jobs:
 
@@ -426,7 +426,7 @@ stages:
   # STAGE 7 : SECURITY SCAN (TRIVY)
   # ═══════════════════════════════════════════════════════════════════════
   - stage: SecurityScan
-    displayName: '6 - Security Scan Trivy'
+    displayName: '5 - Security Scan Trivy'
     dependsOn: DockerBuild
     jobs:
       - job: TrivyScan
@@ -465,7 +465,7 @@ stages:
   # STAGE 8 : PUSH TO NEXUS & DOCKER HUB
   # ══════════════════════════════════════════
   - stage: PushImages
-    displayName: '7 - Push to Nexus & Docker Hub'
+    displayName: '6 - Push to Nexus & Docker Hub'
     dependsOn: SecurityScan
     jobs:
       - job: PushAllImages
@@ -509,7 +509,7 @@ stages:
   # STAGE 9 : DEPLOY TO KUBERNETES
   # ══════════════════════════════════════════
   - stage: Deploy
-    displayName: '8 - Deploy to AKS Engine'
+    displayName: '7 - Deploy to AKS Engine'
     dependsOn: PushImages
     jobs:
       - deployment: K8sDeploy
@@ -554,7 +554,7 @@ stages:
   # STAGE 10 : VÉRIFICATION MONITORING
   # ══════════════════════════════════════════
   - stage: VerifyMonitoring
-    displayName: '9 - Vérification Monitoring Prometheus'
+    displayName: '8 - Vérification Monitoring Prometheus'
     dependsOn: Deploy
     jobs:
       - job: CheckPrometheusTargets
