@@ -17,7 +17,7 @@ variables:
   - name: FRONTEND_IMAGE
     value: 'maramhassen/ecommerce-frontend'
   - name: IMAGE_TAG
-    value: 'latest'
+    value: 'v1.1'
   - name: K8S_NAMESPACE
     value: 'ecommerce'
   # Registre interne Nexus (stockage)
@@ -397,7 +397,7 @@ stages:
               fi
               docker build \
                 -t $(BACKEND_IMAGE):$(IMAGE_TAG) \
-                -t $(BACKEND_IMAGE):latest .
+                -t $(BACKEND_IMAGE):v1.1 .
               echo "✅ Image backend construite"
             displayName: 'Build Backend Image'
 
@@ -418,7 +418,7 @@ stages:
               fi
               docker build \
                 -t $(FRONTEND_IMAGE):$(IMAGE_TAG) \
-                -t $(FRONTEND_IMAGE):latest .
+                -t $(FRONTEND_IMAGE):v1.1 .
               echo "✅ Image frontend construite"
             displayName: 'Build Frontend Image'
 
@@ -432,11 +432,11 @@ stages:
       - job: TrivyScan
         displayName: 'Trivy Vulnerability Scan'
         steps:
-          # ⚠️ Important : Récupérer le code pour avoir accès aux images
+          #  Récupérer le code pour avoir accès aux images
           - checkout: self
             displayName: 'Checkout code'
 
-          # Vérifier que les images existent localement
+          # Vérifier que les images existent
           - script: |
               echo "=== IMAGES DISPONIBLES ==="
               docker images | grep ecommerce
