@@ -550,3 +550,25 @@ stages:
                     echo "✅ Déploiement réussi !"
                     echo "🌐 Application: http://102.141.206.178"
                   displayName: 'kubectl Deploy'
+  # ══════════════════════════════════════════
+  # STAGE 10 : VÉRIFICATION MONITORING
+  # ══════════════════════════════════════════
+  - stage: VerifyMonitoring
+    displayName: '9 - Vérification Monitoring Prometheus'
+    dependsOn: Deploy
+    jobs:
+      - job: CheckPrometheusTargets
+        displayName: 'Vérifier que Prometheus scrape le backend'
+        steps:
+          - checkout: none
+          - script: |
+              sleep 60
+              echo "=== VÉRIFICATION DES MÉTRIQUES BACKEND ==="
+              HEALTH=$(curl -s "http://localhost:9090/api/v1/targets" | grep -o '"job":"ecommerce-backend"[^}]*"health":"[a-z]*"' | grep -o '"health":"[a-z]*"' | cut -d'"' -f4)
+              echo "État du target ecommerce-backend: $HEALTH"
+              if [ "$HEALTH" == "up" ]; then
+                echo "✅ Prometheus scrape correctement le backend"
+              else
+                echo "⚠️ Le backend n'est pas encore scrapé correctement (peut nécessiter plus de temps)"
+              fi
+            displayName: 'Check Prometheus Targets'
