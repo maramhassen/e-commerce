@@ -1,0 +1,859 @@
+<?xml version="1.0"?>
+<testsuite name="Chrome Headless 150.0.0.0 (Windows 10)" package="" timestamp="2026-07-05T22:46:19" id="0" hostname="DESKTOP-5PIN9LJ" tests="290" errors="1" failures="9" time="0.547">
+  <properties>
+    <property name="browser.fullName" value="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36"/>
+  </properties>
+  <testcase name="UserListComponent Méthodes utilitaires should get correct role class for ADMIN" time="0.056" classname="UserListComponent Méthodes utilitaires"/>
+  <testcase name="UserListComponent Méthodes utilitaires should get correct role text for CLIENT" time="0.003" classname="UserListComponent Méthodes utilitaires"/>
+  <testcase name="UserListComponent Méthodes utilitaires should get correct role class for CLIENT" time="0.002" classname="UserListComponent Méthodes utilitaires"/>
+  <testcase name="UserListComponent Méthodes utilitaires should get correct role icon for CLIENT" time="0.002" classname="UserListComponent Méthodes utilitaires"/>
+  <testcase name="UserListComponent Méthodes utilitaires should get correct role text for ADMIN" time="0.002" classname="UserListComponent Méthodes utilitaires"/>
+  <testcase name="UserListComponent Méthodes utilitaires should get correct role icon for ADMIN" time="0.002" classname="UserListComponent Méthodes utilitaires"/>
+  <testcase name="UserListComponent Rafraîchissement should refresh user list" time="0.006" classname="UserListComponent Rafraîchissement"/>
+  <testcase name="UserListComponent Création d'utilisateur test should handle create error and add mock user locally" time="0.003" classname="UserListComponent Création d'utilisateur test"/>
+  <testcase name="UserListComponent Création d'utilisateur test should create test user successfully" time="0.003" classname="UserListComponent Création d'utilisateur test"/>
+  <testcase name="UserListComponent Suppression d'utilisateur should not delete user with invalid id" time="0.002" classname="UserListComponent Suppression d'utilisateur"/>
+  <testcase name="UserListComponent Suppression d'utilisateur should not delete non-existent user" time="0.002" classname="UserListComponent Suppression d'utilisateur"/>
+  <testcase name="UserListComponent Suppression d'utilisateur should handle delete error" time="0.002" classname="UserListComponent Suppression d'utilisateur"/>
+  <testcase name="UserListComponent Suppression d'utilisateur should not delete current user" time="0.002" classname="UserListComponent Suppression d'utilisateur"/>
+  <testcase name="UserListComponent Suppression d'utilisateur should not delete user without confirmation" time="0.001" classname="UserListComponent Suppression d'utilisateur"/>
+  <testcase name="UserListComponent Suppression d'utilisateur should not delete last admin" time="0.002" classname="UserListComponent Suppression d'utilisateur"/>
+  <testcase name="UserListComponent Suppression d'utilisateur should delete user with confirmation" time="0.003" classname="UserListComponent Suppression d'utilisateur"/>
+  <testcase name="UserListComponent Chargement des utilisateurs should handle connection error and load mock data" time="0.002" classname="UserListComponent Chargement des utilisateurs"/>
+  <testcase name="UserListComponent Chargement des utilisateurs should handle empty user list" time="0.002" classname="UserListComponent Chargement des utilisateurs"/>
+  <testcase name="UserListComponent Chargement des utilisateurs should handle non-array data" time="0.001" classname="UserListComponent Chargement des utilisateurs"/>
+  <testcase name="UserListComponent Chargement des utilisateurs should load users successfully" time="0.002" classname="UserListComponent Chargement des utilisateurs"/>
+  <testcase name="UserListComponent Chargement des utilisateurs should handle backend error" time="0.002" classname="UserListComponent Chargement des utilisateurs"/>
+  <testcase name="UserListComponent Initialisation du composant should load users when authenticated and admin" time="0.008" classname="UserListComponent Initialisation du composant"/>
+  <testcase name="UserListComponent Initialisation du composant should create the component" time="0.002" classname="UserListComponent Initialisation du composant"/>
+  <testcase name="UserListComponent Initialisation du composant should initialize with default values" time="0.002" classname="UserListComponent Initialisation du composant"/>
+  <testcase name="UserListComponent Initialisation du composant should NOT load users when not admin" time="0.003" classname="UserListComponent Initialisation du composant"/>
+  <testcase name="UserListComponent Initialisation du composant should check admin status on init" time="0.005" classname="UserListComponent Initialisation du composant"/>
+  <testcase name="UserListComponent Initialisation du composant should NOT load users when not authenticated" time="0.005" classname="UserListComponent Initialisation du composant"/>
+  <testcase name="UserListComponent Initialisation du composant should load current user on init" time="0.006" classname="UserListComponent Initialisation du composant"/>
+  <testcase name="UserListComponent Gestion d'erreur should handle status 404 error" time="0.003" classname="UserListComponent Gestion d'erreur"/>
+  <testcase name="UserListComponent Gestion d'erreur should handle status 0 error" time="0.002" classname="UserListComponent Gestion d'erreur"/>
+  <testcase name="UserListComponent Gestion d'erreur should handle status 401 error" time="0.003" classname="UserListComponent Gestion d'erreur"/>
+  <testcase name="UserListComponent Gestion d'erreur should handle unknown error" time="0.002" classname="UserListComponent Gestion d'erreur"/>
+  <testcase name="UserListComponent Gestion d'erreur should handle status 403 error" time="0.004" classname="UserListComponent Gestion d'erreur"/>
+  <testcase name="UserListComponent Données mockées should load mock data correctly" time="0.002" classname="UserListComponent Données mockées"/>
+  <testcase name="UserListComponent Données mockées should handle missing current user in mock data" time="0.002" classname="UserListComponent Données mockées"/>
+  <testcase name="UserListComponent Génération HTML d'erreur should generate backend error HTML" time="0.002" classname="UserListComponent Génération HTML d'erreur"/>
+  <testcase name="UserListComponent Génération HTML d'erreur should handle error without message" time="0.002" classname="UserListComponent Génération HTML d'erreur"/>
+  <testcase name="UserListComponent AfterViewInit should call testDirectApiCall" time="0.004" classname="UserListComponent AfterViewInit"/>
+  <testcase name="NavbarComponent should create" time="0.023" classname="NavbarComponent">
+    <failure type="">NullInjectorError: R3InjectorError(DynamicTestModule)[AuthService -&gt; HttpClient -&gt; HttpClient]: 
+  NullInjectorError: No provider for HttpClient!
+error properties: Object({ ngTempTokenPath: null, ngTokenPath: [ 'AuthService', 'HttpClient', 'HttpClient' ] })
+    at NullInjector.get (node_modules/@angular/core/fesm2022/core.mjs:8890:27)
+    at R3Injector.get (node_modules/@angular/core/fesm2022/core.mjs:9334:33)
+    at R3Injector.get (node_modules/@angular/core/fesm2022/core.mjs:9334:33)
+    at injectInjectorOnly (node_modules/@angular/core/fesm2022/core.mjs:842:40)
+    at ɵɵinject (node_modules/@angular/core/fesm2022/core.mjs:848:60)
+    at Object.factory (ng:///AuthService/ɵfac.js:4:39)
+    at callback (node_modules/@angular/core/fesm2022/core.mjs:9454:43)
+    at runInInjectorProfilerContext (node_modules/@angular/core/fesm2022/core.mjs:798:9)
+    at R3Injector.hydrate (node_modules/@angular/core/fesm2022/core.mjs:9453:17)
+    at R3Injector.get (node_modules/@angular/core/fesm2022/core.mjs:9323:33)
+</failure>
+  </testcase>
+  <testcase name="HomeComponent should create" time="0.039" classname="HomeComponent">
+    <failure type="">NullInjectorError: R3InjectorError(DynamicTestModule)[ProductService -&gt; HttpClient -&gt; HttpClient]: 
+  NullInjectorError: No provider for HttpClient!
+error properties: Object({ ngTempTokenPath: null, ngTokenPath: [ 'ProductService', 'HttpClient', 'HttpClient' ] })
+    at NullInjector.get (node_modules/@angular/core/fesm2022/core.mjs:8890:27)
+    at R3Injector.get (node_modules/@angular/core/fesm2022/core.mjs:9334:33)
+    at R3Injector.get (node_modules/@angular/core/fesm2022/core.mjs:9334:33)
+    at injectInjectorOnly (node_modules/@angular/core/fesm2022/core.mjs:842:40)
+    at ɵɵinject (node_modules/@angular/core/fesm2022/core.mjs:848:60)
+    at Object.factory (ng:///ProductService/ɵfac.js:4:42)
+    at callback (node_modules/@angular/core/fesm2022/core.mjs:9454:43)
+    at runInInjectorProfilerContext (node_modules/@angular/core/fesm2022/core.mjs:798:9)
+    at R3Injector.hydrate (node_modules/@angular/core/fesm2022/core.mjs:9453:17)
+    at R3Injector.get (node_modules/@angular/core/fesm2022/core.mjs:9323:33)
+</failure>
+  </testcase>
+  <testcase name="FooterComponent should create" time="0.009" classname="FooterComponent">
+    <failure type="">NullInjectorError: R3InjectorError(DynamicTestModule)[AuthService -&gt; HttpClient -&gt; HttpClient]: 
+  NullInjectorError: No provider for HttpClient!
+error properties: Object({ ngTempTokenPath: null, ngTokenPath: [ 'AuthService', 'HttpClient', 'HttpClient' ] })
+    at NullInjector.get (node_modules/@angular/core/fesm2022/core.mjs:8890:27)
+    at R3Injector.get (node_modules/@angular/core/fesm2022/core.mjs:9334:33)
+    at R3Injector.get (node_modules/@angular/core/fesm2022/core.mjs:9334:33)
+    at injectInjectorOnly (node_modules/@angular/core/fesm2022/core.mjs:842:40)
+    at ɵɵinject (node_modules/@angular/core/fesm2022/core.mjs:848:60)
+    at Object.factory (ng:///AuthService/ɵfac.js:4:39)
+    at callback (node_modules/@angular/core/fesm2022/core.mjs:9454:43)
+    at runInInjectorProfilerContext (node_modules/@angular/core/fesm2022/core.mjs:798:9)
+    at R3Injector.hydrate (node_modules/@angular/core/fesm2022/core.mjs:9453:17)
+    at R3Injector.get (node_modules/@angular/core/fesm2022/core.mjs:9323:33)
+</failure>
+  </testcase>
+  <testcase name="ProductService getCategoryName returns &quot;Non catégorisé&quot; when nothing is available" time="0.002" classname="ProductService getCategoryName"/>
+  <testcase name="ProductService getCategoryName returns category name when present" time="0.001" classname="ProductService getCategoryName"/>
+  <testcase name="ProductService getImageUrl returns assets path as-is" time="0.001" classname="ProductService getImageUrl"/>
+  <testcase name="ProductService getImageUrl returns default image when empty/null/undefined" time="0.002" classname="ProductService getImageUrl"/>
+  <testcase name="ProductService getImageUrl returns full URLs as-is" time="0.002" classname="ProductService getImageUrl"/>
+  <testcase name="ProductService getImageUrl builds full URL for UUID-like filenames" time="0.002" classname="ProductService getImageUrl"/>
+  <testcase name="ProductService should create a product then reload it via getById" time="0.004" classname="ProductService"/>
+  <testcase name="ProductService should handle create error" time="0.002" classname="ProductService"/>
+  <testcase name="ProductService should propagate a 404 error from getById through handleError" time="0.002" classname="ProductService"/>
+  <testcase name="ProductService should update a product then reload it via getById" time="0.002" classname="ProductService"/>
+  <testcase name="ProductService should delete a product" time="0.003" classname="ProductService"/>
+  <testcase name="ProductService should handle delete error" time="0.002" classname="ProductService"/>
+  <testcase name="ProductService should be created" time="0.001" classname="ProductService"/>
+  <testcase name="ProductService should fetch a product by id and enrich it with its category" time="0.002" classname="ProductService"/>
+  <testcase name="ProductService should fetch all products via getAll()" time="0.002" classname="ProductService"/>
+  <testcase name="HeaderComponent should create" time="0.003" classname="HeaderComponent">
+    <failure type="">NullInjectorError: R3InjectorError(DynamicTestModule)[AuthService -&gt; HttpClient -&gt; HttpClient]: 
+  NullInjectorError: No provider for HttpClient!
+error properties: Object({ ngTempTokenPath: null, ngTokenPath: [ 'AuthService', 'HttpClient', 'HttpClient' ] })
+    at NullInjector.get (node_modules/@angular/core/fesm2022/core.mjs:8890:27)
+    at R3Injector.get (node_modules/@angular/core/fesm2022/core.mjs:9334:33)
+    at R3Injector.get (node_modules/@angular/core/fesm2022/core.mjs:9334:33)
+    at injectInjectorOnly (node_modules/@angular/core/fesm2022/core.mjs:842:40)
+    at ɵɵinject (node_modules/@angular/core/fesm2022/core.mjs:848:60)
+    at Object.factory (ng:///AuthService/ɵfac.js:4:39)
+    at callback (node_modules/@angular/core/fesm2022/core.mjs:9454:43)
+    at runInInjectorProfilerContext (node_modules/@angular/core/fesm2022/core.mjs:798:9)
+    at R3Injector.hydrate (node_modules/@angular/core/fesm2022/core.mjs:9453:17)
+    at R3Injector.get (node_modules/@angular/core/fesm2022/core.mjs:9323:33)
+</failure>
+  </testcase>
+  <testcase name="OrderService should get order by id" time="0.001" classname="OrderService"/>
+  <testcase name="OrderService should delete order" time="0.002" classname="OrderService"/>
+  <testcase name="OrderService should test create order" time="0.003" classname="OrderService"/>
+  <testcase name="OrderService should handle 500 error from createOrder" time="0.003" classname="OrderService"/>
+  <testcase name="OrderService should handle error when deleting order" time="0.002" classname="OrderService"/>
+  <testcase name="OrderService should get order by cart id" time="0.002" classname="OrderService"/>
+  <testcase name="OrderService should handle empty orders" time="0.001" classname="OrderService"/>
+  <testcase name="OrderService should create order from cart" time="0.002" classname="OrderService"/>
+  <testcase name="OrderService should get all orders (admin)" time="0.003" classname="OrderService"/>
+  <testcase name="OrderService should get status color" time="0.002" classname="OrderService"/>
+  <testcase name="OrderService should be created" time="0.001" classname="OrderService"/>
+  <testcase name="OrderService should get status text" time="0.002" classname="OrderService"/>
+  <testcase name="OrderService should update order status" time="0.002" classname="OrderService"/>
+  <testcase name="OrderService should return N/A for invalid date" time="0.001" classname="OrderService"/>
+  <testcase name="OrderService should handle error when userId is invalid (0)" time="0.001" classname="OrderService"/>
+  <testcase name="OrderService should handle error when updating status" time="0.002" classname="OrderService"/>
+  <testcase name="OrderService should format date" time="0.016" classname="OrderService"/>
+  <testcase name="OrderService should get total items in order" time="0.002" classname="OrderService"/>
+  <testcase name="OrderService should handle 404 from getOrderById" time="0.002" classname="OrderService"/>
+  <testcase name="OrderService should handle error when userId is negative" time="0.002" classname="OrderService"/>
+  <testcase name="OrderService should get orders by user" time="0.002" classname="OrderService"/>
+  <testcase name="OrderListComponent should not delete order without confirmation" time="0.017" classname="OrderListComponent"/>
+  <testcase name="OrderListComponent should get status color" time="0.003" classname="OrderListComponent"/>
+  <testcase name="OrderListComponent should get status class" time="0.003" classname="OrderListComponent"/>
+  <testcase name="OrderListComponent should not create order without user" time="0.004" classname="OrderListComponent"/>
+  <testcase name="OrderListComponent should get status text" time="0.002" classname="OrderListComponent"/>
+  <testcase name="OrderListComponent should reload orders" time="0.002" classname="OrderListComponent"/>
+  <testcase name="OrderListComponent should redirect to login if no user" time="0.003" classname="OrderListComponent"/>
+  <testcase name="OrderListComponent should load all orders for admin" time="0.003" classname="OrderListComponent"/>
+  <testcase name="OrderListComponent should not update status without confirmation" time="0.004" classname="OrderListComponent"/>
+  <testcase name="OrderListComponent should update status with confirmation" time="0.002" classname="OrderListComponent"/>
+  <testcase name="OrderListComponent should load orders on init for user" time="0.002" classname="OrderListComponent"/>
+  <testcase name="OrderListComponent should get total items in order" time="0.001" classname="OrderListComponent"/>
+  <testcase name="OrderListComponent should filter by status" time="0.002" classname="OrderListComponent">
+    <failure type="">Expected 0 to be 1.
+    at &lt;Jasmine&gt;
+    at UserContext.apply (src/app/orders/order-list/order-list.component.spec.ts:154:45)
+    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:368:26)
+    at ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:273:39)
+    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:367:52)
+</failure>
+    <failure type="">Expected undefined to be 'EN_ATTENTE'.
+    at &lt;Jasmine&gt;
+    at UserContext.apply (src/app/orders/order-list/order-list.component.spec.ts:155:49)
+    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:368:26)
+    at ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:273:39)
+    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:367:52)
+</failure>
+  </testcase>
+  <testcase name="OrderListComponent should create" time="0.004" classname="OrderListComponent"/>
+  <testcase name="OrderListComponent should delete order" time="0.003" classname="OrderListComponent"/>
+  <testcase name="OrderListComponent should format price" time="0.002" classname="OrderListComponent"/>
+  <testcase name="OrderListComponent should format date" time="0.003" classname="OrderListComponent"/>
+  <testcase name="OrderListComponent should filter by search term (admin only)" time="0.002" classname="OrderListComponent"/>
+  <testcase name="OrderListComponent should create order from cart" time="0.004" classname="OrderListComponent"/>
+  <testcase name="OrderListComponent should calculate stats correctly" time="0.003" classname="OrderListComponent">
+    <failure type="">Expected undefined to be 1.
+    at &lt;Jasmine&gt;
+    at UserContext.apply (src/app/orders/order-list/order-list.component.spec.ts:141:51)
+    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:368:26)
+    at ProxyZoneSpec.onInvoke (node_modules/zone.js/fesm2015/zone-testing.js:273:39)
+    at _ZoneDelegate.invoke (node_modules/zone.js/fesm2015/zone.js:367:52)
+</failure>
+  </testcase>
+  <testcase name="OrderListComponent should clear filters" time="0.002" classname="OrderListComponent"/>
+  <testcase name="OrderListComponent should handle error when loading orders" time="0.003" classname="OrderListComponent"/>
+  <testcase name="OrderListComponent should navigate to order details" time="0.002" classname="OrderListComponent"/>
+  <testcase name="UserService should be created" time="0.001" classname="UserService"/>
+  <testcase name="UserService should delete a user" time="0.002" classname="UserService"/>
+  <testcase name="UserService should create a user" time="0.002" classname="UserService"/>
+  <testcase name="UserService should fetch all users" time="0.001" classname="UserService"/>
+  <testcase name="OrderDetailComponent should not delete order without confirmation" time="0.011" classname="OrderDetailComponent"/>
+  <testcase name="OrderDetailComponent should print order" time="0.003" classname="OrderDetailComponent"/>
+  <testcase name="OrderDetailComponent should create" time="0.001" classname="OrderDetailComponent"/>
+  <testcase name="OrderDetailComponent should get status text" time="0.001" classname="OrderDetailComponent"/>
+  <testcase name="OrderDetailComponent should format date" time="0.002" classname="OrderDetailComponent"/>
+  <testcase name="OrderDetailComponent should check admin status on init" time="0.002" classname="OrderDetailComponent"/>
+  <testcase name="OrderDetailComponent should handle invalid order id" time="0.001" classname="OrderDetailComponent"/>
+  <testcase name="OrderDetailComponent should handle error when loading order fails" time="0.002" classname="OrderDetailComponent"/>
+  <testcase name="OrderDetailComponent should update order status" time="0.006" classname="OrderDetailComponent"/>
+  <testcase name="OrderDetailComponent should load order on init" time="0.002" classname="OrderDetailComponent"/>
+  <testcase name="OrderDetailComponent should delete order with confirmation" time="0.001" classname="OrderDetailComponent"/>
+  <testcase name="OrderDetailComponent should generate invoice" time="0.001" classname="OrderDetailComponent"/>
+  <testcase name="OrderDetailComponent should go back to orders" time="0.001" classname="OrderDetailComponent"/>
+  <testcase name="OrderDetailComponent should get status class" time="0.002" classname="OrderDetailComponent"/>
+  <testcase name="OrderDetailComponent should get total quantity from order" time="0.001" classname="OrderDetailComponent"/>
+  <testcase name="ProductDetailComponent should not delete without confirmation" time="0.009" classname="ProductDetailComponent"/>
+  <testcase name="ProductDetailComponent should go back" time="0.001" classname="ProductDetailComponent"/>
+  <testcase name="ProductDetailComponent should handle error when adding to cart" time="0.001" classname="ProductDetailComponent"/>
+  <testcase name="ProductDetailComponent should delete product with confirmation" time="0.001" classname="ProductDetailComponent"/>
+  <testcase name="ProductDetailComponent should load product on init" time="0.001" classname="ProductDetailComponent"/>
+  <testcase name="ProductDetailComponent should handle error when loading product" time="0.002" classname="ProductDetailComponent"/>
+  <testcase name="ProductDetailComponent should create" time="0.002" classname="ProductDetailComponent"/>
+  <testcase name="ProductDetailComponent should add product to cart" time="0.002" classname="ProductDetailComponent"/>
+  <testcase name="AppComponent should create the app" time="0.003" classname="AppComponent">
+    <failure type="">NullInjectorError: R3InjectorError(DynamicTestModule)[AuthService -&gt; HttpClient -&gt; HttpClient]: 
+  NullInjectorError: No provider for HttpClient!
+error properties: Object({ ngTempTokenPath: null, ngTokenPath: [ 'AuthService', 'HttpClient', 'HttpClient' ] })
+    at NullInjector.get (node_modules/@angular/core/fesm2022/core.mjs:8890:27)
+    at R3Injector.get (node_modules/@angular/core/fesm2022/core.mjs:9334:33)
+    at R3Injector.get (node_modules/@angular/core/fesm2022/core.mjs:9334:33)
+    at injectInjectorOnly (node_modules/@angular/core/fesm2022/core.mjs:842:40)
+    at ɵɵinject (node_modules/@angular/core/fesm2022/core.mjs:848:60)
+    at Object.factory (ng:///AuthService/ɵfac.js:4:39)
+    at callback (node_modules/@angular/core/fesm2022/core.mjs:9454:43)
+    at runInInjectorProfilerContext (node_modules/@angular/core/fesm2022/core.mjs:798:9)
+    at R3Injector.hydrate (node_modules/@angular/core/fesm2022/core.mjs:9453:17)
+    at R3Injector.get (node_modules/@angular/core/fesm2022/core.mjs:9323:33)
+</failure>
+  </testcase>
+  <testcase name="AppComponent should render title" time="0.002" classname="AppComponent">
+    <failure type="">NullInjectorError: R3InjectorError(DynamicTestModule)[AuthService -&gt; HttpClient -&gt; HttpClient]: 
+  NullInjectorError: No provider for HttpClient!
+error properties: Object({ ngTempTokenPath: null, ngTokenPath: [ 'AuthService', 'HttpClient', 'HttpClient' ] })
+    at NullInjector.get (node_modules/@angular/core/fesm2022/core.mjs:8890:27)
+    at R3Injector.get (node_modules/@angular/core/fesm2022/core.mjs:9334:33)
+    at R3Injector.get (node_modules/@angular/core/fesm2022/core.mjs:9334:33)
+    at injectInjectorOnly (node_modules/@angular/core/fesm2022/core.mjs:842:40)
+    at ɵɵinject (node_modules/@angular/core/fesm2022/core.mjs:848:60)
+    at Object.factory (ng:///AuthService/ɵfac.js:4:39)
+    at callback (node_modules/@angular/core/fesm2022/core.mjs:9454:43)
+    at runInInjectorProfilerContext (node_modules/@angular/core/fesm2022/core.mjs:798:9)
+    at R3Injector.hydrate (node_modules/@angular/core/fesm2022/core.mjs:9453:17)
+    at R3Injector.get (node_modules/@angular/core/fesm2022/core.mjs:9323:33)
+</failure>
+  </testcase>
+  <testcase name="AppComponent should have as title 'site-e-commerce'" time="0.001" classname="AppComponent">
+    <failure type="">NullInjectorError: R3InjectorError(DynamicTestModule)[AuthService -&gt; HttpClient -&gt; HttpClient]: 
+  NullInjectorError: No provider for HttpClient!
+error properties: Object({ ngTempTokenPath: null, ngTokenPath: [ 'AuthService', 'HttpClient', 'HttpClient' ] })
+    at NullInjector.get (node_modules/@angular/core/fesm2022/core.mjs:8890:27)
+    at R3Injector.get (node_modules/@angular/core/fesm2022/core.mjs:9334:33)
+    at R3Injector.get (node_modules/@angular/core/fesm2022/core.mjs:9334:33)
+    at injectInjectorOnly (node_modules/@angular/core/fesm2022/core.mjs:842:40)
+    at ɵɵinject (node_modules/@angular/core/fesm2022/core.mjs:848:60)
+    at Object.factory (ng:///AuthService/ɵfac.js:4:39)
+    at callback (node_modules/@angular/core/fesm2022/core.mjs:9454:43)
+    at runInInjectorProfilerContext (node_modules/@angular/core/fesm2022/core.mjs:798:9)
+    at R3Injector.hydrate (node_modules/@angular/core/fesm2022/core.mjs:9453:17)
+    at R3Injector.get (node_modules/@angular/core/fesm2022/core.mjs:9323:33)
+</failure>
+  </testcase>
+  <testcase name="ProductListComponent should create" time="0.012" classname="ProductListComponent"/>
+  <testcase name="ProductListComponent should get paginated products" time="0.003" classname="ProductListComponent"/>
+  <testcase name="ProductListComponent should handle delete error" time="0.003" classname="ProductListComponent"/>
+  <testcase name="ProductListComponent should not delete without confirmation" time="0.003" classname="ProductListComponent"/>
+  <testcase name="ProductListComponent should delete product with confirmation" time="0.003" classname="ProductListComponent"/>
+  <testcase name="ProductListComponent should handle error when adding to cart" time="0.002" classname="ProductListComponent"/>
+  <testcase name="ProductListComponent should load products on init" time="0.002" classname="ProductListComponent"/>
+  <testcase name="ProductListComponent should add product to cart" time="0.002" classname="ProductListComponent"/>
+  <testcase name="ProductListComponent should filter by search keyword" time="0.003" classname="ProductListComponent"/>
+  <testcase name="ProductListComponent should filter by category" time="0.004" classname="ProductListComponent"/>
+  <testcase name="LoginComponent should initialize with empty fields" time="0.006" classname="LoginComponent"/>
+  <testcase name="LoginComponent should test backend connection" time="0.003" classname="LoginComponent"/>
+  <testcase name="LoginComponent should create" time="0.004" classname="LoginComponent"/>
+  <testcase name="LoginComponent should handle backend test error" time="0.002" classname="LoginComponent"/>
+  <testcase name="LoginComponent should list all users" time="0.002" classname="LoginComponent"/>
+  <testcase name="LoginComponent should handle login error - invalid credentials" time="0.004" classname="LoginComponent"/>
+  <testcase name="LoginComponent should test admin login" time="0.002" classname="LoginComponent"/>
+  <testcase name="LoginComponent should login successfully" time="0.005" classname="LoginComponent"/>
+  <testcase name="LoginComponent should check for session expired message" time="0.002" classname="LoginComponent"/>
+  <testcase name="LoginComponent should handle login error - server error" time="0.003" classname="LoginComponent"/>
+  <testcase name="LoginComponent should handle login error - 404" time="0.003" classname="LoginComponent"/>
+  <testcase name="LoginComponent should reset form" time="0.002" classname="LoginComponent"/>
+  <testcase name="LoginComponent should login with return URL" time="0.003" classname="LoginComponent"/>
+  <testcase name="LoginComponent should navigate to register" time="0.003" classname="LoginComponent"/>
+  <testcase name="LoginComponent should show error when fields are empty" time="0.002" classname="LoginComponent"/>
+  <testcase name="LoginComponent should test client login" time="0.003" classname="LoginComponent"/>
+  <system-out>
+    <![CDATA[Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔄 Rafraîchissement de la liste...'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Création d'un utilisateur test...'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '❌ Erreur création test user:', Error: Create failed
+Error: Create failed
+    at errorFactory (http://localhost:9876/_karma_webpack_/webpack:/src/app/users/user-list/user-list.component.spec.ts:366:63)
+    at Observable._subscribe (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/observable/throwError.js:5:51)
+    at Observable._trySubscribe (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/Observable.js:37:25)
+    at cb (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/Observable.js:31:30)
+    at errorContext (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/util/errorContext.js:19:9)
+    at Observable.subscribe (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/Observable.js:22:21)
+    at UserListComponent.createTestUser (http://localhost:9876/_karma_webpack_/webpack:/src/app/users/user-list/user-list.component.ts:337:39)
+    at UserContext.apply (http://localhost:9876/_karma_webpack_/webpack:/src/app/users/user-list/user-list.component.spec.ts:371:17)
+    at _ZoneDelegate.invoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:368:26)
+    at ProxyZoneSpec.onInvoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone-testing.js:273:39)
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Utilisateur mocké ajouté localement:', Object{id: 4, nom: 'Test82', prenom: 'User', email: 'test.user.1783291579267@maboutique.com', motDePasse: 'password123', role: 'CLIENT'}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Création d'un utilisateur test...'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ Utilisateur test créé:', Object{id: 4, nom: 'Test42', prenom: 'User', email: 'test@example.com', motDePasse: 'password', role: 'CLIENT'}
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'ID utilisateur invalide'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '❌ Erreur lors de la suppression:', Error: Delete failed
+Error: Delete failed
+    at errorFactory (http://localhost:9876/_karma_webpack_/webpack:/src/app/users/user-list/user-list.component.spec.ts:331:63)
+    at Observable._subscribe (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/observable/throwError.js:5:51)
+    at Observable._trySubscribe (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/Observable.js:37:25)
+    at cb (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/Observable.js:31:30)
+    at errorContext (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/util/errorContext.js:19:9)
+    at Observable.subscribe (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/Observable.js:22:21)
+    at UserListComponent.deleteUser (http://localhost:9876/_karma_webpack_/webpack:/src/app/users/user-list/user-list.component.ts:264:35)
+    at UserContext.apply (http://localhost:9876/_karma_webpack_/webpack:/src/app/users/user-list/user-list.component.spec.ts:333:17)
+    at _ZoneDelegate.invoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:368:26)
+    at ProxyZoneSpec.onInvoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone-testing.js:273:39)
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ Utilisateur 2 supprimé avec succès'
+,Chrome Headless 150.0.0.0 (Windows 10) ALERT: '✅ Utilisateur "Jane Smith" supprimé avec succès'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== DÉBUT CHARGEMENT UTILISATEURS ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'URL utilisée:', '/api/users'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '❌ Problème de connexion au backend:', Error: Connection failed
+Error: Connection failed
+    at errorFactory (http://localhost:9876/_karma_webpack_/webpack:/src/app/users/user-list/user-list.component.spec.ts:217:78)
+    at Observable._subscribe (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/observable/throwError.js:5:51)
+    at Observable._trySubscribe (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/Observable.js:37:25)
+    at cb (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/Observable.js:31:30)
+    at errorContext (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/util/errorContext.js:19:9)
+    at Observable.subscribe (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/Observable.js:22:21)
+    at UserListComponent.loadUsers (http://localhost:9876/_karma_webpack_/webpack:/src/app/users/user-list/user-list.component.ts:100:46)
+    at UserContext.apply (http://localhost:9876/_karma_webpack_/webpack:/src/app/users/user-list/user-list.component.spec.ts:220:17)
+    at UserContext.apply (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone-testing.js:1987:30)
+    at _ZoneDelegate.invoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:368:26)
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Chargement de données mockées en mode développement...'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== DÉBUT CHARGEMENT UTILISATEURS ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'URL utilisée:', '/api/users'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ Backend accessible:', Object{success: true}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ Données API reçues:', []
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Type:', 'object'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Is Array:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '📊 0 utilisateur(s) chargé(s) avec succès'
+,Chrome Headless 150.0.0.0 (Windows 10) WARN: '⚠️ Tableau d'utilisateurs vide'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== DÉBUT CHARGEMENT UTILISATEURS ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'URL utilisée:', '/api/users'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ Backend accessible:', Object{success: true}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ Données API reçues:', Object{data: 'invalid'}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Type:', 'object'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Is Array:', false
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '❌ Format de données incorrect:', Object{data: 'invalid'}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== DÉBUT CHARGEMENT UTILISATEURS ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'URL utilisée:', '/api/users'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ Backend accessible:', Object{success: true}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ Données API reçues:', [Object{id: 1, nom: 'Doe', prenom: 'John', email: 'john@example.com', motDePasse: '', role: 'ADMIN'}, Object{id: 2, nom: 'Smith', prenom: 'Jane', email: 'jane@example.com', motDePasse: '', role: 'CLIENT'}, Object{id: 3, nom: 'Johnson', prenom: 'Bob', email: 'bob@example.com', motDePasse: '', role: 'CLIENT'}]
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Type:', 'object'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Is Array:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '📊 3 utilisateur(s) chargé(s) avec succès'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== DÉBUT CHARGEMENT UTILISATEURS ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'URL utilisée:', '/api/users'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ Backend accessible:', Object{success: true}
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '❌ Erreur lors du chargement des utilisateurs:', Object{status: 500, message: 'Server error'}
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '=== ERREUR DÉTAILLÉE ==='
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Status:', 500
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Status Text:', undefined
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Message:', 'Server error'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'URL:', undefined
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Error Object:', undefined
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== UserListComponent initialisé ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'URL API UserService:', 'http://localhost:8080/api'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Utilisateur connecté:', Object{id: 1, nom: 'Admin', prenom: 'System', email: 'admin@maboutique.com', role: 'ADMIN'}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Est admin?', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Est authentifié?', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== DÉBUT CHARGEMENT UTILISATEURS ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'URL utilisée:', '/api/users'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ Backend accessible:', Object{success: true}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ Données API reçues:', [Object{id: 1, nom: 'Doe', prenom: 'John', email: 'john@example.com', motDePasse: '', role: 'ADMIN'}, Object{id: 2, nom: 'Smith', prenom: 'Jane', email: 'jane@example.com', motDePasse: '', role: 'CLIENT'}, Object{id: 3, nom: 'Johnson', prenom: 'Bob', email: 'bob@example.com', motDePasse: '', role: 'CLIENT'}]
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Type:', 'object'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Is Array:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '📊 3 utilisateur(s) chargé(s) avec succès'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== ÉTAT COMPLET DU COMPOSANT ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Is Authenticated:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Is Admin:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Current User:', Object{id: 1, nom: 'Admin', prenom: 'System', email: 'admin@maboutique.com', role: 'ADMIN'}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Token exists:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '===================='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== TEST API DIRECT AVEC FETCH ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Fetch Response Status:', 404, 'Not Found'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Fetch Response Headers:', Headers{}
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Fetch Error:', Error: HTTP 404: Not Found
+Error: HTTP 404: Not Found
+    at apply (http://localhost:9876/_karma_webpack_/webpack:/src/app/users/user-list/user-list.component.ts:75:17)
+    at _ZoneDelegate.invoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:368:26)
+    at ProxyZoneSpec.onInvoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone-testing.js:273:39)
+    at _ZoneDelegate.invoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:367:52)
+    at Object.onInvoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2022/core.mjs:11083:33)
+    at _ZoneDelegate.invoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:367:52)
+    at Zone.run (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:129:43)
+    at apply (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:1257:36)
+    at _ZoneDelegate.invokeTask (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:402:31)
+    at ProxyZoneSpec.onInvokeTask (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone-testing.js:304:39)
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Message d'erreur:', 'HTTP 404: Not Found'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== UserListComponent initialisé ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'URL API UserService:', 'http://localhost:8080/api'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Utilisateur connecté:', Object{id: 1, nom: 'Admin', prenom: 'System', email: 'admin@maboutique.com', role: 'ADMIN'}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Est admin?', false
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Est authentifié?', true
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Utilisateur n'est pas administrateur. Rôle:', 'ADMIN'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== ÉTAT COMPLET DU COMPOSANT ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Is Authenticated:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Is Admin:', false
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Current User:', Object{id: 1, nom: 'Admin', prenom: 'System', email: 'admin@maboutique.com', role: 'ADMIN'}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Token exists:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '===================='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== TEST API DIRECT AVEC FETCH ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== UserListComponent initialisé ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'URL API UserService:', 'http://localhost:8080/api'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Utilisateur connecté:', Object{id: 1, nom: 'Admin', prenom: 'System', email: 'admin@maboutique.com', role: 'ADMIN'}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Est admin?', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Est authentifié?', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== DÉBUT CHARGEMENT UTILISATEURS ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'URL utilisée:', '/api/users'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ Backend accessible:', Object{success: true}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ Données API reçues:', []
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Type:', 'object'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Is Array:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '📊 0 utilisateur(s) chargé(s) avec succès'
+,Chrome Headless 150.0.0.0 (Windows 10) WARN: '⚠️ Tableau d'utilisateurs vide'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== ÉTAT COMPLET DU COMPOSANT ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Is Authenticated:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Is Admin:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Current User:', Object{id: 1, nom: 'Admin', prenom: 'System', email: 'admin@maboutique.com', role: 'ADMIN'}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Token exists:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '===================='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== TEST API DIRECT AVEC FETCH ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Fetch Response Status:', 404, 'Not Found'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Fetch Response Headers:', Headers{}
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Fetch Error:', Error: HTTP 404: Not Found
+Error: HTTP 404: Not Found
+    at apply (http://localhost:9876/_karma_webpack_/webpack:/src/app/users/user-list/user-list.component.ts:75:17)
+    at _ZoneDelegate.invoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:368:26)
+    at ProxyZoneSpec.onInvoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone-testing.js:273:39)
+    at _ZoneDelegate.invoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:367:52)
+    at Object.onInvoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2022/core.mjs:11083:33)
+    at _ZoneDelegate.invoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:367:52)
+    at Zone.run (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:129:43)
+    at apply (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:1257:36)
+    at _ZoneDelegate.invokeTask (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:402:31)
+    at ProxyZoneSpec.onInvokeTask (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone-testing.js:304:39)
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Message d'erreur:', 'HTTP 404: Not Found'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Fetch Response Status:', 404, 'Not Found'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Fetch Response Headers:', Headers{}
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Fetch Error:', Error: HTTP 404: Not Found
+Error: HTTP 404: Not Found
+    at apply (http://localhost:9876/_karma_webpack_/webpack:/src/app/users/user-list/user-list.component.ts:75:17)
+    at _ZoneDelegate.invoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:368:26)
+    at ProxyZoneSpec.onInvoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone-testing.js:273:39)
+    at _ZoneDelegate.invoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:367:52)
+    at Object.onInvoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2022/core.mjs:11083:33)
+    at _ZoneDelegate.invoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:367:52)
+    at Zone.run (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:129:43)
+    at apply (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:1257:36)
+    at _ZoneDelegate.invokeTask (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:402:31)
+    at ProxyZoneSpec.onInvokeTask (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone-testing.js:304:39)
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Message d'erreur:', 'HTTP 404: Not Found'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== UserListComponent initialisé ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'URL API UserService:', 'http://localhost:8080/api'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Utilisateur connecté:', Object{id: 1, nom: 'Admin', prenom: 'System', email: 'admin@maboutique.com', role: 'ADMIN'}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Est admin?', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Est authentifié?', false
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Utilisateur non authentifié'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== ÉTAT COMPLET DU COMPOSANT ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Is Authenticated:', false
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Is Admin:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Current User:', Object{id: 1, nom: 'Admin', prenom: 'System', email: 'admin@maboutique.com', role: 'ADMIN'}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Token exists:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '===================='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== TEST API DIRECT AVEC FETCH ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== UserListComponent initialisé ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'URL API UserService:', 'http://localhost:8080/api'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Utilisateur connecté:', Object{id: 1, nom: 'Admin', prenom: 'System', email: 'admin@maboutique.com', role: 'ADMIN'}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Est admin?', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Est authentifié?', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== DÉBUT CHARGEMENT UTILISATEURS ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'URL utilisée:', '/api/users'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ Backend accessible:', Object{success: true}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ Données API reçues:', []
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Type:', 'object'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Is Array:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '📊 0 utilisateur(s) chargé(s) avec succès'
+,Chrome Headless 150.0.0.0 (Windows 10) WARN: '⚠️ Tableau d'utilisateurs vide'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== ÉTAT COMPLET DU COMPOSANT ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Is Authenticated:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Is Admin:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Current User:', Object{id: 1, nom: 'Admin', prenom: 'System', email: 'admin@maboutique.com', role: 'ADMIN'}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Token exists:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '===================='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== TEST API DIRECT AVEC FETCH ==='
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '=== ERREUR DÉTAILLÉE ==='
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Status:', 404
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Status Text:', undefined
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Message:', 'Not Found'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'URL:', '/api/users'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Error Object:', undefined
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '=== ERREUR DÉTAILLÉE ==='
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Status:', 0
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Status Text:', undefined
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Message:', 'Connection lost'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'URL:', undefined
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Error Object:', undefined
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '=== ERREUR DÉTAILLÉE ==='
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Status:', 401
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Status Text:', undefined
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Message:', 'Unauthorized'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'URL:', undefined
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Error Object:', undefined
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '=== ERREUR DÉTAILLÉE ==='
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Status:', 503
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Status Text:', undefined
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Message:', 'Service Unavailable'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'URL:', undefined
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Error Object:', undefined
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '=== ERREUR DÉTAILLÉE ==='
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Status:', 403
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Status Text:', undefined
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Message:', 'Forbidden'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'URL:', undefined
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Error Object:', undefined
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Chargement de données mockées...'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ 5 utilisateurs mockés chargés'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Données:', [Object{id: 1, nom: 'Administrateur', prenom: 'Système', email: 'admin@maboutique.com', motDePasse: '', role: 'ADMIN'}, Object{id: 2, nom: 'Client', prenom: 'Premium', email: 'client.premium@test.com', motDePasse: '', role: 'CLIENT'}, Object{id: 3, nom: 'Dupont', prenom: 'Jean', email: 'jean@example.com', motDePasse: '', role: 'ADMIN'}, Object{id: 4, nom: 'Martin', prenom: 'Sophie', email: 'sophie.martin@example.com', motDePasse: '', role: 'CLIENT'}, Object{id: 5, nom: 'Leroy', prenom: 'Thomas', email: 'thomas.leroy@example.com', motDePasse: '', role: 'CLIENT'}]
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Chargement de données mockées...'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ 5 utilisateurs mockés chargés'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Données:', [Object{id: 1, nom: 'Administrateur', prenom: 'Système', email: 'admin@maboutique.com', motDePasse: '', role: 'ADMIN'}, Object{id: 2, nom: 'Client', prenom: 'Premium', email: 'client.premium@test.com', motDePasse: '', role: 'CLIENT'}, Object{id: 3, nom: 'Dupont', prenom: 'Jean', email: 'jean.dupont@test.com', motDePasse: '', role: 'ADMIN'}, Object{id: 4, nom: 'Martin', prenom: 'Sophie', email: 'sophie.martin@example.com', motDePasse: '', role: 'CLIENT'}, Object{id: 5, nom: 'Leroy', prenom: 'Thomas', email: 'thomas.leroy@example.com', motDePasse: '', role: 'CLIENT'}]
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=== ÉTAT COMPLET DU COMPOSANT ==='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Is Authenticated:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Is Admin:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Current User:', null
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Token exists:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '===================='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Fetch Response Status:', 404, 'Not Found'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Fetch Response Headers:', Headers{}
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Fetch Error:', Error: HTTP 404: Not Found
+Error: HTTP 404: Not Found
+    at apply (http://localhost:9876/_karma_webpack_/webpack:/src/app/users/user-list/user-list.component.ts:75:17)
+    at _ZoneDelegate.invoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:368:26)
+    at ProxyZoneSpec.onInvoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone-testing.js:273:39)
+    at _ZoneDelegate.invoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:367:52)
+    at Object.onInvoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2022/core.mjs:11083:33)
+    at _ZoneDelegate.invoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:367:52)
+    at Zone.run (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:129:43)
+    at apply (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:1257:36)
+    at _ZoneDelegate.invokeTask (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:402:31)
+    at ProxyZoneSpec.onInvokeTask (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone-testing.js:304:39)
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Message d'erreur:', 'HTTP 404: Not Found'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Fetch Response Status:', 404, 'Not Found'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Fetch Response Headers:', Headers{}
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Fetch Error:', Error: HTTP 404: Not Found
+Error: HTTP 404: Not Found
+    at apply (http://localhost:9876/_karma_webpack_/webpack:/src/app/users/user-list/user-list.component.ts:75:17)
+    at _ZoneDelegate.invoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:368:26)
+    at ProxyZoneSpec.onInvoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone-testing.js:273:39)
+    at _ZoneDelegate.invoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:367:52)
+    at Object.onInvoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2022/core.mjs:11083:33)
+    at _ZoneDelegate.invoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:367:52)
+    at Zone.run (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:129:43)
+    at apply (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:1257:36)
+    at _ZoneDelegate.invokeTask (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:402:31)
+    at ProxyZoneSpec.onInvokeTask (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone-testing.js:304:39)
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Message d'erreur:', 'HTTP 404: Not Found'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 ProductService API URL:', '/api/products'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 CategoryService API URL:', '/api/categories'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 ProductService API URL:', '/api/products'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 CategoryService API URL:', '/api/categories'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 ProductService API URL:', '/api/products'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 CategoryService API URL:', '/api/categories'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🖼️ getImageUrl appelé avec:', 'assets/images/foo.jpg'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 ProductService API URL:', '/api/products'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 CategoryService API URL:', '/api/categories'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🖼️ getImageUrl appelé avec:', null
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🖼️ getImageUrl appelé avec:', 'undefined'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 ProductService API URL:', '/api/products'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 CategoryService API URL:', '/api/categories'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🖼️ getImageUrl appelé avec:', 'http://example.com/img.jpg'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🖼️ getImageUrl appelé avec:', 'blob:abc123'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 ProductService API URL:', '/api/products'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 CategoryService API URL:', '/api/categories'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🖼️ getImageUrl appelé avec:', 'a1b2c3d4-e5f6-7890.jpg'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔗 URL construite:', '/api/products/images/a1b2c3d4-e5f6-7890.jpg'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 ProductService API URL:', '/api/products'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 CategoryService API URL:', '/api/categories'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '📦 Payload préparé:', Object{nom: 'Nouveau', description: 'D', prix: 10, stock: 5, actif: true, categoryId: 1}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '📤 Création produit:', Object{nom: 'Nouveau', description: 'D', prix: 10, stock: 5, actif: true, categoryId: 1}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔄 ProductService - Récupération produit 1'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🖼️ getImageUrl appelé avec:', 'test.jpg'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 ProductService API URL:', '/api/products'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 CategoryService API URL:', '/api/categories'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '📦 Payload préparé:', Object{nom: 'Nouveau', description: '', prix: 10, stock: 5, actif: true}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '📤 Création produit:', Object{nom: 'Nouveau', description: '', prix: 10, stock: 5, actif: true}
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '❌ ProductService Error:', Object{status: 500, statusText: 'Internal Server Error', url: '/api/products', error: 'Erreur'}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 ProductService API URL:', '/api/products'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 CategoryService API URL:', '/api/categories'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔄 ProductService - Récupération produit 1'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '❌ ProductService Error:', Object{status: 404, statusText: 'Not Found', url: '/api/products/1', error: 'Not found'}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 ProductService API URL:', '/api/products'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 CategoryService API URL:', '/api/categories'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '📦 Payload préparé:', Object{nom: 'Modifié', description: '', prix: 20, stock: 3, actif: true, categoryId: 2}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '📤 Mise à jour produit 1:', Object{nom: 'Modifié', description: '', prix: 20, stock: 3, actif: true, categoryId: 2}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔄 ProductService - Récupération produit 1'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🖼️ getImageUrl appelé avec:', 'test.jpg'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 ProductService API URL:', '/api/products'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 CategoryService API URL:', '/api/categories'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🗑️ Suppression produit 1'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ Produit 1 supprimé'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 ProductService API URL:', '/api/products'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 CategoryService API URL:', '/api/categories'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🗑️ Suppression produit 1'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '❌ ProductService Error:', Object{status: 500, statusText: 'Internal Server Error', url: '/api/products/1', error: 'Erreur'}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 ProductService API URL:', '/api/products'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 CategoryService API URL:', '/api/categories'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 ProductService API URL:', '/api/products'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 CategoryService API URL:', '/api/categories'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔄 ProductService - Récupération produit 1'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🖼️ getImageUrl appelé avec:', 'test.jpg'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 ProductService API URL:', '/api/products'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 CategoryService API URL:', '/api/categories'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔧 OrderService initialisé avec URL:', '/api/orders'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔵 Récupération commande ID: 1'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🟢 Commande récupérée:', Object{id: 1, total: 199.98, statut: 'EN_ATTENTE', dateCommande: Sun Jul 05 2026 23:46:19 GMT+0100 (heure d’Afrique de l’Ouest), items: [Object{id: ..., quantite: ..., prix: ..., product: ...}], user: Object{id: 1, nom: 'Doe', prenom: 'John', email: 'john@example.com', role: 'CLIENT', motDePasse: ''}}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔧 OrderService initialisé avec URL:', '/api/orders'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔵 Suppression commande ID: 1'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🟢 Réponse suppression:', 'Order deleted'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔧 OrderService initialisé avec URL:', '/api/orders'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🧪 TEST: Création commande test pour userId: 1'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🟢 Réponse test:', 'Test OK'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔧 OrderService initialisé avec URL:', '/api/orders'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '
+========== ORDER SERVICE =========='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔵 FRONTEND: createOrderFromCart() appelé'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔵 Paramètres:'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '   - userId:', 1
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '   - URL complète:', '/api/orders/create/1'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '   - Timestamp:', '2026-07-05T22:46:19.515Z'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '🔴 ERREUR - Échec de la création:', HttpErrorResponse{headers: HttpHeaders{normalizedNames: Map{}, lazyUpdate: null, headers: Map{}}, status: 500, statusText: 'Internal Server Error', url: '/api/orders/create/1', ok: false, name: 'HttpErrorResponse', message: 'Http failure response for /api/orders/create/1: 500 Internal Server Error', error: 'Server Error'}
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '
+🔴 ERREUR HTTP DÉTAILLÉE:'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   Type: Erreur serveur'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   Status:', 500
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   StatusText:', 'Internal Server Error'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   URL:', '/api/orders/create/1'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   Réponse:', 'Server Error'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   Message utilisateur:', 'Erreur interne du serveur'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '=====================================
+'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔧 OrderService initialisé avec URL:', '/api/orders'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔵 Suppression commande ID: 1'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '
+🔴 ERREUR HTTP DÉTAILLÉE:'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   Type: Erreur serveur'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   Status:', 404
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   StatusText:', 'Not Found'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   URL:', '/api/orders/1'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   Réponse:', 'Error'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   Message utilisateur:', 'Ressource non trouvée'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '=====================================
+'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔧 OrderService initialisé avec URL:', '/api/orders'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔵 Récupération commande pour panier ID: 1'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🟢 Commande trouvée:', Object{id: 1, total: 199.98, statut: 'EN_ATTENTE', dateCommande: Sun Jul 05 2026 23:46:19 GMT+0100 (heure d’Afrique de l’Ouest), items: [Object{id: ..., quantite: ..., prix: ..., product: ...}], user: Object{id: 1, nom: 'Doe', prenom: 'John', email: 'john@example.com', role: 'CLIENT', motDePasse: ''}}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔧 OrderService initialisé avec URL:', '/api/orders'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔵 Récupération des commandes pour utilisateur: 1'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🟢 0 commandes récupérées'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '   Aucune commande trouvée'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔧 OrderService initialisé avec URL:', '/api/orders'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '
+========== ORDER SERVICE =========='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔵 FRONTEND: createOrderFromCart() appelé'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔵 Paramètres:'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '   - userId:', 1
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '   - URL complète:', '/api/orders/create/1'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '   - Timestamp:', '2026-07-05T22:46:19.524Z'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🟢 SUCCÈS - Réception de la commande:', Object{id: 1, total: 199.98, statut: 'EN_ATTENTE', dateCommande: Sun Jul 05 2026 23:46:19 GMT+0100 (heure d’Afrique de l’Ouest), items: [Object{id: ..., quantite: ..., prix: ..., product: ...}], user: Object{id: 1, nom: 'Doe', prenom: 'John', email: 'john@example.com', role: 'CLIENT', motDePasse: ''}}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '   - ID Commande:', 1
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '   - Total:', 199.98, 'DT'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '   - Statut:', 'EN_ATTENTE'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '   - Date:', Sun Jul 05 2026 23:46:19 GMT+0100 (heure d’Afrique de l’Ouest)
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '   - Nombre articles:', 1
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '   - Articles:'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '       1. Produit Test x2 = 199.98 DT'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '=====================================
+'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '   Produit dans commande: Produit Test x2'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔧 OrderService initialisé avec URL:', '/api/orders'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔵 Récupération de toutes les commandes'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🟢 1 commandes récupérées'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔧 OrderService initialisé avec URL:', '/api/orders'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔧 OrderService initialisé avec URL:', '/api/orders'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔧 OrderService initialisé avec URL:', '/api/orders'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔧 OrderService initialisé avec URL:', '/api/orders'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔵 Mise à jour statut commande 1 -> CONFIRMEE'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🟢 Statut mis à jour:', Object{id: 1, total: 199.98, statut: 'CONFIRMEE', dateCommande: Sun Jul 05 2026 23:46:19 GMT+0100 (heure d’Afrique de l’Ouest), items: [Object{id: ..., quantite: ..., prix: ..., product: ...}], user: Object{id: 1, nom: 'Doe', prenom: 'John', email: 'john@example.com', role: 'CLIENT', motDePasse: ''}}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔧 OrderService initialisé avec URL:', '/api/orders'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔧 OrderService initialisé avec URL:', '/api/orders'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '
+========== ORDER SERVICE =========='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔵 FRONTEND: createOrderFromCart() appelé'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔵 Paramètres:'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '   - userId:', 0
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '   - URL complète:', '/api/orders/create/0'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '   - Timestamp:', '2026-07-05T22:46:19.540Z'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '🔴 ERREUR: userId est null ou undefined'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔧 OrderService initialisé avec URL:', '/api/orders'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔵 Mise à jour statut commande 1 -> CONFIRMEE'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '
+🔴 ERREUR HTTP DÉTAILLÉE:'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   Type: Erreur serveur'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   Status:', 400
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   StatusText:', 'Bad Request'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   URL:', '/api/orders/1/status?statut=CONFIRMEE'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   Réponse:', 'Error'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   Message utilisateur:', 'Error'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '=====================================
+'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔧 OrderService initialisé avec URL:', '/api/orders'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔧 OrderService initialisé avec URL:', '/api/orders'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔧 OrderService initialisé avec URL:', '/api/orders'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔵 Récupération commande ID: 999'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '
+🔴 ERREUR HTTP DÉTAILLÉE:'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   Type: Erreur serveur'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   Status:', 404
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   StatusText:', 'Not Found'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   URL:', '/api/orders/999'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   Réponse:', 'Not found'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '   Message utilisateur:', 'Ressource non trouvée'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '=====================================
+'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔧 OrderService initialisé avec URL:', '/api/orders'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '
+========== ORDER SERVICE =========='
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔵 FRONTEND: createOrderFromCart() appelé'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔵 Paramètres:'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '   - userId:', -1
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '   - URL complète:', '/api/orders/create/-1'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '   - Timestamp:', '2026-07-05T22:46:19.565Z'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: '🔴 ERREUR: userId invalide:', -1
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔧 OrderService initialisé avec URL:', '/api/orders'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔵 Récupération des commandes pour utilisateur: 1'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🟢 1 commandes récupérées'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '   Détail des commandes:'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '   - #1: 199.98 DT, EN_ATTENTE, 1 article(s)'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Filtre: 2/2 commandes'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Admin: 2 commandes chargées'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ Statut mis à jour:', Object{id: 1, total: 199.98, statut: 'CONFIRMEE', dateCommande: Sun Jul 05 2026 23:46:19 GMT+0100 (heure d’Afrique de l’Ouest), items: [Object{id: ..., quantite: ..., prix: ...}], user: Object{id: 1, nom: 'Doe', prenom: 'John', email: 'john@example.com', role: 'CLIENT', motDePasse: ''}}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Filtre: 2/2 commandes'
+,Chrome Headless 150.0.0.0 (Windows 10) ALERT: '✅ Statut de la commande #1 mis à jour avec succès !'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Filtre: 2/2 commandes'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'User 1: 2 commandes chargées'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Filtre: 0/2 commandes'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ Commande supprimée'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Filtre: 1/1 commandes'
+,Chrome Headless 150.0.0.0 (Windows 10) ALERT: '✅ Commande #1 supprimée avec succès !'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Filtre: 2/2 commandes'
+,Chrome Headless 150.0.0.0 (Windows 10) ALERT: 'Commande créée avec succès !'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Filtre: 2/2 commandes'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'User 1: 2 commandes chargées'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Filtre: 2/2 commandes'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Erreur chargement commandes utilisateur:', Error: Load failed
+Error: Load failed
+    at errorFactory (http://localhost:9876/_karma_webpack_/webpack:/src/app/orders/order-list/order-list.component.spec.ts:121:71)
+    at Observable._subscribe (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/observable/throwError.js:5:51)
+    at Observable._trySubscribe (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/Observable.js:37:25)
+    at cb (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/Observable.js:31:30)
+    at errorContext (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/util/errorContext.js:19:9)
+    at Observable.subscribe (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/Observable.js:22:21)
+    at OrderListComponent.loadUserOrders (http://localhost:9876/_karma_webpack_/webpack:/src/app/orders/order-list/order-list.component.ts:106:52)
+    at OrderListComponent.loadOrders (http://localhost:9876/_karma_webpack_/webpack:/src/app/orders/order-list/order-list.component.ts:75:12)
+    at OrderListComponent.loadCurrentUser (http://localhost:9876/_karma_webpack_/webpack:/src/app/orders/order-list/order-list.component.ts:60:12)
+    at OrderListComponent.ngOnInit (http://localhost:9876/_karma_webpack_/webpack:/src/app/orders/order-list/order-list.component.ts:43:10)
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 API URL utilisée:', '/api/users'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 API URL utilisée:', '/api/users'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 API URL utilisée:', '/api/users'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🌐 API URL utilisée:', '/api/users'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Suppression annulée par l'utilisateur'
+,Chrome Headless 150.0.0.0 (Windows 10) ALERT: 'Erreur lors de l'ajout au panier'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🚀 Début du traitement du produit ID: 1'
+,Chrome Headless 150.0.0.0 (Windows 10) ALERT: '✅ ACTION RÉUSSIE
+
+"Produit Test" a été traité avec succès.
+
+Deux possibilités :
+1. Il a été SUPPRIMÉ définitivement
+2. Il a été DÉSACTIVÉ (s'il était utilisé)
+
+Redirection vers la liste des produits...'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Admin status:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Chargement du produit ID:', '1'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Produit chargé:', Object{nom: 'Produit Test', imageUrl: 'test.jpg'}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Admin status:', true
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Chargement du produit ID:', '1'
+,Chrome Headless 150.0.0.0 (Windows 10) ALERT: '1 × Produit Test ajouté au panier ✅'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Erreur suppression:', Error: Delete failed
+Error: Delete failed
+    at errorFactory (http://localhost:9876/_karma_webpack_/webpack:/src/app/products/product-list/product-list.component.spec.ts:144:64)
+    at Observable._subscribe (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/observable/throwError.js:5:51)
+    at Observable._trySubscribe (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/Observable.js:37:25)
+    at cb (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/Observable.js:31:30)
+    at errorContext (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/util/errorContext.js:19:9)
+    at Observable.subscribe (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/Observable.js:22:21)
+    at ProductListComponent.deleteProduct (http://localhost:9876/_karma_webpack_/webpack:/src/app/products/product-list/product-list.component.ts:288:38)
+    at UserContext.apply (http://localhost:9876/_karma_webpack_/webpack:/src/app/products/product-list/product-list.component.spec.ts:146:15)
+    at UserContext.apply (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone-testing.js:1987:30)
+    at _ZoneDelegate.invoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:368:26)
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '📊 Produit "Produit 1":', Object{id: 1, imageUrl: 'image.jpg', categoryId: 1, category: Object{id: 1, nom: 'Électronique'}, hasCategory: true}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '📊 Produit "Produit 2":', Object{id: 2, imageUrl: 'image.jpg', categoryId: 2, category: Object{id: 2, nom: 'Vêtements'}, hasCategory: true}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '📊 Produit "Produit 3":', Object{id: 3, imageUrl: 'image.jpg', categoryId: 1, category: Object{id: 1, nom: 'Électronique'}, hasCategory: true}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ PRODUITS CHARGÉS:', Object{total: 3, avecImages: 3, avecCatégories: 3}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔍 Application des filtres'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ FILTRES APPLIQUÉS:', Object{totalFiltrés: 3, totalOriginal: 3}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ CATÉGORIES CHARGÉES:', 1
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ Produit ajouté:', Object{}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔍 Application des filtres'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ FILTRES APPLIQUÉS:', Object{totalFiltrés: 1, totalOriginal: 3}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '🔍 Application des filtres'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: '✅ FILTRES APPLIQUÉS:', Object{totalFiltrés: 2, totalOriginal: 3}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Backend test:', Object{status: 'success', message: 'OK'}
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Backend test error:', Object{message: 'Connection failed'}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Utilisateurs:', [Object{id: 1, email: 'test@example.com'}]
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Tentative de login pour: wrong@example.com'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Erreur lors du login:', Error: Identifiants incorrects
+Error: Identifiants incorrects
+    at errorFactory (http://localhost:9876/_karma_webpack_/webpack:/src/app/auth/login/login.component.spec.ts:122:60)
+    at Observable._subscribe (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/observable/throwError.js:5:51)
+    at Observable._trySubscribe (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/Observable.js:37:25)
+    at cb (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/Observable.js:31:30)
+    at errorContext (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/util/errorContext.js:19:9)
+    at Observable.subscribe (http://localhost:9876/_karma_webpack_/webpack:/node_modules/rxjs/dist/esm/internal/Observable.js:22:21)
+    at LoginComponent.login (http://localhost:9876/_karma_webpack_/webpack:/src/app/auth/login/login.component.ts:88:57)
+    at UserContext.apply (http://localhost:9876/_karma_webpack_/webpack:/src/app/auth/login/login.component.spec.ts:124:15)
+    at UserContext.apply (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone-testing.js:1987:30)
+    at _ZoneDelegate.invoke (http://localhost:9876/_karma_webpack_/webpack:/node_modules/zone.js/fesm2015/zone.js:368:26)
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Tentative de login pour: john@example.com'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Login réussi:', Object{token: 'mock-token', user: Object{role: 'CLIENT'}}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Tentative de login pour: john@example.com'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Erreur lors du login:', Object{status: 500}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Tentative de login pour: john@example.com'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR: 'Erreur lors du login:', Object{status: 404}
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Tentative de login pour: john@example.com'
+,Chrome Headless 150.0.0.0 (Windows 10) LOG: 'Login réussi:', Object{token: 'mock-token', user: Object{role: 'CLIENT'}}
+,Chrome Headless 150.0.0.0 (Windows 10) CONFIRM: 'Voulez-vous vraiment annuler ? Les modifications non sauvegardées seront perdues.'
+,Chrome Headless 150.0.0.0 (Windows 10) ERROR
+  Disconnected reconnect failed before timeout of 2000ms (ping timeout)
+
+]]>
+  </system-out>
+  <system-err/>
+</testsuite>

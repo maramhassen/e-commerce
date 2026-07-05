@@ -1,16 +1,8 @@
-const puppeteer = require('puppeteer');
-const path = require('path');
-
-// Définit CHROME_BIN pour CI
-process.env.CHROME_BIN = puppeteer.executablePath();
-
-module.exports = function (config) {
+module.exports = function(config) {
   config.set({
-
     basePath: '',
-
     frameworks: ['jasmine', '@angular-devkit/build-angular'],
-
+    
     plugins: [
       require('karma-jasmine'),
       require('karma-chrome-launcher'),
@@ -19,23 +11,22 @@ module.exports = function (config) {
       require('karma-junit-reporter'),
       require('@angular-devkit/build-angular/plugins/karma')
     ],
-
+    
     client: {
       jasmine: {},
       clearContext: false
     },
-
-    // ✅ Reporers configurés
+    
     reporters: ['progress', 'kjhtml', 'junit', 'coverage'],
-
+    
     junitReporter: {
-      outputDir: path.join(__dirname, 'test-results'),
+      outputDir: 'test-results',
       outputFile: 'junit.xml',
       useBrowserName: false
     },
-
+    
     coverageReporter: {
-      dir: path.join(__dirname, 'coverage'),
+      dir: 'coverage',
       subdir: '.',
       reporters: [
         { type: 'html' },
@@ -44,23 +35,12 @@ module.exports = function (config) {
         { type: 'cobertura' }
       ]
     },
-
-    customLaunchers: {
-      ChromeHeadlessCI: {
-        base: 'ChromeHeadless',
-        flags: [
-          '--no-sandbox',
-          '--disable-gpu',
-          '--disable-dev-shm-usage'
-        ]
-      }
-    },
-
-    browsers: ['ChromeHeadlessCI'],
-
+    
+    // ✅ Utiliser ChromeHeadless directement
+    browsers: ['ChromeHeadless'],
+    
     singleRun: true,
     restartOnFileChange: false,
-
     logLevel: config.LOG_INFO
   });
 };
