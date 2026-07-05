@@ -1,7 +1,7 @@
 package com.example.e_commerce.integration;
 
-import com.example.e_commerce.Entities.product;
-import com.example.e_commerce.Repository.productrepository;
+import com.example.e_commerce.entities.product;
+import com.example.e_commerce.repository.productrepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

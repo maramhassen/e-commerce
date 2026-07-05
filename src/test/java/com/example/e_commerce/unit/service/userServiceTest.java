@@ -1,8 +1,8 @@
 package com.example.e_commerce.unit.service;
 
-import com.example.e_commerce.Entities.user;
-import com.example.e_commerce.Repository.userrepository;
-import com.example.e_commerce.Services.userserviceimpl;
+import com.example.e_commerce.entities.user;
+import com.example.e_commerce.repository.userrepository;
+import com.example.e_commerce.services.userserviceimpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

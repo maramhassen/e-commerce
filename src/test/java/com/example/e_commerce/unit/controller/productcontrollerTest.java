@@ -1,10 +1,10 @@
 package com.example.e_commerce.unit.controller;
 
-import com.example.e_commerce.Controllers.productcontroller;
-import com.example.e_commerce.Entities.product;
-import com.example.e_commerce.Services.iproductservice;
-import com.example.e_commerce.Services.icategoryservice;
-import com.example.e_commerce.Services.filestorageservice;
+import com.example.e_commerce.controllers.productcontroller;
+import com.example.e_commerce.entities.product;
+import com.example.e_commerce.services.iproductservice;
+import com.example.e_commerce.services.icategoryservice;
+import com.example.e_commerce.services.filestorageservice;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,8 +1,8 @@
 package com.example.e_commerce.unit.controller;
 
-import com.example.e_commerce.Controllers.usercontroller;
-import com.example.e_commerce.Entities.user;
-import com.example.e_commerce.Services.iuserservice;
+import com.example.e_commerce.controllers.usercontroller;
+import com.example.e_commerce.entities.user;
+import com.example.e_commerce.services.iuserservice;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;

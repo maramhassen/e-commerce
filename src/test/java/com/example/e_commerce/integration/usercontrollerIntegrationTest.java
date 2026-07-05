@@ -1,8 +1,8 @@
 package com.example.e_commerce.integration;
 
-import com.example.e_commerce.Entities.role;
-import com.example.e_commerce.Entities.user;
-import com.example.e_commerce.Repository.userrepository;
+import com.example.e_commerce.entities.role;
+import com.example.e_commerce.entities.user;
+import com.example.e_commerce.repository.userrepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
