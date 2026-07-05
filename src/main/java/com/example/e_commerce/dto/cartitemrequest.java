@@ -1,4 +1,4 @@
-package com.example.e_commerce.DTO;
+package com.example.e_commerce.dto;
 
 public class cartitemrequest {
     private Long productId;

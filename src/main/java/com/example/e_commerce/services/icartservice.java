@@ -1,6 +1,6 @@
 package com.example.e_commerce.services;
 
-import com.example.e_commerce.DTO.cartitemrequest;
+import com.example.e_commerce.dto.cartitemrequest;
 import com.example.e_commerce.entities.cart;
 import com.example.e_commerce.entities.cartitem;
 import org.springframework.transaction.annotation.Transactional;
