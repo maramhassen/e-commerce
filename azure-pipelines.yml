@@ -321,8 +321,8 @@ stages:
   - stage: CodeQuality
     displayName: '3 - SonarQube Analysis'
     dependsOn:
-      - BuildBackend
-      - BuildFrontend
+      - TestBackend
+      - TestFrontend
     jobs:
 
       - job: SonarBackend
