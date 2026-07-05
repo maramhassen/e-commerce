@@ -315,7 +315,6 @@ stages:
             displayName: '📊 Afficher le résumé des tests'
             condition: always()
 
-
   # ══════════════════════════════════════════
   # STAGE 5 : SONARQUBE ANALYSIS
   # ══════════════════════════════════════════
@@ -337,21 +336,29 @@ stages:
                 https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
                 backend-code
               cd backend-code
-              mvn clean compile -DskipTests
+              mvn clean test
+              echo "✅ Tests + couverture JaCoCo générés"
+              ls -la target/site/jacoco/
               mvn sonar:sonar \
                 -Dsonar.projectKey=ecommerce-backend \
                 -Dsonar.projectName="E-commerce Backend" \
                 -Dsonar.host.url=$(SONAR_HOST_URL) \
                 -Dsonar.login=$(SONAR_TOKEN) \
                 -Dsonar.java.binaries=target/classes \
-                -Dsonar.sources=src/main/java
+                -Dsonar.sources=src/main/java \
+                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
               echo "✅ SonarQube backend terminé"
-            displayName: 'SonarQube Backend Analysis'
+            displayName: 'Test + SonarQube Backend Analysis'
 
       - job: SonarFrontend
         displayName: 'SonarQube Frontend'
         steps:
           - checkout: none
+
+          - task: UseNode@1
+            inputs:
+              version: '18.x'
+            displayName: 'Install Node.js 18'
 
           - script: |
               rm -rf frontend-code
@@ -360,6 +367,22 @@ stages:
                 frontend-code
               cd frontend-code
               npm install
+              npm install puppeteer --save-dev
+            displayName: 'Clone & Install'
+
+          - script: |
+              cd frontend-code
+              npx ng test \
+                --watch=false \
+                --browsers=ChromeHeadlessCI \
+                --code-coverage \
+                --reporters=progress || true
+              echo "✅ Couverture frontend générée"
+              find coverage -name "lcov.info" 2>/dev/null
+            displayName: 'Générer la couverture (lcov)'
+
+          - script: |
+              cd frontend-code
               cat > sonar-project.properties << EOF
               sonar.projectKey=ecommerce-frontend
               sonar.projectName=E-commerce Frontend
@@ -367,6 +390,8 @@ stages:
               sonar.exclusions=**/node_modules/**,**/*.spec.ts
               sonar.host.url=$(SONAR_HOST_URL)
               sonar.login=$(SONAR_TOKEN)
+              sonar.javascript.lcov.reportPaths=coverage/lcov.info
+              sonar.typescript.lcov.reportPaths=coverage/lcov.info
               EOF
               npx sonar-scanner
               echo "✅ SonarQube frontend terminé"
