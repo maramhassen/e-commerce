@@ -30,4 +30,6 @@ public interface cartrepository extends JpaRepository<cart, Long> {
     // 4. Compter le nombre de paniers pour un utilisateur
     @Query("SELECT COUNT(c) FROM Cart c WHERE c.user.id = :userId")
     Long countByUserId(@Param("userId") Long userId);
+
+    List<cart> findcartsWithItemsByUserId(Long userId);
 }

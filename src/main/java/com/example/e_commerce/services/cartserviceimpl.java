@@ -19,90 +19,90 @@ import java.util.Optional;
 @Service
 @Transactional
 public abstract class cartserviceimpl implements icartservice {
-    private final cartrepository cartRepository;
-    private final cartitemrepository cartItemRepository;
-    private final productrepository productRepository;
-    private final userrepository userRepository;
+    private final cartrepository cartrepository;
+    private final cartitemrepository cartitemrepository;
+    private final productrepository productrepository;
+    private final userrepository userrepository;
 
-    public cartserviceimpl(cartrepository cartRepository,
-                           cartitemrepository cartItemRepository,
-                           productrepository productRepository,
-                           userrepository userRepository) {
-        this.cartRepository = cartRepository;
-        this.cartItemRepository = cartItemRepository;
-        this.productRepository = productRepository;
-        this.userRepository = userRepository;
+    public cartserviceimpl(cartrepository cartrepository,
+                           cartitemrepository cartitemrepository,
+                           productrepository productrepository,
+                           userrepository userrepository) {
+        this.cartrepository = cartrepository;
+        this.cartitemrepository = cartitemrepository;
+        this.productrepository = productrepository;
+        this.userrepository = userrepository;
     }
 
     @Override
-    public cart createCart(cart cart) {
+    public cart createcart(cart cart) {
         if (cart.getDateCreation() == null) {
             cart.setDateCreation(new Date());
         }
-        return cartRepository.save(cart);
+        return cartrepository.save(cart);
     }
 
     @Override
-    public cart updateCart(Long id, cart cart) {
-        cart existingCart = cartRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cart not found with id: " + id));
+    public cart updatecart(Long id, cart cart) {
+        cart existingcart = cartrepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("cart not found with id: " + id));
 
-        existingCart.setTotal(cart.getTotal());
-        existingCart.setUser(cart.getUser());
-        existingCart.setItems(cart.getItems());
+        existingcart.setTotal(cart.getTotal());
+        existingcart.setUser(cart.getUser());
+        existingcart.setItems(cart.getItems());
 
-        return cartRepository.save(existingCart);
+        return cartrepository.save(existingcart);
     }
 
     @Override
-    public cart getCartById(Long id) {
-        return cartRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cart not found with id: " + id));
+    public cart getcartById(Long id) {
+        return cartrepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("cart not found with id: " + id));
     }
 
     @Override
-    public List<cart> getAllCarts() {
-        return cartRepository.findAll();
+    public List<cart> getAllcarts() {
+        return cartrepository.findAll();
     }
 
     @Override
-    public void deleteCart(Long id) {
-        cartRepository.deleteById(id);
+    public void deletecart(Long id) {
+        cartrepository.deleteById(id);
     }
 
     @Transactional
     @Override
-    public cartitem addItemToCart(Long cartId, cartitem cartItem) {
-        System.out.println("🔧 addItemToCart - cartId: " + cartId);
+    public cartitem addItemTocart(Long cartId, cartitem cartitem) {
+        System.out.println("🔧 addItemTocart - cartId: " + cartId);
 
-        cart cart = cartRepository.findById(cartId)
+        cart cart = cartrepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Panier introuvable avec id: " + cartId));
 
-        if (cartItem.getProduct() == null || cartItem.getProduct().getId() == null) {
+        if (cartitem.getProduct() == null || cartitem.getProduct().getId() == null) {
             throw new RuntimeException("Produit invalide");
         }
 
-        product product = productRepository.findById(cartItem.getProduct().getId())
-                .orElseThrow(() -> new RuntimeException("Produit introuvable avec l'ID: " + cartItem.getProduct().getId()));
+        product product = productrepository.findById(cartitem.getProduct().getId())
+                .orElseThrow(() -> new RuntimeException("Produit introuvable avec l'ID: " + cartitem.getProduct().getId()));
 
-        if (product.getStock() < cartItem.getQuantite()) {
+        if (product.getStock() < cartitem.getQuantite()) {
             throw new RuntimeException("Stock insuffisant. Disponible: " + product.getStock());
         }
 
-        product.setStock(product.getStock() - cartItem.getQuantite());
-        productRepository.save(product);
+        product.setStock(product.getStock() - cartitem.getQuantite());
+        productrepository.save(product);
 
-        cartItem.setCart(cart);
-        cartItem.setProduct(product);
-        cartItem.setPrixUnitaire(product.getPrix());
+        cartitem.setCart(cart);
+        cartitem.setProduct(product);
+        cartitem.setPrixUnitaire(product.getPrix());
 
-        cart.getItems().add(cartItem);
+        cart.getItems().add(cartitem);
 
-        cartitem savedItem = cartItemRepository.save(cartItem);
+        cartitem savedItem = cartitemrepository.save(cartitem);
 
         // Recalculer le total après ajout
         recalculerTotalPanier(cart);
-        cartRepository.save(cart);
+        cartrepository.save(cart);
 
         System.out.println("✅ Item ajouté avec succès, ID: " + savedItem.getId());
         System.out.println("💰 Nouveau total du panier: " + cart.getTotal() + " DT");
@@ -111,16 +111,16 @@ public abstract class cartserviceimpl implements icartservice {
 
     @Transactional
     @Override
-    public cartitem addProductToCart(Long cartId, Long productId, int quantity) {
-        System.out.println("\n========== DÉBUT addProductToCart ==========");
-        System.out.println("CartId: " + cartId + ", ProductId: " + productId + ", Quantity: " + quantity);
+    public cartitem addProductTocart(Long cartId, Long productId, int quantity) {
+        System.out.println("\n========== DÉBUT addProductTocart ==========");
+        System.out.println("cartId: " + cartId + ", ProductId: " + productId + ", Quantity: " + quantity);
 
-        cart cart = cartRepository.findById(cartId)
+        cart cart = cartrepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Panier introuvable avec id: " + cartId));
 
         cart.getItems().size();
 
-        product product = productRepository.findById(productId)
+        product product = productrepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Produit introuvable avec id: " + productId));
         System.out.println("Produit trouvé: " + product.getNom() + ", Stock: " + product.getStock());
 
@@ -128,111 +128,111 @@ public abstract class cartserviceimpl implements icartservice {
             throw new RuntimeException("Stock insuffisant. Disponible: " + product.getStock());
         }
 
-        Optional<cartitem> existingItemOpt = cartItemRepository.findByCartIdAndProductId(cartId, productId);
+        Optional<cartitem> existingItemOpt = cartitemrepository.findBycartIdAndProductId(cartId, productId);
 
-        cartitem cartItem;
+        cartitem cartitem;
         if (existingItemOpt.isPresent()) {
-            cartItem = existingItemOpt.get();
-            int nouvelleQuantite = cartItem.getQuantite() + quantity;
+            cartitem = existingItemOpt.get();
+            int nouvelleQuantite = cartitem.getQuantite() + quantity;
             if (product.getStock() < nouvelleQuantite) {
                 throw new RuntimeException("Stock insuffisant pour la quantité totale. Disponible: " + product.getStock());
             }
-            cartItem.setQuantite(nouvelleQuantite);
+            cartitem.setQuantite(nouvelleQuantite);
             System.out.println("✅ Mise à jour quantité: " + nouvelleQuantite);
         } else {
-            cartItem = new cartitem();
-            cartItem.setCart(cart);
-            cartItem.setProduct(product);
-            cartItem.setQuantite(quantity);
-            cartItem.setPrixUnitaire(product.getPrix());
-            cart.getItems().add(cartItem);
+            cartitem = new cartitem();
+            cartitem.setCart(cart);
+            cartitem.setProduct(product);
+            cartitem.setQuantite(quantity);
+            cartitem.setPrixUnitaire(product.getPrix());
+            cart.getItems().add(cartitem);
             System.out.println("🆕 Nouvel item créé");
         }
 
         product.setStock(product.getStock() - quantity);
-        productRepository.save(product);
+        productrepository.save(product);
 
-        cartitem savedItem = cartItemRepository.save(cartItem);
+        cartitem savedItem = cartitemrepository.save(cartitem);
 
         // Recalculer le total après ajout/mise à jour
         recalculerTotalPanier(cart);
-        cartRepository.save(cart);
+        cartrepository.save(cart);
 
         System.out.println("✅ Item sauvegardé, ID: " + savedItem.getId());
         System.out.println("💰 Nouveau total du panier: " + cart.getTotal() + " DT");
-        System.out.println("========== FIN addProductToCart ==========\n");
+        System.out.println("========== FIN addProductTocart ==========\n");
         return savedItem;
     }
 
     @Override
-    public cartitem addItemToUserCart(Long userId, cartitem cartItem) {
-        System.out.println("🔧 addItemToUserCart - userId: " + userId);
+    public cartitem addItemToUsercart(Long userId, cartitem cartitem) {
+        System.out.println("🔧 addItemToUsercart - userId: " + userId);
 
-        cart cart = findOrCreateCartForUser(userId);
+        cart cart = findOrCreatecartForUser(userId);
 
-        if (cartItem.getProduct() == null || cartItem.getProduct().getId() == null) {
+        if (cartitem.getProduct() == null || cartitem.getProduct().getId() == null) {
             throw new RuntimeException("Produit invalide");
         }
 
-        product product = productRepository.findById(cartItem.getProduct().getId())
-                .orElseThrow(() -> new RuntimeException("Produit introuvable avec l'ID: " + cartItem.getProduct().getId()));
+        product product = productrepository.findById(cartitem.getProduct().getId())
+                .orElseThrow(() -> new RuntimeException("Produit introuvable avec l'ID: " + cartitem.getProduct().getId()));
 
-        if (product.getStock() < cartItem.getQuantite()) {
+        if (product.getStock() < cartitem.getQuantite()) {
             throw new RuntimeException("Stock insuffisant. Disponible: " + product.getStock());
         }
 
-        Optional<cartitem> existingItemOpt = cartItemRepository.findByCartIdAndProductId(cart.getId(), product.getId());
+        Optional<cartitem> existingItemOpt = cartitemrepository.findBycartIdAndProductId(cart.getId(), product.getId());
 
         if (existingItemOpt.isPresent()) {
             cartitem existingItem = existingItemOpt.get();
-            int nouvelleQuantite = existingItem.getQuantite() + cartItem.getQuantite();
+            int nouvelleQuantite = existingItem.getQuantite() + cartitem.getQuantite();
 
             existingItem.setQuantite(nouvelleQuantite);
-            product.setStock(product.getStock() - cartItem.getQuantite());
-            productRepository.save(product);
+            product.setStock(product.getStock() - cartitem.getQuantite());
+            productrepository.save(product);
 
-            cartItemRepository.save(existingItem);
+            cartitemrepository.save(existingItem);
         } else {
             cartitem newItem = new cartitem();
             newItem.setCart(cart);
             newItem.setProduct(product);
-            newItem.setQuantite(cartItem.getQuantite());
+            newItem.setQuantite(cartitem.getQuantite());
             newItem.setPrixUnitaire(product.getPrix());
 
-            product.setStock(product.getStock() - cartItem.getQuantite());
-            productRepository.save(product);
+            product.setStock(product.getStock() - cartitem.getQuantite());
+            productrepository.save(product);
 
             cart.getItems().add(newItem);
-            cartItemRepository.save(newItem);
+            cartitemrepository.save(newItem);
         }
 
         // Recalculer le total après modification
         recalculerTotalPanier(cart);
-        cartRepository.save(cart);
+        cartrepository.save(cart);
 
-        return cartItemRepository.save(cartItem);
+        return cartitemrepository.save(cartitem);
     }
 
     @Override
-    public cartitem addItemToUserCart(Long userId, cartitemrequest request) {
-        System.out.println("🔧 addItemToUserCart avec request - userId: " + userId);
-        cart cart = findOrCreateCartForUser(userId);
-        return addProductToCart(cart.getId(), request.getProductId(), request.getQuantite());
+    public cartitem addItemToUsercart(Long userId, cartitemrequest request) {
+        System.out.println("🔧 addItemToUsercart avec request - userId: " + userId);
+        cart cart = findOrCreatecartForUser(userId);
+        return addProductTocart(cart.getId(), request.getProductId(), request.getQuantite());
     }
 
     @Override
-    public cart getCartByUserId(Long userId) {
-        System.out.println("🔍 getCartByUserId - userId: " + userId);
-        return cartRepository.findByUserId(userId)
+    public cart getcartByUserId(Long userId) {
+        System.out.println("🔍 getcartByUserId - userId: " + userId);
+        return cartrepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Panier non trouvé pour l'utilisateur ID: " + userId));
     }
 
     @Transactional
     @Override
-    public void removeItemFromCart(Long cartId, Long itemId) {
-        System.out.println("🗑️ removeItemFromCart - cartId: " + cartId + ", itemId: " + itemId);
+    public void removeItemFromcart(Long cartId, Long itemId) {
+        System.out.println("🗑️ removeItemFromcart - cartId: " + cartId + ", itemId: " + itemId);
 
-        cartitem item = cartItemRepository.findById(itemId)
+        cartitem item = cartitemrepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Item non trouvé avec id: " + itemId));
 
         if (!item.getCart().getId().equals(cartId)) {
@@ -241,38 +241,38 @@ public abstract class cartserviceimpl implements icartservice {
 
         product product = item.getProduct();
         product.setStock(product.getStock() + item.getQuantite());
-        productRepository.save(product);
+        productrepository.save(product);
 
-        cartItemRepository.delete(item);
+        cartitemrepository.delete(item);
 
-        cart cart = cartRepository.findById(cartId)
+        cart cart = cartrepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Panier non trouvé avec id: " + cartId));
         recalculerTotalPanier(cart);
-        cartRepository.save(cart);
+        cartrepository.save(cart);
 
         System.out.println("✅ Item supprimé avec succès");
     }
 
     @Transactional
     @Override
-    public void clearUserCart(Long userId) {
-        System.out.println("🧹 clearUserCart - userId: " + userId);
+    public void clearUsercart(Long userId) {
+        System.out.println("🧹 clearUsercart - userId: " + userId);
 
-        cart cart = getCartByUserId(userId);
+        cart cart = getcartByUserId(userId);
 
         for (cartitem item : cart.getItems()) {
             product product = item.getProduct();
             product.setStock(product.getStock() + item.getQuantite());
-            productRepository.save(product);
+            productrepository.save(product);
             System.out.println("📦 Stock restitué: +" + item.getQuantite() + " pour " + product.getNom());
         }
 
-        cartItemRepository.deleteAllByCartId(cart.getId());
+        cartitemrepository.deleteAllByCartId(cart.getId());
 
         cart.getItems().clear();
         cart.setTotal(0.0);
 
-        cartRepository.save(cart);
+        cartrepository.save(cart);
 
         System.out.println("✅ Panier vidé avec succès");
         System.out.println("💰 Total du panier: " + cart.getTotal() + " DT");
@@ -280,15 +280,15 @@ public abstract class cartserviceimpl implements icartservice {
 
     @Transactional
     @Override
-    public cartitem updateCartItemQuantity(Long cartId, Long itemId, int quantity) {
-        System.out.println("📝 updateCartItemQuantity - cartId: " + cartId + ", itemId: " + itemId + ", quantity: " + quantity);
+    public cartitem updatecartitemQuantity(Long cartId, Long itemId, int quantity) {
+        System.out.println("📝 updatecartitemQuantity - cartId: " + cartId + ", itemId: " + itemId + ", quantity: " + quantity);
 
         if (quantity <= 0) {
-            removeItemFromCart(cartId, itemId);
+            removeItemFromcart(cartId, itemId);
             return null;
         }
 
-        cartitem item = cartItemRepository.findById(itemId)
+        cartitem item = cartitemrepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Item non trouvé avec id: " + itemId));
 
         if (!item.getCart().getId().equals(cartId)) {
@@ -304,16 +304,16 @@ public abstract class cartserviceimpl implements icartservice {
         }
 
         product.setStock(product.getStock() - difference);
-        productRepository.save(product);
+        productrepository.save(product);
 
         item.setQuantite(quantity);
-        cartitem updatedItem = cartItemRepository.save(item);
+        cartitem updatedItem = cartitemrepository.save(item);
 
-        cart cart = cartRepository.findById(cartId)
+        cart cart = cartrepository.findById(cartId)
                 .orElseThrow(() -> new RuntimeException("Panier non trouvé avec id: " + cartId));
 
         recalculerTotalPanier(cart);
-        cartRepository.save(cart);
+        cartrepository.save(cart);
 
         System.out.println("✅ Quantité mise à jour avec succès");
         System.out.println("💰 Nouveau total du panier: " + cart.getTotal() + " DT");
@@ -321,19 +321,19 @@ public abstract class cartserviceimpl implements icartservice {
     }
 
     @Override
-    public double calculateCartTotal(Long cartId) {
-        Double total = cartItemRepository.calculateCartTotal(cartId);
+    public double calculatecartTotal(Long cartId) {
+        Double total = cartitemrepository.calculatuserRepositoryecartTotal(cartId);
         return total != null ? total : 0.0;
     }
 
-    // ===== MÉTHODE MODIFIÉE - VERSION CORRIGÉE =====
+
     @Override
-    public cart findOrCreateCartForUser(Long userId) {
-        System.out.println("\n========== findOrCreateCartForUser ==========");
+    public cart findOrCreatecartForUser(Long userId) {
+        System.out.println("\n========== findOrCreatecartForUser ==========");
         System.out.println("🔄 RECHERCHE DU BON PANIER POUR USER: " + userId);
 
         // ÉTAPE 1: Chercher d'abord les paniers qui ont des articles (non vides)
-        List<cart> cartsWithItems = cartRepository.findCartsWithItemsByUserId(userId);
+        List<cart> cartsWithItems = cartrepository.findcartsWithItemsByUserId(userId);
         if (!cartsWithItems.isEmpty()) {
             cart cart = cartsWithItems.get(0); // Prendre le plus récent avec articles
             System.out.println("✅ Panier AVEC articles trouvé: ID=" + cart.getId());
@@ -350,14 +350,14 @@ public abstract class cartserviceimpl implements icartservice {
 
             // Recalculer le total pour être sûr
             recalculerTotalPanier(cart);
-            cartRepository.save(cart);
+            cartrepository.save(cart);
             return cart;
         }
 
         // ÉTAPE 2: Si aucun panier avec articles, prendre le dernier panier créé
-        List<cart> allCarts = cartRepository.findAllByUserIdOrderByDateCreationDesc(userId);
-        if (!allCarts.isEmpty()) {
-            cart cart = allCarts.get(0);
+        List<cart> allcarts = cartrepository.findAllByUserIdOrderByDateCreationDesc(userId);
+        if (!allcarts.isEmpty()) {
+            cart cart = allcarts.get(0);
             System.out.println("✅ Dernier panier trouvé (peut-être vide): ID=" + cart.getId());
             System.out.println("📦 Nombre d'articles: " + (cart.getItems() != null ? cart.getItems().size() : 0));
             return cart;
@@ -365,23 +365,23 @@ public abstract class cartserviceimpl implements icartservice {
 
         // ÉTAPE 3: Créer un nouveau panier
         System.out.println("🆕 Aucun panier trouvé - Création nouveau panier pour user: " + userId);
-        user user = userRepository.findById(userId)
+        user user = userrepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec ID: " + userId));
 
-        cart newCart = new cart();
-        newCart.setUser(user);
-        newCart.setTotal(0.0);
-        newCart.setDateCreation(new Date());
+        cart newcart = new cart();
+        newcart.setUser(user);
+        newcart.setTotal(0.0);
+        newcart.setDateCreation(new Date());
 
-        cart saved = cartRepository.save(newCart);
+        cart saved = cartrepository.save(newcart);
         System.out.println("✅ Nouveau panier créé: ID=" + saved.getId());
-        System.out.println("========== FIN findOrCreateCartForUser ==========\n");
+        System.out.println("========== FIN findOrCreatecartForUser ==========\n");
         return saved;
     }
 
     // Méthode privée pour recalculer le total du panier
     private void recalculerTotalPanier(cart cart) {
-        Double total = cartItemRepository.calculateCartTotal(cart.getId());
+        Double total = cartitemrepository.calculateCartTotal(cart.getId());
         cart.setTotal(total != null ? total : 0.0);
         System.out.println("💰 Recalcul total panier ID " + cart.getId() + ": " + cart.getTotal() + " DT");
     }

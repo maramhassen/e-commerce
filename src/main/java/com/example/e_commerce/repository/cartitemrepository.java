@@ -21,4 +21,8 @@ public interface cartitemrepository extends JpaRepository<cartitem, Long> {
 
     @Query("SELECT SUM(ci.prixUnitaire * ci.quantite) FROM CartItem ci WHERE ci.cart.id = :cartId")
     Double calculateCartTotal(@Param("cartId") Long cartId);
+
+    Double calculatuserRepositoryecartTotal(Long cartId);
+
+    Optional<cartitem> findBycartIdAndProductId(Long id, Long id1);
 }

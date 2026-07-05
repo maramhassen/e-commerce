@@ -178,50 +178,113 @@ stages:
               version: '18.x'
             displayName: 'Install Node.js 18'
 
-          # ✅ Installation de Chrome pour les tests
+          # ✅ Installation de Chrome avec correction dpkg
           - script: |
               echo "=== INSTALLATION DE CHROME ==="
-              sudo apt-get update
-              sudo apt-get install -y chromium-browser
-              sudo ln -s /usr/bin/chromium-browser /usr/bin/google-chrome
-              echo "✅ Chrome installé avec succès"
-              chromium-browser --version
+              echo "📅 Date: $(date)"
+              
+              # Réparer dpkg
+              echo "🔧 Réparation de dpkg..."
+              sudo dpkg --configure -a
+              
+              # Nettoyer et mettre à jour
+              echo "📦 Nettoyage du cache apt..."
+              sudo apt-get clean
+              sudo apt-get update --fix-missing
+              
+              # Installer Chromium
+              echo "🌐 Installation de Chromium..."
+              sudo apt-get install -y chromium-browser --fix-missing
+              
+              # Créer le lien symbolique si nécessaire
+              if [ ! -f "/usr/bin/google-chrome" ]; then
+                echo "🔗 Création du lien symbolique..."
+                sudo ln -s /usr/bin/chromium-browser /usr/bin/google-chrome
+              fi
+              
+              # Vérifier l'installation
+              echo "✅ Vérification de l'installation:"
+              if command -v chromium-browser &> /dev/null; then
+                chromium-browser --version
+                echo "✅ Chrome installé avec succès"
+              else
+                echo "❌ Chrome n'a pas pu être installé"
+                exit 1
+              fi
+              
+              # Définir CHROME_BIN
+              export CHROME_BIN=/usr/bin/chromium-browser
+              echo "CHROME_BIN=$CHROME_BIN"
+              
+              # Ajouter au PATH
+              export PATH=$PATH:/usr/bin
+              echo "✅ Configuration terminée"
             displayName: 'Install Chrome'
 
+          # Clone du projet
           - script: |
+              echo "=== CLONE DU PROJET ==="
               rm -rf frontend-code
               git clone -b front \
                 https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
                 frontend-code
               cd frontend-code
-              npm ci
+              echo "✅ Projet cloné avec succès"
+              echo "📁 Contenu:"
+              ls -la
             displayName: 'Clone project'
 
+          # Installation des dépendances
           - script: |
+              echo "=== INSTALLATION DES DÉPENDANCES ==="
               cd frontend-code
+              
+              echo "📦 Installation des dépendances npm..."
+              npm ci
+              
+              echo "📦 Installation des outils de test..."
               npm install puppeteer --save-dev
               npm install karma-junit-reporter --save-dev
-            displayName: 'Install test tools'
+              
+              echo "✅ Dépendances installées"
+              echo "📊 Version de npm: $(npm --version)"
+              echo "📊 Version de node: $(node --version)"
+            displayName: 'Install dependencies'
 
+          # Exécution des tests
           - script: |
               cd frontend-code
               
-              # ✅ Définir CHROME_BIN
+              # Définir CHROME_BIN
               export CHROME_BIN=/usr/bin/chromium-browser
+              export PATH=$PATH:/usr/bin
               
               echo "=== VÉRIFICATION DE LA CONFIGURATION ==="
               echo "CHROME_BIN = $CHROME_BIN"
-              cat karma.conf.js | head -30
+              echo "📍 Vérification de chromium-browser:"
+              which chromium-browser || echo "⚠️ chromium-browser non trouvé dans le PATH"
               
+              echo "📄 Contenu de karma.conf.js:"
+              cat karma.conf.js | head -40
+              
+              echo ""
               echo "=== EXÉCUTION DES TESTS ==="
+              echo "📅 Début des tests: $(date)"
+              
               mkdir -p test-results
               
-              # ✅ Utiliser ChromeHeadless (sans CI)
+              # Exécuter les tests
               npx ng test \
                 --watch=false \
                 --browsers=ChromeHeadless \
                 --code-coverage \
-                --reporters=junit,progress || true
+                --reporters=junit,progress
+              
+              TEST_EXIT_CODE=$?
+              
+              echo ""
+              echo "📅 Fin des tests: $(date)"
+              echo "📊 Code de sortie: $TEST_EXIT_CODE"
               
               echo ""
               echo "=== VÉRIFICATION DES RAPPORTS ==="
@@ -231,15 +294,31 @@ stages:
               
               echo ""
               echo "📁 Contenu du dossier test-results:"
-              ls -la test-results/ 2>/dev/null || echo "test-results/ non trouvé"
+              ls -la test-results/ 2>/dev/null || echo "❌ test-results/ non trouvé"
               
               echo ""
               echo "📁 Contenu du dossier coverage:"
-              ls -la coverage/ 2>/dev/null || echo "coverage/ non trouvé"
+              ls -la coverage/ 2>/dev/null || echo "❌ coverage/ non trouvé"
               
               if [ -d "coverage" ]; then
                 echo "📁 Contenu détaillé de coverage:"
                 find coverage -type f 2>/dev/null | head -20
+              
+                echo ""
+                echo "📊 Statistiques de couverture:"
+                if [ -f "coverage/cobertura-coverage.xml" ]; then
+                  echo "✅ cobertura-coverage.xml trouvé"
+                  COVERAGE=$(grep -o 'line-rate="[0-9.]*"' coverage/cobertura-coverage.xml | head -1 | cut -d'"' -f2)
+                  if [ ! -z "$COVERAGE" ]; then
+                    COVERAGE_PERCENT=$(echo "$COVERAGE * 100" | bc 2>/dev/null | cut -d'.' -f1)
+                    echo "📊 Taux de couverture: ${COVERAGE_PERCENT}%"
+                  fi
+                fi
+              
+                if [ -f "coverage/lcov.info" ]; then
+                  echo "✅ lcov.info trouvé"
+                  echo "📊 Taille: $(du -h coverage/lcov.info | cut -f1)"
+                fi
               fi
               
               echo ""
@@ -250,8 +329,12 @@ stages:
               echo "📁 Recherche des fichiers de couverture:"
               find . -name "cobertura-coverage.xml" 2>/dev/null | head -5
               find . -name "lcov.info" 2>/dev/null | head -5
+              
+              # Sortir avec le code de test pour que le pipeline sache si les tests ont échoué
+              exit $TEST_EXIT_CODE
             displayName: 'Run Angular Tests'
 
+          # Publication des résultats des tests
           - task: PublishTestResults@2
             displayName: 'Publish Test Results'
             condition: always()
@@ -263,6 +346,7 @@ stages:
               failTaskOnFailedTests: false
               testRunTitle: 'Frontend Unit Tests (Karma + Jasmine)'
 
+          # Publication de la couverture de code
           - task: PublishCodeCoverageResults@2
             displayName: 'Publish Code Coverage'
             condition: always()
@@ -272,6 +356,7 @@ stages:
               pathToSources: 'frontend-code/src'
               failIfCoverageEmpty: false
 
+          # Résumé des tests
           - script: |
               cd frontend-code
               
@@ -279,50 +364,76 @@ stages:
               echo "═══════════════════════════════════════════════════════════════"
               echo "📊 RÉSULTATS DES TESTS FRONTEND"
               echo "═══════════════════════════════════════════════════════════════"
+              echo ""
               
-              # Vérifier si les dossiers existent
+              # Vérifier les dossiers
+              echo "📁 Vérification des dossiers:"
+              
               if [ -d "coverage" ]; then
-                echo "✅ Dossier coverage trouvé"
+                echo "  ✅ Dossier coverage trouvé"
                 COVERAGE_FILE=$(find coverage -name "cobertura-coverage.xml" 2>/dev/null | head -1)
                 if [ -f "$COVERAGE_FILE" ]; then
                   COVERAGE=$(grep -o 'line-rate="[0-9.]*"' "$COVERAGE_FILE" | head -1 | cut -d'"' -f2)
                   if [ ! -z "$COVERAGE" ]; then
-                    COVERAGE_PERCENT=$(echo "$COVERAGE * 100" | bc | cut -d'.' -f1)
-                    echo "📊 Couverture de code: ${COVERAGE_PERCENT}%"
+                    COVERAGE_PERCENT=$(echo "$COVERAGE * 100" | bc 2>/dev/null | cut -d'.' -f1)
+                    echo "  📊 Couverture de code: ${COVERAGE_PERCENT}%"
                   fi
                 else
-                  echo "⚠️ Fichier cobertura-coverage.xml non trouvé"
+                  echo "  ⚠️ Fichier cobertura-coverage.xml non trouvé"
                 fi
               else
-                echo "❌ Dossier coverage non trouvé"
+                echo "  ❌ Dossier coverage non trouvé"
               fi
               
+              echo ""
               if [ -d "test-results" ]; then
-                echo "✅ Dossier test-results trouvé"
+                echo "  ✅ Dossier test-results trouvé"
                 if [ -f "test-results/junit.xml" ]; then
                   TOTAL=$(grep -o 'tests="[0-9]*"' test-results/junit.xml | head -1 | grep -o '[0-9]*')
                   FAILURES=$(grep -o 'failures="[0-9]*"' test-results/junit.xml | head -1 | grep -o '[0-9]*')
+                  SKIPPED=$(grep -o 'skipped="[0-9]*"' test-results/junit.xml | head -1 | grep -o '[0-9]*')
+              
                   if [ ! -z "$TOTAL" ]; then
-                    PASSED=$((TOTAL - FAILURES))
+                    PASSED=$((TOTAL - FAILURES - SKIPPED))
                     echo ""
                     echo "📈 RÉSULTATS DES TESTS:"
                     echo "   ✅ Passés: $PASSED"
                     echo "   ❌ Échoués: $FAILURES"
+                    echo "   ⏭️  Ignorés: $SKIPPED"
                     echo "   📊 Total: $TOTAL"
+              
                     if [ $TOTAL -gt 0 ]; then
                       PASS_PERCENT=$((PASSED * 100 / TOTAL))
                       echo ""
                       echo "🏆 TAUX DE RÉUSSITE: ${PASS_PERCENT}%"
+              
+                      if [ $PASS_PERCENT -ge 80 ]; then
+                        echo "✅ Seuil de qualité atteint (≥80%)"
+                      else
+                        echo "⚠️ Seuil de qualité non atteint (<80%)"
+                      fi
                     fi
                   fi
                 else
-                  echo "⚠️ Fichier junit.xml non trouvé"
+                  echo "  ⚠️ Fichier junit.xml non trouvé"
                 fi
               else
-                echo "❌ Dossier test-results non trouvé"
+                echo "  ❌ Dossier test-results non trouvé"
               fi
               
+              echo ""
+              echo "📁 Structure des fichiers:"
+              echo "  📂 frontend-code/"
+              echo "  ├── 📂 coverage/        $( [ -d "coverage" ] && echo '✅' || echo '❌' )"
+              echo "  ├── 📂 test-results/    $( [ -d "test-results" ] && echo '✅' || echo '❌' )"
+              echo "  ├── 📂 src/             $( [ -d "src" ] && echo '✅' || echo '❌' )"
+              echo "  └── 📄 karma.conf.js    $( [ -f "karma.conf.js" ] && echo '✅' || echo '❌' )"
+              
+              echo ""
               echo "═══════════════════════════════════════════════════════════════"
+              echo "📅 Fin du rapport: $(date)"
+              echo "═══════════════════════════════════════════════════════════════"
+
             displayName: '📊 Afficher le résumé des tests'
             condition: always()
 

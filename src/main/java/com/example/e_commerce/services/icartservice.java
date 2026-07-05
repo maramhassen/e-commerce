@@ -26,6 +26,10 @@ public interface icartservice {
     void removeItemFromcart(Long cartId, Long itemId);
     void clearUsercart(Long userId);
     cartitem updatecartItemQuantity(Long cartId, Long itemId, int quantity);
+
+    @Transactional
+    cartitem updatecartitemQuantity(Long cartId, Long itemId, int quantity);
+
     double calculatecartTotal(Long cartId);
     cart findOrcreatecartForUser(Long userId);
 
@@ -64,4 +68,6 @@ public interface icartservice {
 
     // ===== MÉTHODE MODIFIÉE - VERSION CORRIGÉE =====
     cart findOrCreateCartForUser(Long userId);
+
+    cart findOrCreatecartForUser(Long userId);
 }
