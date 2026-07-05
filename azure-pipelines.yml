@@ -167,19 +167,26 @@ stages:
   - stage: TestFrontend
     displayName: '2.5 - Tests Frontend (Karma + Jasmine)'
     dependsOn: BuildFrontend
-
     jobs:
       - job: FrontendTests
         displayName: 'Run Unit Tests'
-
         steps:
-
           - checkout: none
 
           - task: UseNode@1
             inputs:
               version: '18.x'
             displayName: 'Install Node.js 18'
+
+          # ✅ Installation de Chrome pour les tests
+          - script: |
+              echo "=== INSTALLATION DE CHROME ==="
+              sudo apt-get update
+              sudo apt-get install -y chromium-browser
+              sudo ln -s /usr/bin/chromium-browser /usr/bin/google-chrome
+              echo "✅ Chrome installé avec succès"
+              chromium-browser --version
+            displayName: 'Install Chrome'
 
           - script: |
               rm -rf frontend-code
@@ -199,16 +206,20 @@ stages:
           - script: |
               cd frontend-code
               
+              # ✅ Définir CHROME_BIN
+              export CHROME_BIN=/usr/bin/chromium-browser
+              
               echo "=== VÉRIFICATION DE LA CONFIGURATION ==="
+              echo "CHROME_BIN = $CHROME_BIN"
               cat karma.conf.js | head -30
               
               echo "=== EXÉCUTION DES TESTS ==="
               mkdir -p test-results
               
-              # ✅ Utiliser la commande complète avec tous les flags
+              # ✅ Utiliser ChromeHeadless (sans CI)
               npx ng test \
                 --watch=false \
-                --browsers=ChromeHeadlessCI \
+                --browsers=ChromeHeadless \
                 --code-coverage \
                 --reporters=junit,progress || true
               
@@ -360,6 +371,16 @@ stages:
               version: '18.x'
             displayName: 'Install Node.js 18'
 
+          # ✅ Installation de Chrome pour SonarQube
+          - script: |
+              echo "=== INSTALLATION DE CHROME ==="
+              sudo apt-get update
+              sudo apt-get install -y chromium-browser
+              sudo ln -s /usr/bin/chromium-browser /usr/bin/google-chrome
+              echo "✅ Chrome installé avec succès"
+              chromium-browser --version
+            displayName: 'Install Chrome'
+
           - script: |
               rm -rf frontend-code
               git clone -b front \
@@ -372,30 +393,87 @@ stages:
 
           - script: |
               cd frontend-code
+
+              # ✅ Définir CHROME_BIN
+              export CHROME_BIN=/usr/bin/chromium-browser
+
+              echo "=== GÉNÉRATION DE LA COUVERTURE ==="
               npx ng test \
                 --watch=false \
-                --browsers=ChromeHeadlessCI \
+                --browsers=ChromeHeadless \
                 --code-coverage \
                 --reporters=progress || true
+
               echo "✅ Couverture frontend générée"
+
+              echo "📁 Vérification des fichiers de couverture:"
               find coverage -name "lcov.info" 2>/dev/null
+              find coverage -name "cobertura-coverage.xml" 2>/dev/null
+
+              if [ -f "coverage/lcov.info" ]; then
+                echo "✅ lcov.info trouvé"
+                echo "📊 Contenu du fichier lcov.info:"
+                head -10 coverage/lcov.info
+              else
+                echo "⚠️ lcov.info non trouvé"
+                echo "📁 Contenu du dossier coverage:"
+                ls -la coverage/
+              fi
             displayName: 'Générer la couverture (lcov)'
 
           - script: |
               cd frontend-code
+
+              echo "=== ANALYSE SONARQUBE ==="
+
               cat > sonar-project.properties << EOF
               sonar.projectKey=ecommerce-frontend
               sonar.projectName=E-commerce Frontend
               sonar.sources=src
-              sonar.exclusions=**/node_modules/**,**/*.spec.ts
+              sonar.exclusions=**/node_modules/**,**/*.spec.ts,**/*.test.ts,**/polyfills.ts,**/main.ts,**/environments/**
+              sonar.tests=src
+              sonar.test.inclusions=**/*.spec.ts,**/*.test.ts
               sonar.host.url=$(SONAR_HOST_URL)
               sonar.login=$(SONAR_TOKEN)
               sonar.javascript.lcov.reportPaths=coverage/lcov.info
               sonar.typescript.lcov.reportPaths=coverage/lcov.info
+              sonar.coverage.exclusions=**/*.spec.ts,**/*.test.ts,**/polyfills.ts,**/main.ts,**/environments/**
               EOF
+
+              echo "📄 Contenu de sonar-project.properties:"
+              cat sonar-project.properties
+
+              echo ""
+              echo "🚀 Lancement de l'analyse SonarQube..."
               npx sonar-scanner
+
               echo "✅ SonarQube frontend terminé"
             displayName: 'SonarQube Frontend Analysis'
+
+          - script: |
+              echo ""
+              echo "═══════════════════════════════════════════════════════════════"
+              echo "📊 RÉSUMÉ SONARQUBE FRONTEND"
+              echo "═══════════════════════════════════════════════════════════════"
+
+              cd frontend-code
+
+              # Vérifier les fichiers de couverture
+              if [ -f "coverage/lcov.info" ]; then
+                LINES=$(grep -c "LF:" coverage/lcov.info | head -1 | cut -d':' -f2 || echo "0")
+                echo "✅ Fichier lcov.info présent"
+                echo "📊 Taille: $(du -h coverage/lcov.info | cut -f1)"
+              else
+                echo "❌ Fichier lcov.info manquant"
+                echo "📁 Contenu de coverage:"
+                ls -la coverage/ 2>/dev/null || echo "coverage/ non trouvé"
+              fi
+
+              echo ""
+              echo "🔗 Lien SonarQube: $(SONAR_HOST_URL)/dashboard?id=ecommerce-frontend"
+              echo "═══════════════════════════════════════════════════════════════"
+            displayName: '📊 Résumé SonarQube'
+            condition: always()
 
   # ══════════════════════════════════════════
   # STAGE 6 : BUILD DOCKER IMAGES
