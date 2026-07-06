@@ -4,7 +4,7 @@ import com.example.e_commerce.entities.Product;
 
 import java.util.List;
 
-public interface iproductservice {
+public interface IProductService {
     Product createProduct(Product product);
 
     List<Product> getAllProducts();

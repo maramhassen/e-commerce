@@ -1,18 +1,18 @@
 package com.example.e_commerce.services;
 
 import com.example.e_commerce.entities.Product;
-import com.example.e_commerce.repository.productrepository;
+import com.example.e_commerce.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-public class productserviceimpl implements iproductservice {
+public class ProductServiceImpl implements IProductService {
 
-    private final productrepository productRepository;
+    private final ProductRepository productRepository;
 
-    public productserviceimpl(productrepository productRepository) {
+    public ProductServiceImpl(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
 

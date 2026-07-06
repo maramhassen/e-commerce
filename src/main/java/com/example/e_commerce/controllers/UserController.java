@@ -1,8 +1,9 @@
 package com.example.e_commerce.controllers;
 
 import com.example.e_commerce.entities.User;
-import com.example.e_commerce.services.iuserservice;
+import com.example.e_commerce.services.IUserService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
 
@@ -11,9 +12,9 @@ import java.util.List;
 //@CrossOrigin(origins = "http://localhost:4200")
 //@CrossOrigin(origins = "*")
 public class UserController {
-    private final iuserservice userService;
+    private final IUserService userService;
 
-    public UserController(iuserservice userService) {
+    public UserController(IUserService userService) {
         this.userService = userService;
     }
 

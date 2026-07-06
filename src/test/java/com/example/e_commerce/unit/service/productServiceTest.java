@@ -1,8 +1,8 @@
 package com.example.e_commerce.unit.service;
 
 import com.example.e_commerce.entities.Product;
-import com.example.e_commerce.repository.productrepository;
-import com.example.e_commerce.services.productserviceimpl;
+import com.example.e_commerce.repository.ProductRepository;
+import com.example.e_commerce.services.ProductServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,10 +20,10 @@ import static org.mockito.Mockito.*;
 class productServiceTest {
 
     @Mock
-    private productrepository productRepository;
+    private ProductRepository productRepository;
 
     @InjectMocks
-    private productserviceimpl productService;
+    private ProductServiceImpl productService;
 
     @Test
     void testCreateProduct_Success() {

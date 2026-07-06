@@ -2,7 +2,7 @@ package com.example.e_commerce.integration;
 
 import com.example.e_commerce.entities.Role;
 import com.example.e_commerce.entities.User;
-import com.example.e_commerce.repository.userrepository;
+import com.example.e_commerce.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +42,7 @@ class userControllerIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private userrepository userRepository;
+    private UserRepository userRepository;
 
     @BeforeEach
     void setUp() {

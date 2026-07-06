@@ -1,7 +1,7 @@
 package com.example.e_commerce.integration;
 
 import com.example.e_commerce.entities.Product;
-import com.example.e_commerce.repository.productrepository;
+import com.example.e_commerce.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ class productControllerIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private productrepository productRepository;
+    private ProductRepository productRepository;
 
     @BeforeEach
     void setUp() {

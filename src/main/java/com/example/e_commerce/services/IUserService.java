@@ -5,7 +5,7 @@ import com.example.e_commerce.entities.User;
 import java.util.List;
 import java.util.Optional;
 
-public interface iuserservice {
+public interface IUserService {
     User createUser(User user);
 
     User updateUser(Long id, User user);

@@ -4,7 +4,7 @@ import com.example.e_commerce.entities.CartItem;
 
 import java.util.List;
 
-public interface icartitemservice {
+public interface ICartItemService {
     CartItem createCartItem(CartItem cartItem);
 
     CartItem updateCartItem(Long id, CartItem cartItem);

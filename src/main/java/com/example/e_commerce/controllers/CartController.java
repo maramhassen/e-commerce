@@ -1,9 +1,9 @@
 package com.example.e_commerce.controllers;
 
-import com.example.e_commerce.dto.Cartitemrequest;
+import com.example.e_commerce.dto.CartItemRequest;
 import com.example.e_commerce.entities.Cart;
 import com.example.e_commerce.entities.CartItem;
-import com.example.e_commerce.services.icartservice;
+import com.example.e_commerce.services.ICartService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,10 +11,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/carts")
 //@CrossOrigin(origins = "*")
-public class Cartcontroller {
-    private final icartservice cartService;
+public class CartController {
+    private final ICartService cartService;
 
-    public Cartcontroller(icartservice cartService) {
+    public CartController(ICartService cartService) {
         this.cartService = cartService;
     }
 
@@ -112,7 +112,7 @@ public class Cartcontroller {
     // AJOUT SIMPLE (utilisé par le frontend)
     @PostMapping("/{cartId}/add-item-simple")
     public CartItem addItemToCartSimple(@PathVariable Long cartId,
-                                        @RequestBody Cartitemrequest request) {
+                                        @RequestBody CartItemRequest request) {
         return cartService.addProductToCart(cartId, request.getProductId(), request.getQuantite());
     }
 }

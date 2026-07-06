@@ -1,7 +1,7 @@
 package com.example.e_commerce.controllers;
 
 import com.example.e_commerce.entities.CartItem;
-import com.example.e_commerce.services.icartitemservice;
+import com.example.e_commerce.services.ICartItemService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -9,10 +9,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/cart-items")
 //@CrossOrigin(origins = "*")
-public class Cartitemcontroller {
-    private final icartitemservice cartItemService;
+public class CartItemController {
+    private final ICartItemService cartItemService;
 
-    public Cartitemcontroller(icartitemservice cartItemService) {
+    public CartItemController(ICartItemService cartItemService) {
         this.cartItemService = cartItemService;
     }
 

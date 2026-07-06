@@ -1,7 +1,7 @@
 package com.example.e_commerce.controllers;
 
 import com.example.e_commerce.entities.Category;
-import com.example.e_commerce.services.icategoryservice;
+import com.example.e_commerce.services.ICategoryService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,10 +10,10 @@ import java.util.List;
 @RequestMapping("/api/categories")
 //@CrossOrigin(origins = "*")
 
-public class Categorycontroller {
-    private final icategoryservice categoryService;
+public class CategoryController {
+    private final ICategoryService categoryService;
 
-    public Categorycontroller(icategoryservice categoryService) {
+    public CategoryController(ICategoryService categoryService) {
         this.categoryService = categoryService;
     }
 

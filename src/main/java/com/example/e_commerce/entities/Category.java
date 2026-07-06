@@ -16,7 +16,7 @@ public class Category {
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     @JsonIgnore
-    private List<Product> Products;
+    private List<Product> products;
 
     public Long getId() {
         return id;
@@ -43,10 +43,10 @@ public class Category {
     }
 
     public List<Product> getProducts() {
-        return Products;
+        return products;
     }
 
-    public void setProducts(List<Product> Products) {
-        this.Products = Products;
+    public void setProducts(List<Product> products) {
+        this.products = products;
     }
 }

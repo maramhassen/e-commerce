@@ -2,7 +2,7 @@ package com.example.e_commerce.unit.controller;
 
 import com.example.e_commerce.controllers.UserController;
 import com.example.e_commerce.entities.User;
-import com.example.e_commerce.services.iuserservice;
+import com.example.e_commerce.services.IUserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class userControllerTest {
 
     @Mock
-    private iuserservice userService;
+    private IUserService userService;
 
     @InjectMocks
     private UserController userController;

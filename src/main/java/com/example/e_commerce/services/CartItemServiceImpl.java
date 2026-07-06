@@ -1,16 +1,16 @@
 package com.example.e_commerce.services;
 
 import com.example.e_commerce.entities.CartItem;
-import com.example.e_commerce.repository.cartitemrepository;
+import com.example.e_commerce.repository.CartItemRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class cartitemserviceimpl implements icartitemservice {
-    private final cartitemrepository cartItemRepository;
+public class CartItemServiceImpl implements ICartItemService {
+    private final CartItemRepository cartItemRepository;
 
-    public cartitemserviceimpl(cartitemrepository cartItemRepository) {
+    public CartItemServiceImpl(CartItemRepository cartItemRepository) {
         this.cartItemRepository = cartItemRepository;
     }
 

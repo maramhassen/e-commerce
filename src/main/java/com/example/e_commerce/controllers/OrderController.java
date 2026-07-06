@@ -2,10 +2,11 @@ package com.example.e_commerce.controllers;
 
 import com.example.e_commerce.entities.Order;
 import com.example.e_commerce.entities.OrderStatut;
-import com.example.e_commerce.services.iorderservice;
+import com.example.e_commerce.services.IOrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Date;
 import java.util.List;
@@ -15,9 +16,9 @@ import java.util.List;
 //@CrossOrigin(origins = "*", allowCredentials = "true")
 //@CrossOrigin(allowCredentials = "true")
 public class OrderController {
-    private final iorderservice orderService;
+    private final IOrderService orderService;
 
-    public OrderController(iorderservice orderService) {
+    public OrderController(IOrderService orderService) {
         this.orderService = orderService;
     }
 
@@ -101,9 +102,9 @@ public class OrderController {
         System.out.println("📨 Récupération des commandes pour l'utilisateur: " + userId);
 
         try {
-            List<Order> Orders = orderService.getOrdersByUser(userId);
-            System.out.println("✅ " + Orders.size() + " commandes trouvées pour l'utilisateur " + userId);
-            return ResponseEntity.ok(Orders);
+            List<Order> orders = orderService.getOrdersByUser(userId);
+            System.out.println("✅ " + orders.size() + " commandes trouvées pour l'utilisateur " + userId);
+            return ResponseEntity.ok(orders);
         } catch (RuntimeException e) {
             System.err.println("❌ Erreur: " + e.getMessage());
             return ResponseEntity
@@ -116,9 +117,9 @@ public class OrderController {
     @GetMapping
     public ResponseEntity<List<Order>> getAllOrders() {
         System.out.println("📨 Récupération de toutes les commandes");
-        List<Order> Orders = orderService.getAllOrders();
-        System.out.println("✅ " + Orders.size() + " commandes trouvées");
-        return ResponseEntity.ok(Orders);
+        List<Order> orders = orderService.getAllOrders();
+        System.out.println("✅ " + orders.size() + " commandes trouvées");
+        return ResponseEntity.ok(orders);
     }
 
     // ==================== METTRE À JOUR LE STATUT D'UNE COMMANDE ====================

@@ -15,12 +15,12 @@ import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 @Service
-public class filestorageservice {
+public class FileStorageService {
 
     private final Path fileStorageLocation;
 
     @Autowired
-    public filestorageservice() {
+    public FileStorageService() {
         // ✅ Utiliser le chemin absolu correct
         String uploadDir = System.getenv("FILE_UPLOAD_DIR") != null
                 ? System.getenv("FILE_UPLOAD_DIR")

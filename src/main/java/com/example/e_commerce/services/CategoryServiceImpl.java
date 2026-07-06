@@ -1,16 +1,16 @@
 package com.example.e_commerce.services;
 
 import com.example.e_commerce.entities.Category;
-import com.example.e_commerce.repository.categoryrepository;
+import com.example.e_commerce.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class categoryserviceimpl implements icategoryservice {
-    private final categoryrepository categoryRepository;
+public class CategoryServiceImpl implements ICategoryService {
+    private final CategoryRepository categoryRepository;
 
-    public categoryserviceimpl(categoryrepository categoryRepository) {
+    public CategoryServiceImpl(CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
     }
 

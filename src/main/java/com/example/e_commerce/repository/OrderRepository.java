@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface orderrepository extends JpaRepository<Order, Long> {
+public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByUserId(Long userId);
 
     @Query("SELECT o FROM Order o WHERE o.user.id = :userId ORDER BY o.dateCommande DESC")

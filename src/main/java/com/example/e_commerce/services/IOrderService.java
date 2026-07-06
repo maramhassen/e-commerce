@@ -4,7 +4,7 @@ import com.example.e_commerce.entities.Order;
 import com.example.e_commerce.entities.OrderStatut;
 import java.util.List;
 
-public interface iorderservice {
+public interface IOrderService {
     Order createOrderFromCart(Long userId);
     Order getOrderById(Long id);
     List<Order> getOrdersByUser(Long userId);

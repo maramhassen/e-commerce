@@ -4,7 +4,7 @@ import com.example.e_commerce.entities.Category;
 
 import java.util.List;
 
-public interface icategoryservice {
+public interface ICategoryService {
     Category createCategory(Category category);
 
     Category updateCategory(Long id, Category category);

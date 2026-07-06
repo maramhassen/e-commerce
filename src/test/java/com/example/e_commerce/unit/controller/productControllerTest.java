@@ -2,9 +2,9 @@ package com.example.e_commerce.unit.controller;
 
 import com.example.e_commerce.controllers.ProductController;
 import com.example.e_commerce.entities.Product;
-import com.example.e_commerce.services.iproductservice;
-import com.example.e_commerce.services.icategoryservice;
-import com.example.e_commerce.services.filestorageservice;
+import com.example.e_commerce.services.IProductService;
+import com.example.e_commerce.services.ICategoryService;
+import com.example.e_commerce.services.FileStorageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,13 +36,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class productControllerTest {
 
     @Mock
-    private iproductservice productService;
+    private IProductService productService;
 
     @Mock
-    private icategoryservice categoryService;
+    private ICategoryService categoryService;
 
     @Mock
-    private filestorageservice fileStorageService;
+    private FileStorageService fileStorageService;
 
     @InjectMocks
     private ProductController productController;

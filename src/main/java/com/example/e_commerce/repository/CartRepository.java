@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface cartrepository extends JpaRepository<Cart, Long> {
+public interface CartRepository extends JpaRepository<Cart, Long> {
 
     Optional<Cart> findByUser(User user);
 
@@ -30,6 +30,4 @@ public interface cartrepository extends JpaRepository<Cart, Long> {
     // 4. Compter le nombre de paniers pour un utilisateur
     @Query("SELECT COUNT(c) FROM Cart c WHERE c.user.id = :userId")
     Long countByUserId(@Param("userId") Long userId);
-
-    List<Cart> findcartsWithItemsByUserId(Long userId);
 }

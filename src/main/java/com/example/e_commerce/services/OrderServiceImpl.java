@@ -1,9 +1,9 @@
 package com.example.e_commerce.services;
 
 import com.example.e_commerce.entities.*;
-import com.example.e_commerce.repository.cartrepository;
-import com.example.e_commerce.repository.orderrepository;
-import com.example.e_commerce.repository.userrepository;
+import com.example.e_commerce.repository.CartRepository;
+import com.example.e_commerce.repository.OrderRepository;
+import com.example.e_commerce.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,15 +13,15 @@ import java.util.List;
 
 @Service
 @Transactional
-public class orderserviceimpl implements iorderservice {
+public class OrderServiceImpl implements IOrderService {
 
-    private final orderrepository orderRepository;
-    private final cartrepository cartRepository;
-    private final userrepository userRepository;
+    private final OrderRepository orderRepository;
+    private final CartRepository cartRepository;
+    private final UserRepository userRepository;
 
-    public orderserviceimpl(orderrepository orderRepository,
-                            cartrepository cartRepository,
-                            userrepository userRepository) {
+    public OrderServiceImpl(OrderRepository orderRepository,
+                            CartRepository cartRepository,
+                            UserRepository userRepository) {
         this.orderRepository = orderRepository;
         this.cartRepository = cartRepository;
         this.userRepository = userRepository;
@@ -87,7 +87,7 @@ public class orderserviceimpl implements iorderservice {
             order.setSourceCart(cart); // Lien important
 
             // 6. Créer les OrderItems à partir de TOUS les CartItems
-            List<OrderItem> OrderItems = new ArrayList<>();
+            List<OrderItem> orderItems = new ArrayList<>();
             double totalCommande = 0;
 
             for (CartItem cartItem : cart.getItems()) {
@@ -97,7 +97,7 @@ public class orderserviceimpl implements iorderservice {
                 orderItem.setPrix(cartItem.getPrixUnitaire()); // Prix au moment de l'achat
                 orderItem.setOrder(order);
 
-                OrderItems.add(orderItem);
+                orderItems.add(orderItem);
                 totalCommande += cartItem.getQuantite() * cartItem.getPrixUnitaire();
 
                 System.out.println("   ✅ Transféré vers commande: " + cartItem.getProduct().getNom() +
@@ -105,7 +105,7 @@ public class orderserviceimpl implements iorderservice {
                         (cartItem.getQuantite() * cartItem.getPrixUnitaire()) + " DT");
             }
 
-            order.setItems(OrderItems);
+            order.setItems(orderItems);
             order.setTotal(totalCommande);
 
             // 7. Sauvegarder la commande
@@ -157,17 +157,17 @@ public class orderserviceimpl implements iorderservice {
         userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec ID: " + userId));
 
-        List<Order> Orders = orderRepository.findByUserIdOrderByDateCommandeDesc(userId);
-        System.out.println("📦 " + Orders.size() + " commandes trouvées pour l'utilisateur " + userId);
+        List<Order> orders = orderRepository.findByUserIdOrderByDateCommandeDesc(userId);
+        System.out.println("📦 " + orders.size() + " commandes trouvées pour l'utilisateur " + userId);
 
         // Forcer le chargement des items pour chaque commande
-        for (Order order : Orders) {
+        for (Order order : orders) {
             if (order.getItems() != null) {
                 order.getItems().size();
             }
         }
 
-        return Orders;
+        return orders;
     }
 
     @Override
