@@ -200,10 +200,14 @@ stages:
             condition: succeededOrFailed()
 
           - task: PublishCodeCoverageResults@2
-            inputs:
-              summaryFileLocation: 'backend-code/target/site/jacoco/jacoco.xml'
             displayName: 'Publier la couverture de code'
             condition: succeededOrFailed()
+            inputs:
+              codeCoverageTool: 'JaCoCo'
+              summaryFileLocation: 'backend-code/target/site/jacoco/jacoco.xml'
+              reportDirectory: 'backend-code/target/site/jacoco'
+              additionalCodeCoverageFiles: 'backend-code/target/site/jacoco/**/*'
+              failIfCoverageEmpty: false
   # ══════════════════════════════════════════
   # STAGE 3 : BUILD FRONTEND
   # ══════════════════════════════════════════
