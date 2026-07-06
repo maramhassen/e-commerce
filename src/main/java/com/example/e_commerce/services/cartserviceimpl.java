@@ -1,6 +1,6 @@
 package com.example.e_commerce.services;
 
-import com.example.e_commerce.dto.CartItemRequest;
+import com.example.e_commerce.dto.Cartitemrequest;
 import com.example.e_commerce.entities.Cart;
 import com.example.e_commerce.entities.CartItem;
 import com.example.e_commerce.entities.Product;
@@ -214,7 +214,7 @@ public abstract class cartserviceimpl implements icartservice {
     }
 
     @Override
-    public CartItem addItemToUsercart(Long userId, CartItemRequest request) {
+    public CartItem addItemToUsercart(Long userId, Cartitemrequest request) {
         System.out.println("🔧 addItemToUsercart avec request - userId: " + userId);
         Cart cart = findOrCreatecartForUser(userId);
         return addProductTocart(cart.getId(), request.getProductId(), request.getQuantite());

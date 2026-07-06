@@ -10,10 +10,10 @@ import java.util.List;
 @RequestMapping("/api/categories")
 //@CrossOrigin(origins = "*")
 
-public class CategoryController {
+public class Categorycontroller {
     private final icategoryservice categoryService;
 
-    public CategoryController(icategoryservice categoryService) {
+    public Categorycontroller(icategoryservice categoryService) {
         this.categoryService = categoryService;
     }
 

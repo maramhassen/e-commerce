@@ -1,6 +1,6 @@
 package com.example.e_commerce.services;
 
-import com.example.e_commerce.dto.CartItemRequest;
+import com.example.e_commerce.dto.Cartitemrequest;
 import com.example.e_commerce.entities.Cart;
 import com.example.e_commerce.entities.CartItem;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +19,7 @@ public interface icartservice {
     CartItem addItemTocart(Long cartId, CartItem cartItem);
     CartItem addProductTocart(Long cartId, Long productId, int quantity);
     CartItem addItemToUsercart(Long userId, CartItem cartItem);
-    CartItem addItemToUsercart(Long userId, CartItemRequest request);
+    CartItem addItemToUsercart(Long userId, Cartitemrequest request);
 
     // Gestion du panier
     Cart getcartByUserId(Long userId);
@@ -51,7 +51,7 @@ public interface icartservice {
 
     CartItem addItemToUserCart(Long userId, CartItem cartItem);
 
-    CartItem addItemToUserCart(Long userId, CartItemRequest request);
+    CartItem addItemToUserCart(Long userId, Cartitemrequest request);
 
     Cart getCartByUserId(Long userId);
 

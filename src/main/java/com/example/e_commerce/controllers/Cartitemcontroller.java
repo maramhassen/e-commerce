@@ -9,10 +9,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/cart-items")
 //@CrossOrigin(origins = "*")
-public class CartItemController {
+public class Cartitemcontroller {
     private final icartitemservice cartItemService;
 
-    public CartItemController(icartitemservice cartItemService) {
+    public Cartitemcontroller(icartitemservice cartItemService) {
         this.cartItemService = cartItemService;
     }
 

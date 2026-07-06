@@ -1,6 +1,6 @@
 package com.example.e_commerce.controllers;
 
-import com.example.e_commerce.dto.CartItemRequest;
+import com.example.e_commerce.dto.Cartitemrequest;
 import com.example.e_commerce.entities.Cart;
 import com.example.e_commerce.entities.CartItem;
 import com.example.e_commerce.services.icartservice;
@@ -11,10 +11,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/carts")
 //@CrossOrigin(origins = "*")
-public class CartController {
+public class Cartcontroller {
     private final icartservice cartService;
 
-    public CartController(icartservice cartService) {
+    public Cartcontroller(icartservice cartService) {
         this.cartService = cartService;
     }
 
@@ -112,7 +112,7 @@ public class CartController {
     // AJOUT SIMPLE (utilisé par le frontend)
     @PostMapping("/{cartId}/add-item-simple")
     public CartItem addItemToCartSimple(@PathVariable Long cartId,
-                                        @RequestBody CartItemRequest request) {
+                                        @RequestBody Cartitemrequest request) {
         return cartService.addProductToCart(cartId, request.getProductId(), request.getQuantite());
     }
 }
