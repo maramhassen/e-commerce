@@ -24,7 +24,7 @@ export class LoginComponent implements OnInit {
   constructor(
     private router: Router,
     private authService: AuthService,
-    private route: ActivatedRoute // Ajouté pour récupérer les queryParams
+    private route: ActivatedRoute 
   ) {}
 
   ngOnInit(): void {
