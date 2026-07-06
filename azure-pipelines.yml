@@ -135,16 +135,72 @@ stages:
         displayName: 'Exécution des tests backend'
         steps:
           - checkout: none
+
+          # ✅ FORCER UTF-8 ET VARIABLES D'ENV
           - script: |
+              echo "=== CONFIGURATION DE L'ENVIRONNEMENT ==="
+              
+              # 1. Forcer l'encodage UTF-8
+              export LANG=en_US.UTF-8
+              export LC_ALL=en_US.UTF-8
+              export LANGUAGE=en_US.UTF-8
+              export JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8 -Duser.language=en -Duser.country=US"
+              
+              # 2. Variables d'environnement pour les tests
+              export SPRING_PROFILES_ACTIVE=test
+              export DB_HOST=localhost
+              export DB_PORT=3306
+              export DB_NAME=ecommercetest
+              export DB_USERNAME=testuser
+              export DB_PASSWORD=testpass
+              
+              echo "LANG=$LANG"
+              echo "LC_ALL=$LC_ALL"
+              echo "JAVA_TOOL_OPTIONS=$JAVA_TOOL_OPTIONS"
+              echo "SPRING_PROFILES_ACTIVE=$SPRING_PROFILES_ACTIVE"
+
+            displayName: 'Configurer l environnement CI'
+
+          # ✅ CLONE ET EXÉCUTION DES TESTS
+          - script: |
+              set -e
+              
+              echo "=== CLONE DU BACKEND ==="
               rm -rf backend-code
               git clone -b backend \
                 https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
                 backend-code
               cd backend-code
-              mvn clean verify
-              echo "✅ Tests + couverture backend exécutés"
-              ls -la target/site/jacoco/
+              
+              echo "=== EXÉCUTION DES TESTS UNIT AIRES ==="
+              
+              # Exécuter les tests avec les bons paramètres
+              mvn clean test \
+                -DargLine="-Dfile.encoding=UTF-8" \
+                -Dspring.profiles.active=test \
+                -Duser.language=en \
+                -Duser.country=US \
+                -Dmaven.test.failure.ignore=false
+              
+              # Si les tests passent, générer la couverture
+              if [ $? -eq 0 ]; then
+                echo "✅ Tests passés avec succès"
+                mvn jacoco:report
+                echo "📊 Rapport de couverture généré"
+                ls -la target/site/jacoco/
+              else
+                echo "❌ Échec des tests - Affichage des détails"
+                # Afficher les erreurs pour diagnostic
+                find target/surefire-reports -name "*.txt" -exec grep -l "ERROR\|FAILED\|Exception" {} \; | while read f; do
+                  echo "--- $f ---"
+                  cat "$f" | head -50
+                done
+                exit 1
+              fi
+
             displayName: 'Maven Verify (Tests + Coverage)'
+
+          # ✅ PUBLICATION DES RÉSULTATS
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'JUnit'
@@ -153,12 +209,12 @@ stages:
               testRunTitle: 'Backend Unit Tests'
             displayName: 'Publier les résultats des tests backend'
             condition: succeededOrFailed()
+
           - task: PublishCodeCoverageResults@2
             inputs:
               summaryFileLocation: 'backend-code/target/site/jacoco/jacoco.xml'
             displayName: 'Publier la couverture de code backend'
             condition: succeededOrFailed()
-
   # ══════════════════════════════════════════
   # STAGE 3 : BUILD FRONTEND
   # ══════════════════════════════════════════
