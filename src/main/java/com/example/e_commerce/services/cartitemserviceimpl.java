@@ -1,6 +1,6 @@
 package com.example.e_commerce.services;
 
-import com.example.e_commerce.entities.cartitem;
+import com.example.e_commerce.entities.CartItem;
 import com.example.e_commerce.repository.cartitemrepository;
 import org.springframework.stereotype.Service;
 
@@ -15,13 +15,13 @@ public class cartitemserviceimpl implements icartitemservice {
     }
 
     @Override
-    public cartitem createCartItem(cartitem cartItem) {
+    public CartItem createCartItem(CartItem cartItem) {
         return cartItemRepository.save(cartItem);
     }
 
     @Override
-    public cartitem updateCartItem(Long id, cartitem cartItem) {
-        cartitem existingItem = cartItemRepository.findById(id)
+    public CartItem updateCartItem(Long id, CartItem cartItem) {
+        CartItem existingItem = cartItemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("CartItem not found with id: " + id));
 
         existingItem.setQuantite(cartItem.getQuantite());
@@ -33,13 +33,13 @@ public class cartitemserviceimpl implements icartitemservice {
     }
 
     @Override
-    public cartitem getCartItemById(Long id) {
+    public CartItem getCartItemById(Long id) {
         return cartItemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("CartItem not found with id: " + id));
     }
 
     @Override
-    public List<cartitem> getAllCartItems() {
+    public List<CartItem> getAllCartItems() {
         return cartItemRepository.findAll();
     }
 

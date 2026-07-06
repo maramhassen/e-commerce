@@ -1,6 +1,6 @@
 package com.example.e_commerce.services;
 
-import com.example.e_commerce.entities.category;
+import com.example.e_commerce.entities.Category;
 import com.example.e_commerce.repository.categoryrepository;
 import org.springframework.stereotype.Service;
 
@@ -15,13 +15,13 @@ public class categoryserviceimpl implements icategoryservice {
     }
 
     @Override
-    public category createCategory(category category) {
+    public Category createCategory(Category category) {
         return categoryRepository.save(category);
     }
 
     @Override
-    public category updateCategory(Long id, category category) {
-        category existingCategory = categoryRepository.findById(id)
+    public Category updateCategory(Long id, Category category) {
+        Category existingCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
         existingCategory.setNom(category.getNom());
@@ -31,19 +31,19 @@ public class categoryserviceimpl implements icategoryservice {
     }
 
     @Override
-    public category getCategoryById(Long id) {
+    public Category getCategoryById(Long id) {
         return categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
     }
 
     @Override
-    public List<category> getAllCategories() {
+    public List<Category> getAllCategories() {
         return categoryRepository.findAll();
     }
 
     @Override
     public void deleteCategory(Long id) {
-        category category = categoryRepository.findById(id)
+        Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
         if (category.getProducts() != null && !category.getProducts().isEmpty()) {

@@ -1,6 +1,6 @@
 package com.example.e_commerce.controllers;
 
-import com.example.e_commerce.entities.user;
+import com.example.e_commerce.entities.User;
 import com.example.e_commerce.services.iuserservice;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,34 +10,34 @@ import java.util.List;
 @RequestMapping("/api/users")
 //@CrossOrigin(origins = "http://localhost:4200")
 //@CrossOrigin(origins = "*")
-public class usercontroller {
+public class UserController {
     private final iuserservice userService;
 
-    public usercontroller(iuserservice userService) {
+    public UserController(iuserservice userService) {
         this.userService = userService;
     }
 
     // CREATE
     @PostMapping
-    public user createUser(@RequestBody user user) {
+    public User createUser(@RequestBody User user) {
         return userService.createUser(user);
     }
 
     // READ ALL
     @GetMapping
-    public List<user> getAllUsers() {
+    public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
 
     // READ BY ID
     @GetMapping("/{id}")
-    public user getUserById(@PathVariable Long id) {
+    public User getUserById(@PathVariable Long id) {
         return userService.getUserById(id);
     }
 
     // UPDATE
     @PutMapping("/{id}")
-    public user updateUser(@PathVariable Long id, @RequestBody user user) {
+    public User updateUser(@PathVariable Long id, @RequestBody User user) {
         return userService.updateUser(id, user);
     }
 

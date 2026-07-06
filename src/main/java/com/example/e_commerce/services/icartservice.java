@@ -1,59 +1,59 @@
 package com.example.e_commerce.services;
 
-import com.example.e_commerce.dto.cartitemrequest;
-import com.example.e_commerce.entities.cart;
-import com.example.e_commerce.entities.cartitem;
+import com.example.e_commerce.dto.CartItemRequest;
+import com.example.e_commerce.entities.Cart;
+import com.example.e_commerce.entities.CartItem;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 public interface icartservice {
     // cRUD cart
-    cart createcart(cart cart);
-    cart updatecart(Long id, cart cart);
-    cart getcartById(Long id);
-    List<cart> getAllcarts();
+    Cart createcart(Cart cart);
+    Cart updatecart(Long id, Cart cart);
+    Cart getcartById(Long id);
+    List<Cart> getAllcarts();
     void deletecart(Long id);
 
     // cart Items
-    cartitem addItemTocart(Long cartId, cartitem cartItem);
-    cartitem addProductTocart(Long cartId, Long productId, int quantity);
-    cartitem addItemToUsercart(Long userId, cartitem cartItem);
-    cartitem addItemToUsercart(Long userId, cartitemrequest request);
+    CartItem addItemTocart(Long cartId, CartItem cartItem);
+    CartItem addProductTocart(Long cartId, Long productId, int quantity);
+    CartItem addItemToUsercart(Long userId, CartItem cartItem);
+    CartItem addItemToUsercart(Long userId, CartItemRequest request);
 
     // Gestion du panier
-    cart getcartByUserId(Long userId);
+    Cart getcartByUserId(Long userId);
     void removeItemFromcart(Long cartId, Long itemId);
     void clearUsercart(Long userId);
-    cartitem updatecartItemQuantity(Long cartId, Long itemId, int quantity);
+    CartItem updatecartItemQuantity(Long cartId, Long itemId, int quantity);
 
     @Transactional
-    cartitem updatecartitemQuantity(Long cartId, Long itemId, int quantity);
+    CartItem updatecartitemQuantity(Long cartId, Long itemId, int quantity);
 
     double calculatecartTotal(Long cartId);
-    cart findOrcreatecartForUser(Long userId);
+    Cart findOrcreatecartForUser(Long userId);
 
-    cart createCart(cart cart);
+    Cart createCart(Cart cart);
 
-    cart updateCart(Long id, cart cart);
+    Cart updateCart(Long id, Cart cart);
 
-    cart getCartById(Long id);
+    Cart getCartById(Long id);
 
-    List<cart> getAllCarts();
+    List<Cart> getAllCarts();
 
     void deleteCart(Long id);
 
     @Transactional
-    cartitem addItemToCart(Long cartId, cartitem cartItem);
+    CartItem addItemToCart(Long cartId, CartItem cartItem);
 
     @Transactional
-    cartitem addProductToCart(Long cartId, Long productId, int quantity);
+    CartItem addProductToCart(Long cartId, Long productId, int quantity);
 
-    cartitem addItemToUserCart(Long userId, cartitem cartItem);
+    CartItem addItemToUserCart(Long userId, CartItem cartItem);
 
-    cartitem addItemToUserCart(Long userId, cartitemrequest request);
+    CartItem addItemToUserCart(Long userId, CartItemRequest request);
 
-    cart getCartByUserId(Long userId);
+    Cart getCartByUserId(Long userId);
 
     @Transactional
     void removeItemFromCart(Long cartId, Long itemId);
@@ -62,12 +62,12 @@ public interface icartservice {
     void clearUserCart(Long userId);
 
     @Transactional
-    cartitem updateCartItemQuantity(Long cartId, Long itemId, int quantity);
+    CartItem updateCartItemQuantity(Long cartId, Long itemId, int quantity);
 
     double calculateCartTotal(Long cartId);
 
     // ===== MÉTHODE MODIFIÉE - VERSION CORRIGÉE =====
-    cart findOrCreateCartForUser(Long userId);
+    Cart findOrCreateCartForUser(Long userId);
 
-    cart findOrCreatecartForUser(Long userId);
+    Cart findOrCreatecartForUser(Long userId);
 }

@@ -2,7 +2,7 @@ package com.example.e_commerce.entities;
 import jakarta.persistence.*;
 
 @Entity
-public class orderitem {
+public class OrderItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -12,10 +12,10 @@ public class orderitem {
     private double prix;
 
     @ManyToOne
-    private product product;
+    private Product product;
 
     @ManyToOne
-    private order order;
+    private Order order;
 
 
     public Long getId() {
@@ -42,19 +42,19 @@ public class orderitem {
         this.prix = prix;
     }
 
-    public product getProduct() {
+    public Product getProduct() {
         return product;
     }
 
-    public void setProduct(product product) {
+    public void setProduct(Product product) {
         this.product = product;
     }
 
-    public order getOrder() {
+    public Order getOrder() {
         return order;
     }
 
-    public void setOrder(order order) {
+    public void setOrder(Order order) {
         this.order = order;
     }
 }

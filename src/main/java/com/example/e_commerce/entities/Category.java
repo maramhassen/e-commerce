@@ -5,7 +5,7 @@ import java.util.List;
 
 @Entity
 
-public class category {
+public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,7 +16,7 @@ public class category {
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     @JsonIgnore
-    private List<product> products;
+    private List<Product> Products;
 
     public Long getId() {
         return id;
@@ -42,11 +42,11 @@ public class category {
         this.description = description;
     }
 
-    public List<product> getProducts() {
-        return products;
+    public List<Product> getProducts() {
+        return Products;
     }
 
-    public void setProducts(List<product> products) {
-        this.products = products;
+    public void setProducts(List<Product> Products) {
+        this.Products = Products;
     }
 }

@@ -7,7 +7,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "orders")
-public class order {
+public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -16,7 +16,7 @@ public class order {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private orderstatut statut = orderstatut.EN_ATTENTE;
+    private OrderStatut statut = OrderStatut.EN_ATTENTE;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateCommande = new Date();
@@ -24,25 +24,25 @@ public class order {
     @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonIgnoreProperties({"orders", "cart"})
-    private user user;
+    private User user;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonIgnoreProperties("order")
-    private List<orderitem> items;
+    private List<OrderItem> items;
 
     @OneToOne
     @JoinColumn(name = "cart_id", unique = true)
     @JsonIgnoreProperties({"order", "items", "user"})
-    private cart sourceCart;
+    private Cart sourceCart;
 
     // Constructeurs
-    public order() {}
+    public Order() {}
 
-    public order(user user, cart sourceCart) {
+    public Order(User user, Cart sourceCart) {
         this.user = user;
         this.sourceCart = sourceCart;
         this.dateCommande = new Date();
-        this.statut = orderstatut.EN_ATTENTE;
+        this.statut = OrderStatut.EN_ATTENTE;
     }
 
     // Getters et Setters
@@ -52,18 +52,18 @@ public class order {
     public double getTotal() { return total; }
     public void setTotal(double total) { this.total = total; }
 
-    public orderstatut getStatut() { return statut; }
-    public void setStatut(orderstatut statut) { this.statut = statut; }
+    public OrderStatut getStatut() { return statut; }
+    public void setStatut(OrderStatut statut) { this.statut = statut; }
 
     public Date getDateCommande() { return dateCommande; }
     public void setDateCommande(Date dateCommande) { this.dateCommande = dateCommande; }
 
-    public user getUser() { return user; }
-    public void setUser(user user) { this.user = user; }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 
-    public List<orderitem> getItems() { return items; }
-    public void setItems(List<orderitem> items) { this.items = items; }
+    public List<OrderItem> getItems() { return items; }
+    public void setItems(List<OrderItem> items) { this.items = items; }
 
-    public cart getSourceCart() { return sourceCart; }
-    public void setSourceCart(cart sourceCart) { this.sourceCart = sourceCart; }
+    public Cart getSourceCart() { return sourceCart; }
+    public void setSourceCart(Cart sourceCart) { this.sourceCart = sourceCart; }
 }

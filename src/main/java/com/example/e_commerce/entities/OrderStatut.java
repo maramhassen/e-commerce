@@ -1,6 +1,6 @@
 package com.example.e_commerce.entities;
 
-public enum orderstatut {
+public enum OrderStatut {
     EN_ATTENTE ,
     CONFIRMEE,
     EXPEDIEE ,

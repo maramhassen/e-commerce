@@ -1,7 +1,7 @@
 package com.example.e_commerce.controllers;
 
-import com.example.e_commerce.entities.order;
-import com.example.e_commerce.entities.orderstatut;
+import com.example.e_commerce.entities.Order;
+import com.example.e_commerce.entities.OrderStatut;
 import com.example.e_commerce.services.iorderservice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +14,10 @@ import java.util.List;
 @RequestMapping("/api/orders")
 //@CrossOrigin(origins = "*", allowCredentials = "true")
 //@CrossOrigin(allowCredentials = "true")
-public class ordercontroller {
+public class OrderController {
     private final iorderservice orderService;
 
-    public ordercontroller(iorderservice orderService) {
+    public OrderController(iorderservice orderService) {
         this.orderService = orderService;
     }
 
@@ -39,7 +39,7 @@ public class ordercontroller {
             }
 
             System.out.println("🔄 Appel du service pour créer la commande...");
-            order order = orderService.createOrderFromCart(userId);
+            Order order = orderService.createOrderFromCart(userId);
 
             System.out.println("✅ SUCCÈS - Commande créée avec ID: " + order.getId());
             System.out.println("   Total: " + order.getTotal() + " DT");
@@ -84,7 +84,7 @@ public class ordercontroller {
         System.out.println("📨 Récupération commande ID: " + id);
 
         try {
-            order order = orderService.getOrderById(id);
+            Order order = orderService.getOrderById(id);
             System.out.println("✅ Commande trouvée: ID=" + order.getId());
             return ResponseEntity.ok(order);
         } catch (RuntimeException e) {
@@ -101,9 +101,9 @@ public class ordercontroller {
         System.out.println("📨 Récupération des commandes pour l'utilisateur: " + userId);
 
         try {
-            List<order> orders = orderService.getOrdersByUser(userId);
-            System.out.println("✅ " + orders.size() + " commandes trouvées pour l'utilisateur " + userId);
-            return ResponseEntity.ok(orders);
+            List<Order> Orders = orderService.getOrdersByUser(userId);
+            System.out.println("✅ " + Orders.size() + " commandes trouvées pour l'utilisateur " + userId);
+            return ResponseEntity.ok(Orders);
         } catch (RuntimeException e) {
             System.err.println("❌ Erreur: " + e.getMessage());
             return ResponseEntity
@@ -114,23 +114,23 @@ public class ordercontroller {
 
     // ==================== RÉCUPÉRER TOUTES LES COMMANDES (ADMIN) ====================
     @GetMapping
-    public ResponseEntity<List<order>> getAllOrders() {
+    public ResponseEntity<List<Order>> getAllOrders() {
         System.out.println("📨 Récupération de toutes les commandes");
-        List<order> orders = orderService.getAllOrders();
-        System.out.println("✅ " + orders.size() + " commandes trouvées");
-        return ResponseEntity.ok(orders);
+        List<Order> Orders = orderService.getAllOrders();
+        System.out.println("✅ " + Orders.size() + " commandes trouvées");
+        return ResponseEntity.ok(Orders);
     }
 
     // ==================== METTRE À JOUR LE STATUT D'UNE COMMANDE ====================
     @PutMapping("/{orderId}/status")
     public ResponseEntity<?> updateOrderStatus(
             @PathVariable Long orderId,
-            @RequestParam orderstatut statut) {
+            @RequestParam OrderStatut statut) {
 
         System.out.println("📨 Mise à jour statut commande " + orderId + " -> " + statut);
 
         try {
-            order order = orderService.updateOrderStatus(orderId, statut);
+            Order order = orderService.updateOrderStatus(orderId, statut);
             System.out.println("✅ Statut mis à jour pour la commande " + orderId);
             return ResponseEntity.ok(order);
         } catch (RuntimeException e) {
@@ -164,7 +164,7 @@ public class ordercontroller {
         System.out.println("📨 Récupération commande pour panier ID: " + cartId);
 
         try {
-            order order = orderService.getOrderByCartId(cartId);
+            Order order = orderService.getOrderByCartId(cartId);
             System.out.println("✅ Commande trouvée: " + order.getId());
             return ResponseEntity.ok(order);
         } catch (RuntimeException e) {
@@ -181,7 +181,7 @@ public class ordercontroller {
         System.out.println("🧪 TEST: Création commande pour userId: " + userId);
 
         try {
-            order order = orderService.createOrderFromCart(userId);
+            Order order = orderService.createOrderFromCart(userId);
             return ResponseEntity.ok("✅ TEST RÉUSSI! Commande créée avec ID: " + order.getId());
         } catch (Exception e) {
             return ResponseEntity

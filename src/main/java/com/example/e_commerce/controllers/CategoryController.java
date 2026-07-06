@@ -1,6 +1,6 @@
 package com.example.e_commerce.controllers;
 
-import com.example.e_commerce.entities.category;
+import com.example.e_commerce.entities.Category;
 import com.example.e_commerce.services.icategoryservice;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,35 +10,35 @@ import java.util.List;
 @RequestMapping("/api/categories")
 //@CrossOrigin(origins = "*")
 
-public class categorycontroller {
+public class CategoryController {
     private final icategoryservice categoryService;
 
-    public categorycontroller(icategoryservice categoryService) {
+    public CategoryController(icategoryservice categoryService) {
         this.categoryService = categoryService;
     }
 
     // CREATE
     @PostMapping
-    public category createCategory(@RequestBody category category) {
+    public Category createCategory(@RequestBody Category category) {
         return categoryService.createCategory(category);
     }
 
     // READ ALL
     @GetMapping
-    public List<category> getAllCategories() {
+    public List<Category> getAllCategories() {
         return categoryService.getAllCategories();
     }
 
     // READ BY ID
     @GetMapping("/{id}")
-    public category getCategoryById(@PathVariable Long id) {
+    public Category getCategoryById(@PathVariable Long id) {
         return categoryService.getCategoryById(id);
     }
 
     // UPDATE
     @PutMapping("/{id}")
-    public category updateCategory(@PathVariable Long id,
-                                   @RequestBody category category) {
+    public Category updateCategory(@PathVariable Long id,
+                                   @RequestBody Category category) {
         return categoryService.updateCategory(id, category);
     }
 

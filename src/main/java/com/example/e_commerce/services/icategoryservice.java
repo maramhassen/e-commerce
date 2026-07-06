@@ -1,17 +1,17 @@
 package com.example.e_commerce.services;
 
-import com.example.e_commerce.entities.category;
+import com.example.e_commerce.entities.Category;
 
 import java.util.List;
 
 public interface icategoryservice {
-    category createCategory(category category);
+    Category createCategory(Category category);
 
-    category updateCategory(Long id, category category);
+    Category updateCategory(Long id, Category category);
 
-    category getCategoryById(Long id);
+    Category getCategoryById(Long id);
 
-    List<category> getAllCategories();
+    List<Category> getAllCategories();
 
     void deleteCategory(Long id);
 }

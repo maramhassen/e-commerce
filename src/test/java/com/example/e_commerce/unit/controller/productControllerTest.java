@@ -1,7 +1,7 @@
 package com.example.e_commerce.unit.controller;
 
-import com.example.e_commerce.controllers.productcontroller;
-import com.example.e_commerce.entities.product;
+import com.example.e_commerce.controllers.ProductController;
+import com.example.e_commerce.entities.Product;
 import com.example.e_commerce.services.iproductservice;
 import com.example.e_commerce.services.icategoryservice;
 import com.example.e_commerce.services.filestorageservice;
@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *  - On teste UNIQUEMENT la couche Controller (le routage HTTP, la sérialisation JSON)
  */
 @ExtendWith(MockitoExtension.class)
-class productcontrollerTest {
+class productControllerTest {
 
     @Mock
     private iproductservice productService;
@@ -45,7 +45,7 @@ class productcontrollerTest {
     private filestorageservice fileStorageService;
 
     @InjectMocks
-    private productcontroller productController;
+    private ProductController productController;
 
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
@@ -62,16 +62,16 @@ class productcontrollerTest {
 
     @Test
     void testGetAllProducts() throws Exception {
-        product product1 = new product();
+        Product product1 = new Product();
         product1.setId(1L);
         product1.setNom("Produit 1");
 
-        product product2 = new product();
+        Product product2 = new Product();
         product2.setId(2L);
         product2.setNom("Produit 2");
 
-        List<product> products = Arrays.asList(product1, product2);
-        when(productService.getAllProducts()).thenReturn(products);
+        List<Product> Products = Arrays.asList(product1, product2);
+        when(productService.getAllProducts()).thenReturn(Products);
 
         mockMvc.perform(get("/api/products"))
                 .andExpect(status().isOk())
@@ -83,7 +83,7 @@ class productcontrollerTest {
 
     @Test
     void testGetProductById() throws Exception {
-        product product = new product();
+        Product product = new Product();
         product.setId(1L);
         product.setNom("Produit Test");
         when(productService.getProductById(1L)).thenReturn(product);
@@ -110,13 +110,13 @@ class productcontrollerTest {
                 }
                 """;
 
-        product savedProduct = new product();
+        Product savedProduct = new Product();
         savedProduct.setId(1L);
         savedProduct.setNom("Nouveau Produit");
         savedProduct.setPrix(49.99);
         savedProduct.setStock(5);
 
-        when(productService.createProduct(any(product.class))).thenReturn(savedProduct);
+        when(productService.createProduct(any(Product.class))).thenReturn(savedProduct);
 
         mockMvc.perform(post("/api/products")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -125,7 +125,7 @@ class productcontrollerTest {
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.nom").value("Nouveau Produit"));
 
-        verify(productService, times(1)).createProduct(any(product.class));
+        verify(productService, times(1)).createProduct(any(Product.class));
     }
 
     @Test
@@ -140,17 +140,17 @@ class productcontrollerTest {
                 }
                 """;
 
-        product existingProduct = new product();
+        Product existingProduct = new Product();
         existingProduct.setId(1L);
         existingProduct.setNom("Ancien nom");
 
-        product resultProduct = new product();
+        Product resultProduct = new Product();
         resultProduct.setId(1L);
         resultProduct.setNom("Produit Modifié");
         resultProduct.setPrix(59.99);
 
         when(productService.getProductById(1L)).thenReturn(existingProduct);
-        when(productService.updateProduct(eq(1L), any(product.class))).thenReturn(resultProduct);
+        when(productService.updateProduct(eq(1L), any(Product.class))).thenReturn(resultProduct);
 
         mockMvc.perform(put("/api/products/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -158,12 +158,12 @@ class productcontrollerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nom").value("Produit Modifié"));
 
-        verify(productService, times(1)).updateProduct(eq(1L), any(product.class));
+        verify(productService, times(1)).updateProduct(eq(1L), any(Product.class));
     }
 
     @Test
     void testDeleteProduct() throws Exception {
-        product product = new product();
+        Product product = new Product();
         product.setId(1L);
         product.setImageUrl(null);
 

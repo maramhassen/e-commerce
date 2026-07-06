@@ -1,7 +1,7 @@
 package com.example.e_commerce.integration;
 
-import com.example.e_commerce.entities.role;
-import com.example.e_commerce.entities.user;
+import com.example.e_commerce.entities.Role;
+import com.example.e_commerce.entities.User;
 import com.example.e_commerce.repository.userrepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
-class usercontrollerIntegrationTest {
+class userControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -51,12 +51,12 @@ class usercontrollerIntegrationTest {
 
     @Test
     void testCreateUser() throws Exception {
-        user user = new user();
+        User user = new User();
         user.setNom("Dupont");
         user.setPrenom("Jean");
         user.setEmail("jean.dupont@example.com");
         user.setMotDePasse("password123");
-        user.setRole(role.CLIENT);
+        user.setRole(Role.CLIENT);
 
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -69,15 +69,15 @@ class usercontrollerIntegrationTest {
 
     @Test
     void testGetAllUsers() throws Exception {
-        user user1 = new user();
+        User user1 = new User();
         user1.setNom("Martin");
         user1.setEmail("martin@example.com");
-        user1.setRole(role.CLIENT);
+        user1.setRole(Role.CLIENT);
 
-        user user2 = new user();
+        User user2 = new User();
         user2.setNom("Bernard");
         user2.setEmail("bernard@example.com");
-        user2.setRole(role.CLIENT);
+        user2.setRole(Role.CLIENT);
 
         userRepository.save(user1);
         userRepository.save(user2);
@@ -90,11 +90,11 @@ class usercontrollerIntegrationTest {
 
     @Test
     void testGetUserById() throws Exception {
-        user user = new user();
+        User user = new User();
         user.setNom("Durand");
         user.setEmail("durand@example.com");
-        user.setRole(role.CLIENT);
-        user saved = userRepository.save(user);
+        user.setRole(Role.CLIENT);
+        User saved = userRepository.save(user);
 
         mockMvc.perform(get("/api/users/{id}", saved.getId()))
                 .andExpect(status().isOk())
@@ -113,16 +113,16 @@ class usercontrollerIntegrationTest {
 
     @Test
     void testUpdateUser() throws Exception {
-        user user = new user();
+        User user = new User();
         user.setNom("AncienNom");
         user.setEmail("ancien@example.com");
-        user.setRole(role.CLIENT);
-        user saved = userRepository.save(user);
+        user.setRole(Role.CLIENT);
+        User saved = userRepository.save(user);
 
-        user updatedUser = new user();
+        User updatedUser = new User();
         updatedUser.setNom("NouveauNom");
         updatedUser.setEmail("nouveau@email.com");
-        updatedUser.setRole(role.CLIENT);
+        updatedUser.setRole(Role.CLIENT);
 
         mockMvc.perform(put("/api/users/{id}", saved.getId())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -134,10 +134,10 @@ class usercontrollerIntegrationTest {
 
     @Test
     void testUpdateUser_NotFound() throws Exception {
-        user updatedUser = new user();
+        User updatedUser = new User();
         updatedUser.setNom("Inexistant");
         updatedUser.setEmail("x@example.com");
-        updatedUser.setRole(role.CLIENT);
+        updatedUser.setRole(Role.CLIENT);
 
         // updateUser() lève une RuntimeException via le service, non interceptée
         // par le controller -> MockMvc relance une ServletException.
@@ -150,11 +150,11 @@ class usercontrollerIntegrationTest {
 
     @Test
     void testDeleteUser() throws Exception {
-        user user = new user();
+        User user = new User();
         user.setNom("À supprimer");
         user.setEmail("delete@example.com");
-        user.setRole(role.CLIENT);
-        user saved = userRepository.save(user);
+        user.setRole(Role.CLIENT);
+        User saved = userRepository.save(user);
 
         mockMvc.perform(delete("/api/users/{id}", saved.getId()))
                 .andExpect(status().isOk());

@@ -1,8 +1,8 @@
 package com.example.e_commerce.controllers;
 
-import com.example.e_commerce.dto.cartitemrequest;
-import com.example.e_commerce.entities.cart;
-import com.example.e_commerce.entities.cartitem;
+import com.example.e_commerce.dto.CartItemRequest;
+import com.example.e_commerce.entities.Cart;
+import com.example.e_commerce.entities.CartItem;
 import com.example.e_commerce.services.icartservice;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,34 +11,34 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/carts")
 //@CrossOrigin(origins = "*")
-public class cartcontroller {
+public class CartController {
     private final icartservice cartService;
 
-    public cartcontroller(icartservice cartService) {
+    public CartController(icartservice cartService) {
         this.cartService = cartService;
     }
 
     // CREATE
     @PostMapping
-    public cart createCart(@RequestBody cart cart) {
+    public Cart createCart(@RequestBody Cart cart) {
         return cartService.createCart(cart);
     }
 
     // READ ALL
     @GetMapping
-    public List<cart> getAllCarts() {
+    public List<Cart> getAllCarts() {
         return cartService.getAllCarts();
     }
 
     // READ BY ID
     @GetMapping("/{id}")
-    public cart getCartById(@PathVariable Long id) {
+    public Cart getCartById(@PathVariable Long id) {
         return cartService.getCartById(id);
     }
 
     // UPDATE
     @PutMapping("/{id}")
-    public cart updateCart(@PathVariable Long id, @RequestBody cart cart) {
+    public Cart updateCart(@PathVariable Long id, @RequestBody Cart cart) {
         return cartService.updateCart(id, cart);
     }
 
@@ -50,13 +50,13 @@ public class cartcontroller {
 
     // AJOUTER UN ITEM À UN PANIER SPÉCIFIQUE (par cartId)
     @PostMapping("/{cartId}/add-item")
-    public cartitem addItemToCart(@PathVariable Long cartId, @RequestBody cartitem cartItem) {
+    public CartItem addItemToCart(@PathVariable Long cartId, @RequestBody CartItem cartItem) {
         return cartService.addItemToCart(cartId, cartItem);
     }
 
     // AJOUTER UN PRODUIT AU PANIER (alternative)
     @PostMapping("/{cartId}/add-product/{productId}")
-    public cartitem addProductToCart(@PathVariable Long cartId,
+    public CartItem addProductToCart(@PathVariable Long cartId,
                                      @PathVariable Long productId,
                                      @RequestParam int quantity) {
         return cartService.addProductToCart(cartId, productId, quantity);
@@ -64,14 +64,14 @@ public class cartcontroller {
 
     // AJOUTER UN ITEM AU PANIER DE L'UTILISATEUR
     @PostMapping("/user/{userId}/add-item")
-    public cartitem addItemToUserCart(@PathVariable Long userId, @RequestBody cartitem cartItem) {
+    public CartItem addItemToUserCart(@PathVariable Long userId, @RequestBody CartItem cartItem) {
         return cartService.addItemToUserCart(userId, cartItem);
     }
 
     // ========== MÉTHODE CORRIGÉE ==========
     // RÉCUPÉRER LE PANIER DE L'UTILISATEUR - UTILISE findOrCreateCartForUser
     @GetMapping("/user/{userId}")
-    public cart getCartByUserId(@PathVariable Long userId) {
+    public Cart getCartByUserId(@PathVariable Long userId) {
         // Cette méthode crée automatiquement le panier s'il n'existe pas
         return cartService.findOrCreateCartForUser(userId);
     }
@@ -90,7 +90,7 @@ public class cartcontroller {
 
     // METTRE À JOUR LA QUANTITÉ D'UN ITEM
     @PutMapping("/{cartId}/update-item/{itemId}")
-    public cartitem updateCartItemQuantity(
+    public CartItem updateCartItemQuantity(
             @PathVariable Long cartId,
             @PathVariable Long itemId,
             @RequestParam int quantity) {
@@ -105,14 +105,14 @@ public class cartcontroller {
 
     // TROUVER OU CRÉER UN PANIER POUR L'UTILISATEUR
     @GetMapping("/user/{userId}/find-or-create")
-    public cart findOrCreateCartForUser(@PathVariable Long userId) {
+    public Cart findOrCreateCartForUser(@PathVariable Long userId) {
         return cartService.findOrCreateCartForUser(userId);
     }
 
     // AJOUT SIMPLE (utilisé par le frontend)
     @PostMapping("/{cartId}/add-item-simple")
-    public cartitem addItemToCartSimple(@PathVariable Long cartId,
-                                        @RequestBody cartitemrequest request) {
+    public CartItem addItemToCartSimple(@PathVariable Long cartId,
+                                        @RequestBody CartItemRequest request) {
         return cartService.addProductToCart(cartId, request.getProductId(), request.getQuantite());
     }
 }

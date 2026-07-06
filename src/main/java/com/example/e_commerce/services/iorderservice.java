@@ -1,15 +1,15 @@
 package com.example.e_commerce.services;
 
-import com.example.e_commerce.entities.order;
-import com.example.e_commerce.entities.orderstatut;
+import com.example.e_commerce.entities.Order;
+import com.example.e_commerce.entities.OrderStatut;
 import java.util.List;
 
 public interface iorderservice {
-    order createOrderFromCart(Long userId);
-    order getOrderById(Long id);
-    List<order> getOrdersByUser(Long userId);
-    List<order> getAllOrders();
-    order updateOrderStatus(Long orderId, orderstatut statut);
+    Order createOrderFromCart(Long userId);
+    Order getOrderById(Long id);
+    List<Order> getOrdersByUser(Long userId);
+    List<Order> getAllOrders();
+    Order updateOrderStatus(Long orderId, OrderStatut statut);
     void deleteOrder(Long id);
-    order getOrderByCartId(Long cartId);
+    Order getOrderByCartId(Long cartId);
 }

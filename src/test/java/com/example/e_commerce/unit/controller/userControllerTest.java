@@ -1,7 +1,7 @@
 package com.example.e_commerce.unit.controller;
 
-import com.example.e_commerce.controllers.usercontroller;
-import com.example.e_commerce.entities.user;
+import com.example.e_commerce.controllers.UserController;
+import com.example.e_commerce.entities.User;
 import com.example.e_commerce.services.iuserservice;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,13 +25,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-class usercontrollerTest {
+class userControllerTest {
 
     @Mock
     private iuserservice userService;
 
     @InjectMocks
-    private usercontroller userController;
+    private UserController userController;
 
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
@@ -44,16 +44,16 @@ class usercontrollerTest {
 
     @Test
     void testGetAllUsers() throws Exception {
-        user user1 = new user();
+        User user1 = new User();
         user1.setId(1L);
         user1.setNom("Dupont");
 
-        user user2 = new user();
+        User user2 = new User();
         user2.setId(2L);
         user2.setNom("Martin");
 
-        List<user> users = Arrays.asList(user1, user2);
-        when(userService.getAllUsers()).thenReturn(users);
+        List<User> Users = Arrays.asList(user1, user2);
+        when(userService.getAllUsers()).thenReturn(Users);
 
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
@@ -65,7 +65,7 @@ class usercontrollerTest {
 
     @Test
     void testGetUserById_Success() throws Exception {
-        user user = new user();
+        User user = new User();
         user.setId(1L);
         user.setNom("Dupont");
         user.setEmail("dupont@example.com");
@@ -89,17 +89,17 @@ class usercontrollerTest {
 
     @Test
     void testCreateUser_Success() throws Exception {
-        user user = new user();
+        User user = new User();
         user.setNom("Dupont");
         user.setEmail("dupont@example.com");
         user.setMotDePasse("password123");
 
-        user savedUser = new user();
+        User savedUser = new User();
         savedUser.setId(1L);
         savedUser.setNom("Dupont");
         savedUser.setEmail("dupont@example.com");
 
-        when(userService.createUser(any(user.class))).thenReturn(savedUser);
+        when(userService.createUser(any(User.class))).thenReturn(savedUser);
 
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -108,21 +108,21 @@ class usercontrollerTest {
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.nom").value("Dupont"));
 
-        verify(userService, times(1)).createUser(any(user.class));
+        verify(userService, times(1)).createUser(any(User.class));
     }
 
     @Test
     void testUpdateUser_Success() throws Exception {
-        user updatedUser = new user();
+        User updatedUser = new User();
         updatedUser.setNom("NouveauNom");
         updatedUser.setEmail("nouveau@email.com");
 
-        user resultUser = new user();
+        User resultUser = new User();
         resultUser.setId(1L);
         resultUser.setNom("NouveauNom");
         resultUser.setEmail("nouveau@email.com");
 
-        when(userService.updateUser(eq(1L), any(user.class))).thenReturn(resultUser);
+        when(userService.updateUser(eq(1L), any(User.class))).thenReturn(resultUser);
 
         mockMvc.perform(put("/api/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -130,7 +130,7 @@ class usercontrollerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nom").value("NouveauNom"));
 
-        verify(userService, times(1)).updateUser(eq(1L), any(user.class));
+        verify(userService, times(1)).updateUser(eq(1L), any(User.class));
     }
 
     @Test

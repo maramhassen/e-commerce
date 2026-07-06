@@ -1,7 +1,7 @@
     package com.example.e_commerce.controllers;
 
-    import com.example.e_commerce.entities.product;
-    import com.example.e_commerce.entities.category;
+    import com.example.e_commerce.entities.Product;
+    import com.example.e_commerce.entities.Category;
     import com.example.e_commerce.services.filestorageservice;
     import com.example.e_commerce.services.iproductservice;
     import com.example.e_commerce.services.icategoryservice;
@@ -24,7 +24,7 @@
     @RequestMapping("/api/products")
     //@CrossOrigin(origins = "*", allowedHeaders = "*")
     //@CrossOrigin(allowCredentials = "true")
-    public class productcontroller {
+    public class ProductController {
         private final iproductservice productService;
 
         @Autowired
@@ -36,7 +36,7 @@
         @Autowired
         private ObjectMapper objectMapper;
 
-        public productcontroller(iproductservice productService) {
+        public ProductController(iproductservice productService) {
             this.productService = productService;
         }
 
@@ -90,7 +90,7 @@
             try {
                 System.out.println("📝 Création produit avec données: " + productData);
 
-                product product = new product();
+                Product product = new Product();
                 product.setNom((String) productData.get("nom"));
                 product.setDescription((String) productData.get("description"));
                 product.setPrix(Double.parseDouble(productData.get("prix").toString()));
@@ -112,17 +112,17 @@
                     Map<String, Object> categoryMap = (Map<String, Object>) categoryObj;
                     if (categoryMap.containsKey("id")) {
                         Long categoryId = Long.valueOf(categoryMap.get("id").toString());
-                        category category = categoryService.getCategoryById(categoryId);
+                        Category category = categoryService.getCategoryById(categoryId);
                         product.setCategory(category);
                     }
                 } else if (categoryIdObj != null) {
                     // Si categoryId est fourni directement
                     Long categoryId = Long.valueOf(categoryIdObj.toString());
-                    category category = categoryService.getCategoryById(categoryId);
+                    Category category = categoryService.getCategoryById(categoryId);
                     product.setCategory(category);
                 }
 
-                product savedProduct = productService.createProduct(product);
+                Product savedProduct = productService.createProduct(product);
                 System.out.println("✅ Produit créé avec ID: " + savedProduct.getId());
 
                 return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
@@ -148,7 +148,7 @@
                 // Parser le JSON en Map pour accéder aux champs
                 JsonNode productNode = objectMapper.readTree(productJson);
 
-                product product = new product();
+                Product product = new Product();
                 product.setNom(productNode.get("nom").asText());
                 product.setDescription(productNode.get("description").asText());
                 product.setPrix(productNode.get("prix").asDouble());
@@ -159,7 +159,7 @@
                 JsonNode categoryNode = productNode.get("category");
                 if (categoryNode != null && !categoryNode.isNull()) {
                     Long categoryId = categoryNode.get("id").asLong();
-                    category category = categoryService.getCategoryById(categoryId);
+                    Category category = categoryService.getCategoryById(categoryId);
                     product.setCategory(category);
                 }
 
@@ -173,7 +173,7 @@
                     System.out.println("ℹ️ Aucune image fournie");
                 }
 
-                product savedProduct = productService.createProduct(product);
+                Product savedProduct = productService.createProduct(product);
                 System.out.println("✅ Produit créé: ID=" + savedProduct.getId() +
                         ", Image=" + savedProduct.getImageUrl());
 
@@ -192,11 +192,11 @@
         @GetMapping
         public ResponseEntity<?> getAll() {
             try {
-                List<product> products = productService.getAllProducts();
+                List<Product> Products = productService.getAllProducts();
 
-                System.out.println("📋 Récupération de " + products.size() + " produits");
+                System.out.println("📋 Récupération de " + Products.size() + " produits");
 
-                return ResponseEntity.ok(products);
+                return ResponseEntity.ok(Products);
 
             } catch (Exception e) {
                 System.err.println("❌ Erreur récupération produits: " + e.getMessage());
@@ -212,7 +212,7 @@
             try {
                 System.out.println("🔍 Récupération produit ID: " + id);
 
-                product product = productService.getProductById(id);
+                Product product = productService.getProductById(id);
 
                 if (product == null) {
                     System.out.println("❌ Produit non trouvé ID: " + id);
@@ -238,7 +238,7 @@
                 System.out.println("✏️ Mise à jour produit ID: " + id);
                 System.out.println("📋 Données reçues: " + productData);
 
-                product existing = productService.getProductById(id);
+                Product existing = productService.getProductById(id);
                 if (existing == null) {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND)
                             .body(Map.of("error", "Produit non trouvé"));
@@ -266,16 +266,16 @@
                     Map<String, Object> categoryMap = (Map<String, Object>) categoryObj;
                     if (categoryMap.containsKey("id")) {
                         Long categoryId = Long.valueOf(categoryMap.get("id").toString());
-                        category category = categoryService.getCategoryById(categoryId);
+                        Category category = categoryService.getCategoryById(categoryId);
                         existing.setCategory(category);
                     }
                 } else if (categoryIdObj != null) {
                     Long categoryId = Long.valueOf(categoryIdObj.toString());
-                    category category = categoryService.getCategoryById(categoryId);
+                    Category category = categoryService.getCategoryById(categoryId);
                     existing.setCategory(category);
                 }
 
-                product updatedProduct = productService.updateProduct(id, existing);
+                Product updatedProduct = productService.updateProduct(id, existing);
                 System.out.println("✅ Produit mis à jour: " + updatedProduct.getNom());
 
                 return ResponseEntity.ok(updatedProduct);
@@ -299,7 +299,7 @@
             try {
                 System.out.println("📤 Upload mise à jour produit ID: " + id);
 
-                product existingProduct = productService.getProductById(id);
+                Product existingProduct = productService.getProductById(id);
                 if (existingProduct == null) {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND)
                             .body(Map.of("error", "Produit non trouvé"));
@@ -322,7 +322,7 @@
                 JsonNode categoryNode = productNode.get("category");
                 if (categoryNode != null && !categoryNode.isNull()) {
                     Long categoryId = categoryNode.get("id").asLong();
-                    category category = categoryService.getCategoryById(categoryId);
+                    Category category = categoryService.getCategoryById(categoryId);
                     existingProduct.setCategory(category);
                 }
 
@@ -351,7 +351,7 @@
                 }
                 // Sinon, garder l'image existante
 
-                product updatedProduct = productService.updateProduct(id, existingProduct);
+                Product updatedProduct = productService.updateProduct(id, existingProduct);
                 System.out.println("✅ Produit mis à jour: ID=" + updatedProduct.getId());
 
                 return ResponseEntity.ok(updatedProduct);
@@ -367,7 +367,7 @@
         @DeleteMapping("/{id}")
         public ResponseEntity<?> delete(@PathVariable Long id) {
             try {
-                product product = productService.getProductById(id);
+                Product product = productService.getProductById(id);
 
                 // Supprimer l'image associée
                 if (product.getImageUrl() != null && !product.getImageUrl().isEmpty()) {
@@ -389,14 +389,14 @@
         @GetMapping("/test/images")
         public ResponseEntity<?> testImages() {
             try {
-                List<product> products = productService.getAllProducts();
+                List<Product> Products = productService.getAllProducts();
 
                 StringBuilder response = new StringBuilder();
                 response.append("<h1>Test d'images</h1>");
-                response.append("<p>Total produits: ").append(products.size()).append("</p>");
+                response.append("<p>Total produits: ").append(Products.size()).append("</p>");
                 response.append("<ul>");
 
-                for (product p : products) {
+                for (Product p : Products) {
                     response.append("<li>")
                             .append(p.getId()).append(": ")
                             .append(p.getNom()).append(" - ")

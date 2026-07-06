@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-public class cart {
+public class Cart {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,20 +20,20 @@ public class cart {
     @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonIgnoreProperties({"cart", "orders"})
-    private user user;
+    private User user;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonIgnoreProperties("cart")
-    private List<cartitem> items;
+    private List<CartItem> items;
 
     @OneToOne(mappedBy = "sourceCart")
     @JsonIgnoreProperties("sourceCart")
-    private order order;
+    private Order order;
 
     // Constructeurs
-    public cart() {}
+    public Cart() {}
 
-    public cart(user user) {
+    public Cart(User user) {
         this.user = user;
         this.total = 0.0;
         this.dateCreation = new Date();
@@ -49,12 +49,12 @@ public class cart {
     public Date getDateCreation() { return dateCreation; }
     public void setDateCreation(Date dateCreation) { this.dateCreation = dateCreation; }
 
-    public user getUser() { return user; }
-    public void setUser(user user) { this.user = user; }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 
-    public List<cartitem> getItems() { return items; }
-    public void setItems(List<cartitem> items) { this.items = items; }
+    public List<CartItem> getItems() { return items; }
+    public void setItems(List<CartItem> items) { this.items = items; }
 
-    public order getOrder() { return order; }
-    public void setOrder(order order) { this.order = order; }
+    public Order getOrder() { return order; }
+    public void setOrder(Order order) { this.order = order; }
 }

@@ -1,6 +1,6 @@
 package com.example.e_commerce.repository;
 
-import com.example.e_commerce.entities.cartitem;
+import com.example.e_commerce.entities.CartItem;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -10,11 +10,11 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface cartitemrepository extends JpaRepository<cartitem, Long> {
+public interface cartitemrepository extends JpaRepository<CartItem, Long> {
 
-    Optional<cartitem> findByCartIdAndProductId(Long cartId, Long productId);
+    Optional<CartItem> findByCartIdAndProductId(Long cartId, Long productId);
 
-    List<cartitem> findByCartId(Long cartId);
+    List<CartItem> findByCartId(Long cartId);
     @Transactional
     @Modifying
     void deleteAllByCartId(Long cartId);
@@ -24,5 +24,5 @@ public interface cartitemrepository extends JpaRepository<cartitem, Long> {
 
     Double calculatuserRepositoryecartTotal(Long cartId);
 
-    Optional<cartitem> findBycartIdAndProductId(Long id, Long id1);
+    Optional<CartItem> findBycartIdAndProductId(Long id, Long id1);
 }

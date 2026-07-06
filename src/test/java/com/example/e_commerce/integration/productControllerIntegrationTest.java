@@ -1,6 +1,6 @@
 package com.example.e_commerce.integration;
 
-import com.example.e_commerce.entities.product;
+import com.example.e_commerce.entities.Product;
 import com.example.e_commerce.repository.productrepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
-class productcontrollerIntegrationTest {
+class productControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -62,7 +62,7 @@ class productcontrollerIntegrationTest {
 
     @Test
     void testGetAllProducts() throws Exception {
-        product product = new product();
+        Product product = new Product();
         product.setNom("Produit 1");
         product.setPrix(50.00);
         product.setStock(1);
@@ -76,11 +76,11 @@ class productcontrollerIntegrationTest {
 
     @Test
     void testGetProductById() throws Exception {
-        product product = new product();
+        Product product = new Product();
         product.setNom("Produit Unique");
         product.setPrix(75.00);
         product.setStock(1);
-        product saved = productRepository.save(product);
+        Product saved = productRepository.save(product);
 
         mockMvc.perform(get("/api/products/{id}", saved.getId()))
                 .andExpect(status().isOk())
@@ -98,11 +98,11 @@ class productcontrollerIntegrationTest {
 
     @Test
     void testUpdateProduct() throws Exception {
-        product product = new product();
+        Product product = new Product();
         product.setNom("Ancien Nom");
         product.setPrix(30.00);
         product.setStock(5);
-        product saved = productRepository.save(product);
+        Product saved = productRepository.save(product);
 
         String requestJson = """
                 {
@@ -144,11 +144,11 @@ class productcontrollerIntegrationTest {
 
     @Test
     void testDeleteProduct() throws Exception {
-        product product = new product();
+        Product product = new Product();
         product.setNom("Produit à supprimer");
         product.setPrix(20.00);
         product.setStock(1);
-        product saved = productRepository.save(product);
+        Product saved = productRepository.save(product);
 
         mockMvc.perform(delete("/api/products/{id}", saved.getId()))
                 .andExpect(status().isOk())

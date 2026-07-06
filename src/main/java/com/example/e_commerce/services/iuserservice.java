@@ -1,20 +1,20 @@
 package com.example.e_commerce.services;
 
-import com.example.e_commerce.entities.user;
+import com.example.e_commerce.entities.User;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface iuserservice {
-    user createUser(user user);
+    User createUser(User user);
 
-    user updateUser(Long id, user user);
+    User updateUser(Long id, User user);
 
-    user getUserById(Long id);
+    User getUserById(Long id);
 
-    List<user> getAllUsers();
+    List<User> getAllUsers();
 
     void deleteUser(Long id);
-    Optional<user> getUserByEmail(String email);
+    Optional<User> getUserByEmail(String email);
 
 }

@@ -11,7 +11,7 @@ import java.util.Date;
 @Entity
 @Table(name = "users")
 
-public class user {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,14 +27,14 @@ public class user {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private role role; // ADMIN, CLIENT
+    private Role role; // ADMIN, CLIENT
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateCreation = new Date();
 
     private boolean actif = true;
 
-    public user(String nom, String prenom, String email, String motDePasse, role role) {
+    public User(String nom, String prenom, String email, String motDePasse, Role role) {
         this.nom = nom;
         this.prenom = prenom;
         this.email = email;
@@ -82,11 +82,11 @@ public class user {
         this.motDePasse = motDePasse;
     }
 
-    public role getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(role role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 

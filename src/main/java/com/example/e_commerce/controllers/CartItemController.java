@@ -1,6 +1,6 @@
 package com.example.e_commerce.controllers;
 
-import com.example.e_commerce.entities.cartitem;
+import com.example.e_commerce.entities.CartItem;
 import com.example.e_commerce.services.icartitemservice;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,35 +9,35 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/cart-items")
 //@CrossOrigin(origins = "*")
-public class cartitemcontroller {
+public class CartItemController {
     private final icartitemservice cartItemService;
 
-    public cartitemcontroller(icartitemservice cartItemService) {
+    public CartItemController(icartitemservice cartItemService) {
         this.cartItemService = cartItemService;
     }
 
     // CREATE
     @PostMapping
-    public cartitem createCartItem(@RequestBody cartitem cartItem) {
+    public CartItem createCartItem(@RequestBody CartItem cartItem) {
         return cartItemService.createCartItem(cartItem);
     }
 
     // READ ALL
     @GetMapping
-    public List<cartitem> getAllCartItems() {
+    public List<CartItem> getAllCartItems() {
         return cartItemService.getAllCartItems();
     }
 
     // READ BY ID
     @GetMapping("/{id}")
-    public cartitem getCartItemById(@PathVariable Long id) {
+    public CartItem getCartItemById(@PathVariable Long id) {
         return cartItemService.getCartItemById(id);
     }
 
     // UPDATE
     @PutMapping("/{id}")
-    public cartitem updateCartItem(@PathVariable Long id,
-                                   @RequestBody cartitem cartItem) {
+    public CartItem updateCartItem(@PathVariable Long id,
+                                   @RequestBody CartItem cartItem) {
         return cartItemService.updateCartItem(id, cartItem);
     }
 

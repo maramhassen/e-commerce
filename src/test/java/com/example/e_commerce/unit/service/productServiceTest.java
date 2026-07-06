@@ -1,6 +1,6 @@
 package com.example.e_commerce.unit.service;
 
-import com.example.e_commerce.entities.product;
+import com.example.e_commerce.entities.Product;
 import com.example.e_commerce.repository.productrepository;
 import com.example.e_commerce.services.productserviceimpl;
 import org.junit.jupiter.api.Test;
@@ -27,65 +27,65 @@ class productServiceTest {
 
     @Test
     void testCreateProduct_Success() {
-        product product = new product();
+        Product product = new Product();
         product.setNom("Produit Test");
         product.setPrix(99.99);
         product.setStock(10);
 
-        product savedProduct = new product();
+        Product savedProduct = new Product();
         savedProduct.setId(1L);
         savedProduct.setNom("Produit Test");
         savedProduct.setPrix(99.99);
         savedProduct.setStock(10);
 
-        when(productRepository.save(any(product.class))).thenReturn(savedProduct);
+        when(productRepository.save(any(Product.class))).thenReturn(savedProduct);
 
-        product result = productService.createProduct(product);
+        Product result = productService.createProduct(product);
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
         assertEquals("Produit Test", result.getNom());
-        verify(productRepository, times(1)).save(any(product.class));
+        verify(productRepository, times(1)).save(any(Product.class));
     }
 
     @Test
     void testCreateProduct_WithNullName_ShouldThrowException() {
-        product product = new product();
+        Product product = new Product();
         product.setNom(null);
         product.setPrix(99.99);
 
         assertThrows(RuntimeException.class, () -> productService.createProduct(product));
-        verify(productRepository, never()).save(any(product.class));
+        verify(productRepository, never()).save(any(Product.class));
     }
 
     @Test
     void testCreateProduct_WithEmptyName_ShouldThrowException() {
-        product product = new product();
+        Product product = new Product();
         product.setNom("");
         product.setPrix(99.99);
 
         assertThrows(RuntimeException.class, () -> productService.createProduct(product));
-        verify(productRepository, never()).save(any(product.class));
+        verify(productRepository, never()).save(any(Product.class));
     }
 
     @Test
     void testCreateProduct_WithNegativePrice_ShouldThrowException() {
-        product product = new product();
+        Product product = new Product();
         product.setNom("Produit Test");
         product.setPrix(-10.0);
 
         assertThrows(RuntimeException.class, () -> productService.createProduct(product));
-        verify(productRepository, never()).save(any(product.class));
+        verify(productRepository, never()).save(any(Product.class));
     }
 
     @Test
     void testGetProductById_Success() {
-        product product = new product();
+        Product product = new Product();
         product.setId(1L);
         product.setNom("Produit Test");
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
-        product result = productService.getProductById(1L);
+        Product result = productService.getProductById(1L);
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
@@ -105,17 +105,17 @@ class productServiceTest {
 
     @Test
     void testGetAllProducts_Success() {
-        product product1 = new product();
+        Product product1 = new Product();
         product1.setId(1L);
         product1.setNom("Produit 1");
 
-        product product2 = new product();
+        Product product2 = new Product();
         product2.setId(2L);
         product2.setNom("Produit 2");
 
         when(productRepository.findAll()).thenReturn(Arrays.asList(product1, product2));
 
-        List<product> result = productService.getAllProducts();
+        List<Product> result = productService.getAllProducts();
 
         assertEquals(2, result.size());
         verify(productRepository, times(1)).findAll();
@@ -123,42 +123,42 @@ class productServiceTest {
 
     @Test
     void testUpdateProduct_Success() {
-        product existingProduct = new product();
+        Product existingProduct = new Product();
         existingProduct.setId(1L);
         existingProduct.setNom("Ancien Nom");
         existingProduct.setPrix(30.0);
         existingProduct.setStock(5);
 
-        product updatedProduct = new product();
+        Product updatedProduct = new Product();
         updatedProduct.setNom("Nouveau Nom");
         updatedProduct.setPrix(40.0);
         updatedProduct.setStock(10);
 
         when(productRepository.findById(1L)).thenReturn(Optional.of(existingProduct));
-        when(productRepository.save(any(product.class))).thenReturn(existingProduct);
+        when(productRepository.save(any(Product.class))).thenReturn(existingProduct);
 
-        product result = productService.updateProduct(1L, updatedProduct);
+        Product result = productService.updateProduct(1L, updatedProduct);
 
         assertNotNull(result);
         assertEquals("Nouveau Nom", result.getNom());
         assertEquals(40.0, result.getPrix());
         verify(productRepository, times(1)).findById(1L);
-        verify(productRepository, times(1)).save(any(product.class));
+        verify(productRepository, times(1)).save(any(Product.class));
     }
 
     @Test
     void testUpdateProduct_NotFound() {
-        product updatedProduct = new product();
+        Product updatedProduct = new Product();
         when(productRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class, () -> productService.updateProduct(99L, updatedProduct));
         verify(productRepository, times(1)).findById(99L);
-        verify(productRepository, never()).save(any(product.class));
+        verify(productRepository, never()).save(any(Product.class));
     }
 
     @Test
     void testDeleteProduct_Success() {
-        product product = new product();
+        Product product = new Product();
         product.setId(1L);
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         doNothing().when(productRepository).delete(product);
@@ -175,6 +175,6 @@ class productServiceTest {
 
         assertThrows(RuntimeException.class, () -> productService.deleteProduct(99L));
         verify(productRepository, times(1)).findById(99L);
-        verify(productRepository, never()).delete(any(product.class));
+        verify(productRepository, never()).delete(any(Product.class));
     }
 }

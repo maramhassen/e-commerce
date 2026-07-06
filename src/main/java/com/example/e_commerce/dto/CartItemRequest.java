@@ -1,12 +1,12 @@
 package com.example.e_commerce.dto;
 
-public class cartitemrequest {
+public class CartItemRequest {
     private Long productId;
     private int quantite;
 
-    public cartitemrequest() {}
+    public CartItemRequest() {}
 
-    public cartitemrequest(Long productId, int quantite) {
+    public CartItemRequest(Long productId, int quantite) {
         this.productId = productId;
         this.quantite = quantite;
     }

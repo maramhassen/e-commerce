@@ -1,6 +1,6 @@
 package com.example.e_commerce.unit.service;
 
-import com.example.e_commerce.entities.user;
+import com.example.e_commerce.entities.User;
 import com.example.e_commerce.repository.userrepository;
 import com.example.e_commerce.services.userserviceimpl;
 import org.junit.jupiter.api.Test;
@@ -27,39 +27,39 @@ public class userServiceTest {
     @Test
     void testCreateUser_Success() {
         // Arrange
-        user user = new user();
+        User user = new User();
         user.setNom("Dupont");
         user.setEmail("dupont@example.com");
         user.setMotDePasse("password123");
 
-        user savedUser = new user();
+        User savedUser = new User();
         savedUser.setId(1L);
         savedUser.setNom("Dupont");
         savedUser.setEmail("dupont@example.com");
 
-        when(userRepository.save(any(user.class))).thenReturn(savedUser);
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
         // Act
-        user result = userService.createUser(user);
+        User result = userService.createUser(user);
 
         // Assert
         assertNotNull(result);
         assertEquals(1L, result.getId());
         assertEquals("Dupont", result.getNom());
-        verify(userRepository, times(1)).save(any(user.class));
+        verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
     void testGetUserById_Success() {
         // Arrange
-        user user = new user();
+        User user = new User();
         user.setId(1L);
         user.setNom("Dupont");
         user.setEmail("dupont@example.com");
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         // Act
-        user result = userService.getUserById(1L);
+        User result = userService.getUserById(1L);
 
         // Assert
         assertNotNull(result);
@@ -81,18 +81,18 @@ public class userServiceTest {
     @Test
     void testGetAllUsers_Success() {
         // Arrange
-        user user1 = new user();
+        User user1 = new User();
         user1.setId(1L);
         user1.setNom("Dupont");
 
-        user user2 = new user();
+        User user2 = new User();
         user2.setId(2L);
         user2.setNom("Martin");
 
         when(userRepository.findAll()).thenReturn(Arrays.asList(user1, user2));
 
         // Act
-        List<user> result = userService.getAllUsers();
+        List<User> result = userService.getAllUsers();
 
         // Assert
         assertEquals(2, result.size());
@@ -102,40 +102,40 @@ public class userServiceTest {
     @Test
     void testUpdateUser_Success() {
         // Arrange
-        user existingUser = new user();
+        User existingUser = new User();
         existingUser.setId(1L);
         existingUser.setNom("AncienNom");
         existingUser.setEmail("ancien@email.com");
 
-        user updatedUser = new user();
+        User updatedUser = new User();
         updatedUser.setNom("NouveauNom");
         updatedUser.setEmail("nouveau@email.com");
         updatedUser.setMotDePasse("newpassword");
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
-        when(userRepository.save(any(user.class))).thenReturn(existingUser);
+        when(userRepository.save(any(User.class))).thenReturn(existingUser);
 
         // Act
-        user result = userService.updateUser(1L, updatedUser);
+        User result = userService.updateUser(1L, updatedUser);
 
         // Assert
         assertNotNull(result);
         assertEquals("NouveauNom", result.getNom());
         assertEquals("nouveau@email.com", result.getEmail());
         verify(userRepository, times(1)).findById(1L);
-        verify(userRepository, times(1)).save(any(user.class));
+        verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
     void testUpdateUser_NotFound() {
         // Arrange
-        user updatedUser = new user();
+        User updatedUser = new User();
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
         // Act & Assert
         assertThrows(RuntimeException.class, () -> userService.updateUser(99L, updatedUser));
         verify(userRepository, times(1)).findById(99L);
-        verify(userRepository, never()).save(any(user.class));
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test

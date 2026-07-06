@@ -1,17 +1,17 @@
 package com.example.e_commerce.services;
 
-import com.example.e_commerce.entities.cartitem;
+import com.example.e_commerce.entities.CartItem;
 
 import java.util.List;
 
 public interface icartitemservice {
-    cartitem createCartItem(cartitem cartItem);
+    CartItem createCartItem(CartItem cartItem);
 
-    cartitem updateCartItem(Long id, cartitem cartItem);
+    CartItem updateCartItem(Long id, CartItem cartItem);
 
-    cartitem getCartItemById(Long id);
+    CartItem getCartItemById(Long id);
 
-    List<cartitem> getAllCartItems();
+    List<CartItem> getAllCartItems();
 
     void deleteCartItem(Long id);
 }

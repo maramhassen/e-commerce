@@ -30,24 +30,24 @@ public class orderserviceimpl implements iorderservice {
     // ===== MÉTHODE MODIFIÉE - VERSION CORRIGÉE =====
     @Override
     @Transactional
-    public order createOrderFromCart(Long userId) {
+    public Order createOrderFromCart(Long userId) {
         System.out.println("\n========== CRÉATION COMMANDE POUR USER: " + userId + " ==========");
 
         try {
             // 1. Récupérer l'utilisateur
-            user user = userRepository.findById(userId)
+            User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec ID: " + userId));
             System.out.println("✅ Utilisateur trouvé: " + user.getEmail());
 
             // 2. Récupérer le BON panier (celui avec des articles et le plus récent)
-            List<cart> cartsWithItems = cartRepository.findCartsWithItemsByUserId(userId);
+            List<Cart> cartsWithItems = cartRepository.findCartsWithItemsByUserId(userId);
 
             if (cartsWithItems.isEmpty()) {
                 throw new RuntimeException("Aucun panier avec articles trouvé pour l'utilisateur " + userId);
             }
 
             // Prendre le premier panier de la liste (le plus récent avec articles)
-            cart cart = cartsWithItems.get(0);
+            Cart cart = cartsWithItems.get(0);
             System.out.println("✅ Panier sélectionné pour la commande: ID=" + cart.getId());
 
             // Forcer le chargement de tous les items
@@ -58,7 +58,7 @@ public class orderserviceimpl implements iorderservice {
             System.out.println("📦 Articles dans le panier (avant création commande):");
             double panierTotal = 0;
             if (cart.getItems() != null) {
-                for (cartitem item : cart.getItems()) {
+                for (CartItem item : cart.getItems()) {
                     double ligneTotal = item.getQuantite() * item.getPrixUnitaire();
                     panierTotal += ligneTotal;
                     System.out.println("   - " + item.getProduct().getNom() +
@@ -80,24 +80,24 @@ public class orderserviceimpl implements iorderservice {
             }
 
             // 5. Créer la commande avec le lien vers le panier
-            order order = new order();
+            Order order = new Order();
             order.setUser(user);
             order.setDateCommande(new Date());
-            order.setStatut(orderstatut.EN_ATTENTE);
+            order.setStatut(OrderStatut.EN_ATTENTE);
             order.setSourceCart(cart); // Lien important
 
             // 6. Créer les OrderItems à partir de TOUS les CartItems
-            List<orderitem> orderitems = new ArrayList<>();
+            List<OrderItem> OrderItems = new ArrayList<>();
             double totalCommande = 0;
 
-            for (cartitem cartItem : cart.getItems()) {
-                orderitem orderItem = new orderitem();
+            for (CartItem cartItem : cart.getItems()) {
+                OrderItem orderItem = new OrderItem();
                 orderItem.setProduct(cartItem.getProduct());
                 orderItem.setQuantite(cartItem.getQuantite());
                 orderItem.setPrix(cartItem.getPrixUnitaire()); // Prix au moment de l'achat
                 orderItem.setOrder(order);
 
-                orderitems.add(orderItem);
+                OrderItems.add(orderItem);
                 totalCommande += cartItem.getQuantite() * cartItem.getPrixUnitaire();
 
                 System.out.println("   ✅ Transféré vers commande: " + cartItem.getProduct().getNom() +
@@ -105,11 +105,11 @@ public class orderserviceimpl implements iorderservice {
                         (cartItem.getQuantite() * cartItem.getPrixUnitaire()) + " DT");
             }
 
-            order.setItems(orderitems);
+            order.setItems(OrderItems);
             order.setTotal(totalCommande);
 
             // 7. Sauvegarder la commande
-            order savedOrder = orderRepository.save(order);
+            Order savedOrder = orderRepository.save(order);
             System.out.println("✅ Commande sauvegardée: ID=" + savedOrder.getId());
             System.out.println("📦 Nombre d'articles dans la commande: " + savedOrder.getItems().size());
             System.out.println("💰 Total de la commande: " + savedOrder.getTotal() + " DT");
@@ -120,7 +120,7 @@ public class orderserviceimpl implements iorderservice {
             System.out.println("✅ Panier mis à jour avec la référence de la commande");
 
             // 9. Créer un NOUVEAU panier vide pour l'utilisateur
-            cart newCart = new cart();
+            Cart newCart = new Cart();
             newCart.setUser(user);
             newCart.setTotal(0.0);
             newCart.setDateCreation(new Date());
@@ -138,8 +138,8 @@ public class orderserviceimpl implements iorderservice {
     }
 
     @Override
-    public order getOrderById(Long id) {
-        order order = orderRepository.findById(id)
+    public Order getOrderById(Long id) {
+        Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Commande non trouvée avec ID: " + id));
 
         // Forcer le chargement des items
@@ -152,43 +152,43 @@ public class orderserviceimpl implements iorderservice {
     }
 
     @Override
-    public List<order> getOrdersByUser(Long userId) {
+    public List<Order> getOrdersByUser(Long userId) {
         // Vérifier que l'utilisateur existe
         userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec ID: " + userId));
 
-        List<order> orders = orderRepository.findByUserIdOrderByDateCommandeDesc(userId);
-        System.out.println("📦 " + orders.size() + " commandes trouvées pour l'utilisateur " + userId);
+        List<Order> Orders = orderRepository.findByUserIdOrderByDateCommandeDesc(userId);
+        System.out.println("📦 " + Orders.size() + " commandes trouvées pour l'utilisateur " + userId);
 
         // Forcer le chargement des items pour chaque commande
-        for (order order : orders) {
+        for (Order order : Orders) {
             if (order.getItems() != null) {
                 order.getItems().size();
             }
         }
 
-        return orders;
+        return Orders;
     }
 
     @Override
-    public List<order> getAllOrders() {
+    public List<Order> getAllOrders() {
         return orderRepository.findAll();
     }
 
     @Override
-    public order updateOrderStatus(Long orderId, orderstatut statut) {
-        order order = getOrderById(orderId);
+    public Order updateOrderStatus(Long orderId, OrderStatut statut) {
+        Order order = getOrderById(orderId);
         order.setStatut(statut);
         return orderRepository.save(order);
     }
 
     @Override
     public void deleteOrder(Long id) {
-        order order = getOrderById(id);
+        Order order = getOrderById(id);
 
         // Mettre à jour le panier associé si nécessaire
         if (order.getSourceCart() != null) {
-            cart cart = order.getSourceCart();
+            Cart cart = order.getSourceCart();
             cart.setOrder(null);
             cartRepository.save(cart);
             System.out.println("✅ Lien avec le panier supprimé");
@@ -199,7 +199,7 @@ public class orderserviceimpl implements iorderservice {
     }
 
     @Override
-    public order getOrderByCartId(Long cartId) {
+    public Order getOrderByCartId(Long cartId) {
         return orderRepository.findBySourceCartId(cartId)
                 .orElseThrow(() -> new RuntimeException("Aucune commande trouvée pour le panier ID: " + cartId));
     }

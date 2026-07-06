@@ -1,6 +1,6 @@
 package com.example.e_commerce.services;
 
-import com.example.e_commerce.entities.product;
+import com.example.e_commerce.entities.Product;
 import com.example.e_commerce.repository.productrepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +18,7 @@ public class productserviceimpl implements iproductservice {
 
     @Override
     @Transactional
-    public product createProduct(product product) {
+    public Product createProduct(Product product) {
         // Validation des données
         if (product.getNom() == null || product.getNom().trim().isEmpty()) {
             throw new RuntimeException("Le nom du produit est obligatoire");
@@ -37,20 +37,20 @@ public class productserviceimpl implements iproductservice {
     }
 
     @Override
-    public List<product> getAllProducts() {
+    public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
 
     @Override
-    public product getProductById(Long id) {
+    public Product getProductById(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Produit non trouvé avec ID: " + id));
     }
 
     @Override
     @Transactional
-    public product updateProduct(Long id, product product) {
-        product existing = getProductById(id);
+    public Product updateProduct(Long id, Product product) {
+        Product existing = getProductById(id);
 
         existing.setNom(product.getNom());
         existing.setDescription(product.getDescription());
@@ -70,7 +70,7 @@ public class productserviceimpl implements iproductservice {
     @Override
     @Transactional
     public void deleteProduct(Long id) {
-        product product = getProductById(id);
+        Product product = getProductById(id);
         productRepository.delete(product);
     }
 }

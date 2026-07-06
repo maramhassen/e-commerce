@@ -3,7 +3,7 @@ import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
-public class product {
+public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +22,7 @@ public class product {
 
     @ManyToOne
     @JoinColumn(name = "category_id")
-    private category category;
+    private Category category;
 
     public Long getId() {
         return id;
@@ -88,11 +88,11 @@ public class product {
         this.dateAjout = dateAjout;
     }
 
-    public category getCategory() {
+    public Category getCategory() {
         return category;
     }
 
-    public void setCategory(category category) {
+    public void setCategory(Category category) {
         this.category = category;
     }
 }

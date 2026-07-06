@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
-public class cartitem {
+public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -13,11 +13,11 @@ public class cartitem {
     private double prixUnitaire;
 
     @ManyToOne
-    private product product;
+    private Product product;
 
     @ManyToOne
     @JsonIgnore
-    private cart cart;
+    private Cart cart;
 
     public Long getId() {
         return id;
@@ -43,19 +43,19 @@ public class cartitem {
         this.prixUnitaire = prixUnitaire;
     }
 
-    public product getProduct() {
+    public Product getProduct() {
         return product;
     }
 
-    public void setProduct(product product) {
+    public void setProduct(Product product) {
         this.product = product;
     }
 
-    public cart getCart() {
+    public Cart getCart() {
         return cart;
     }
 
-    public void setCart(cart cart) {
+    public void setCart(Cart cart) {
         this.cart = cart;
     }
 }

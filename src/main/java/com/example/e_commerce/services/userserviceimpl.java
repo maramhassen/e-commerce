@@ -1,6 +1,6 @@
 package com.example.e_commerce.services;
 
-import com.example.e_commerce.entities.user;
+import com.example.e_commerce.entities.User;
 import com.example.e_commerce.repository.userrepository;
 import org.springframework.stereotype.Service;
 
@@ -15,13 +15,13 @@ public class userserviceimpl implements iuserservice {
     }
 
     @Override
-    public user createUser(user user) {
+    public User createUser(User user) {
         return userRepository.save(user);
     }
 
     @Override
-    public user updateUser(Long id, user user) {
-        user existingUser = userRepository.findById(id)
+    public User updateUser(Long id, User user) {
+        User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         existingUser.setNom(user.getNom());
@@ -34,13 +34,13 @@ public class userserviceimpl implements iuserservice {
     }
 
     @Override
-    public user getUserById(Long id) {
+    public User getUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     @Override
-    public List<user> getAllUsers() {
+    public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
@@ -50,7 +50,7 @@ public class userserviceimpl implements iuserservice {
     }
 
     @Override
-    public Optional<user> getUserByEmail(String email) {
+    public Optional<User> getUserByEmail(String email) {
         return Optional.empty();
     }
 }
