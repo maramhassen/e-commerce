@@ -600,7 +600,7 @@ stages:
               # ⭐ Le fichier sonar-project.properties est automatiquement détecté
               mvn sonar:sonar \
                 -Dsonar.host.url=$(SONAR_HOST_URL) \
-                -Dsonar.login=$(SONAR_TOKEN)
+                -Dsonar.login=$(SONAR_TOKEN)\
                 -Dsonar.projectKey=ecommerce-backend
               
               echo "✅ SonarQube backend terminé"
@@ -696,7 +696,8 @@ stages:
               npx sonar-scanner
                 -Dsonar.host.url=$(SONAR_HOST_URL) \
                 -Dsonar.login=$(SONAR_TOKEN) \
-                -Dsonar.token=$(SONAR_TOKEN)
+                -Dsonar.token=$(SONAR_TOKEN)\
+                -Dsonar.projectKey=ecommerce-frontend
               
               echo "✅ SonarQube frontend terminé"
             displayName: 'SonarQube Frontend Analysis'
