@@ -125,7 +125,7 @@ stages:
               ArtifactName: 'backend-jar'
             displayName: 'Publish backend artifacts'
   # ══════════════════════════════════════════
-  # STAGE 2 : TESTS BACKEND (CORRIGÉ)
+  # STAGE 2 : TESTS BACKEND
   # ══════════════════════════════════════════
   - stage: TestBackend
     displayName: '1.5 - Tests Backend (JUnit + Mockito)'
@@ -137,12 +137,16 @@ stages:
           - checkout: none
 
           - script: |
-              echo "=== CONFIGURATION ENVIRONNEMENT CI ==="
+              echo "=== CONFIGURATION DE L'ENVIRONNEMENT ==="
               
-              # Forcer UTF-8
+              # 1. Forcer UTF-8
               export LANG=en_US.UTF-8
               export LC_ALL=en_US.UTF-8
               export JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF-8"
+              
+              # 2. ⭐ DÉFINIR LE DOSSIER UPLOAD (SOLUTION CLÉ)
+              export FILE_UPLOAD_DIR="/tmp/ecommerce-uploads/images"
+              echo "📁 FILE_UPLOAD_DIR=$FILE_UPLOAD_DIR"
               
               echo "=== CLONE DU BACKEND ==="
               rm -rf backend-code
@@ -151,12 +155,15 @@ stages:
                 backend-code
               cd backend-code
               
-              echo "=== PRÉPARATION DOSSIER UPLOAD ==="
-              # Créer le dossier dans /tmp (toujours accessible)
-              mkdir -p /tmp/ecommerce-uploads/images
-              chmod -R 777 /tmp/ecommerce-uploads
+              echo "=== CRÉATION DU DOSSIER UPLOAD ==="
+              mkdir -p $FILE_UPLOAD_DIR
+              chmod -R 777 $(dirname $FILE_UPLOAD_DIR)
               
-              echo "=== EXÉCUTION DES TESTS AVEC PROFIL CI ==="
+              echo "=== CONTENU DU DOSSIER UPLOAD ==="
+              ls -la $FILE_UPLOAD_DIR 2>/dev/null || echo "Dossier créé avec succès"
+              
+              echo ""
+              echo "=== EXÉCUTION DES TESTS AVEC VARIABLE D'ENV ==="
               mvn clean verify \
                 -Dspring.profiles.active=ci \
                 -DargLine="-Dfile.encoding=UTF-8" \
@@ -167,16 +174,21 @@ stages:
                 echo "📊 Rapport de couverture:"
                 ls -la target/site/jacoco/ || echo "⚠️ JaCoCo non généré"
               else
-                echo "❌ Échec des tests - Détails:"
-                find target/surefire-reports -name "*.txt" -exec grep -l "ERROR\|FAILED" {} \; | head -3 | while read f; do
-                  echo "--- $f ---"
-                  head -30 "$f"
-                  echo
+                echo "❌ Échec des tests"
+                echo ""
+                echo "=== DÉTAIL DES ERREURS ==="
+                find target/surefire-reports -name "*.txt" -exec grep -l "Exception\|ERROR" {} \; | while read f; do
+                  echo "📄 $(basename $f)"
+                  grep -B 2 -A 5 "Caused by:\|Exception" "$f" | head -30
+                  echo "---"
                 done
                 exit 1
               fi
 
             displayName: 'Maven Verify (Tests + Coverage)'
+            env:
+              # ⭐ FORCER LA VARIABLE D'ENVIRONNEMENT POUR LE PROCESSUS MAVEN
+              FILE_UPLOAD_DIR: /tmp/ecommerce-uploads/images
 
           - task: PublishTestResults@2
             inputs:
