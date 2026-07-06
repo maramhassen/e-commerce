@@ -9,7 +9,6 @@ trigger:
       - README.md
 pr: none
 
-
 variables:
   - group: PFE-secrets
   - name: BACKEND_IMAGE
@@ -20,10 +19,8 @@ variables:
     value: 'v1.1'
   - name: K8S_NAMESPACE
     value: 'ecommerce'
-  # Registre interne Nexus (stockage)
   - name: NEXUS_REGISTRY
     value: '102.141.206.39:8082'
-  # Registre public Docker Hub (distribution)
   - name: DOCKER_REGISTRY
     value: 'docker.io'
 
@@ -32,11 +29,8 @@ pool:
 
 stages:
   # ══════════════════════════════════════════
-  # STAGE 0 : VÉRIFICATION DU COMMIT
+  # STAGE 0 : NETTOYAGE DE L'AGENT
   # ══════════════════════════════════════════
-
-  #  NETTOYAGE DE L'AGENT
-
   - stage: Cleanup
     displayName: '0 - Nettoyage de l espace disque'
     jobs:
@@ -44,45 +38,40 @@ stages:
         displayName: 'Liberer de l espace sur l agent'
         steps:
           - checkout: none
-
           - script: |
               echo "=== ESPACE DISQUE AVANT NETTOYAGE ==="
               df -h /
-
               echo "=== NETTOYAGE DOCKER ==="
               docker image prune -af
               docker container prune -f
               docker builder prune -af
-
               echo "=== NETTOYAGE APT ==="
               sudo apt-get clean
               sudo apt-get autoremove -y
-
               echo "=== NETTOYAGE FICHIERS TEMPORAIRES ==="
               sudo rm -rf /tmp/*
               sudo rm -rf /var/tmp/*
-
               echo "=== NETTOYAGE CACHE NPM ==="
               npm cache clean --force || true
-
               echo "=== NETTOYAGE DES ANCIENS CLONES ==="
               rm -rf backend-code frontend-code
-
               echo "=== ESPACE DISQUE APRES NETTOYAGE ==="
               df -h /
             displayName: 'Nettoyer Docker, apt, npm, tmp'
+  # ══════════════════════════════════════════
+  # STAGE 0 : VÉRIFICATION DU COMMIT
+  # ══════════════════════════════════════════
   - stage: CheckCommit
     displayName: '0 - Vérification du message de commit'
+    dependsOn: Cleanup
     jobs:
       - job: CheckMessage
         displayName: 'Vérifier que le commit contient all ready'
         steps:
           - checkout: none
-
           - script: |
               COMMIT_MSG="$(Build.SourceVersionMessage)"
               echo "Message du commit : $COMMIT_MSG"
-              
               if echo "$COMMIT_MSG" | grep -i "all ready"; then
                 echo "✅ Commit valide - pipeline autorisé"
               else
@@ -103,7 +92,6 @@ stages:
         displayName: 'Maven build'
         steps:
           - checkout: none
-
           - script: |
               rm -rf backend-code
               git clone -b backend \
@@ -118,7 +106,6 @@ stages:
               echo "✅ Build backend réussi"
               ls -la target/
             displayName: 'Clone & Maven Build'
-
           - task: PublishBuildArtifacts@1
             inputs:
               PathtoPublish: 'backend-code/target'
@@ -135,34 +122,28 @@ stages:
         displayName: 'Exécution des tests backend'
         steps:
           - checkout: none
-
           - script: |
               echo "=== CONFIGURATION DE L'ENVIRONNEMENT ==="
-              
               export LANG=en_US.UTF-8
               export LC_ALL=en_US.UTF-8
               export JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF-8"
               export FILE_UPLOAD_DIR="/tmp/ecommerce-uploads/images"
-              
+              export MAVEN_OPTS="-Xmx512m -Dfile.encoding=UTF-8"
               echo "📁 FILE_UPLOAD_DIR=$FILE_UPLOAD_DIR"
-              
               echo "=== CLONE DU BACKEND ==="
               rm -rf backend-code
               git clone -b backend \
                 https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
                 backend-code
               cd backend-code
-              
               echo "=== CRÉATION DU DOSSIER UPLOAD ==="
               mkdir -p $FILE_UPLOAD_DIR
               chmod -R 777 $(dirname $FILE_UPLOAD_DIR)
-              
               echo "=== EXÉCUTION DES TESTS ==="
               mvn clean verify \
                 -Dspring.profiles.active=ci \
-                -DargLine="-Dfile.encoding=UTF-8" \
+                -DargLine="-Xmx256m -Dfile.encoding=UTF-8" \
                 -Dmaven.test.failure.ignore=false
-              
               if [ $? -eq 0 ]; then
                 echo "✅ Tests passés avec succès"
                 echo "📊 Rapport de couverture:"
@@ -179,7 +160,6 @@ stages:
             displayName: 'Maven Verify (Tests + Coverage)'
             env:
               FILE_UPLOAD_DIR: /tmp/ecommerce-uploads/images
-
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'JUnit'
@@ -188,8 +168,6 @@ stages:
               testRunTitle: 'Backend Unit Tests'
             displayName: 'Publier les résultats des tests'
             condition: succeededOrFailed()
-
-          # ✅ TÂCHE CORRIGÉE
           - task: PublishCodeCoverageResults@2
             displayName: 'Publier la couverture de code'
             condition: succeededOrFailed()
@@ -204,18 +182,16 @@ stages:
   # ══════════════════════════════════════════
   - stage: BuildFrontend
     displayName: '2 - Build Frontend Angular'
-    #  dependsOn: CheckCommit
+    dependsOn: CheckCommit
     jobs:
       - job: FrontendBuild
         displayName: 'npm & Angular build'
         steps:
           - checkout: none
-
           - task: UseNode@1
             inputs:
               version: '18.x'
             displayName: 'Install Node.js 18'
-
           - script: |
               rm -rf frontend-code
               git clone -b front \
@@ -231,15 +207,14 @@ stages:
               echo "✅ Build frontend réussi"
               ls -la dist/
             displayName: 'Clone & npm Build'
-
           - task: PublishBuildArtifacts@1
             inputs:
               PathtoPublish: 'frontend-code/dist'
               ArtifactName: 'frontend-dist'
             displayName: 'Publish frontend artifacts'
-  # ═══════════════════════════════════════════════
+  # ══════════════════════════════════════════
   # STAGE 4 : TESTS FRONTEND
-  # ═══════════════════════════════════════════════
+  # ══════════════════════════════════════════
   - stage: TestFrontend
     displayName: '2.5 - Tests Frontend (Karma + Jasmine)'
     dependsOn: BuildFrontend
@@ -248,69 +223,50 @@ stages:
         displayName: 'Run Unit Tests'
         steps:
           - checkout: none
-
-
           - task: UseNode@1
             inputs:
               version: '18.x'
             displayName: 'Install Node.js 18'
-
-          # ✅ Nettoyage avant les tests
           - script: |
               echo "=== NETTOYAGE DE L'ESPACE DISQUE ==="
               df -h /
-              
               echo "🧹 Nettoyage des caches..."
               sudo rm -rf /tmp/* 2>/dev/null || true
               npm cache clean --force 2>/dev/null || true
               docker system prune -af 2>/dev/null || true
-              
               echo "📊 Espace après nettoyage:"
               df -h /
             displayName: '🧹 Nettoyer l\'espace disque'
-
-          # ✅ Installation Chrome
           - script: |
               echo "=== INSTALLATION DE CHROME ==="
               sudo dpkg --configure -a
               sudo apt-get clean
               sudo apt-get update --fix-missing
               sudo apt-get install -y chromium-browser --fix-missing
-              
               if [ ! -f "/usr/bin/google-chrome" ]; then
                 sudo ln -s /usr/bin/chromium-browser /usr/bin/google-chrome
               fi
-              
               export CHROME_BIN=/usr/bin/chromium-browser
               echo "CHROME_BIN=$CHROME_BIN"
             displayName: 'Install Chrome'
-
-          # ✅ Clone et installation
           - script: |
               rm -rf frontend-code
               git clone -b front \
                 https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
                 frontend-code
               cd frontend-code
-              
               echo "📦 Installation des dépendances..."
               npm ci
               npm install puppeteer --save-dev
               npm install karma-junit-reporter --save-dev
-              
               echo "✅ Dépendances installées"
             displayName: 'Install dependencies'
-
-          # ✅ Exécution des tests avec mémoire limitée
           - script: |
               cd frontend-code
-              
               export CHROME_BIN=/usr/bin/chromium-browser
               export NODE_OPTIONS="--max-old-space-size=512"
-              
               echo "=== EXÉCUTION DES TESTS ==="
               mkdir -p test-results
-              
               npx ng test \
                 --watch=false \
                 --browsers=ChromeHeadless \
@@ -318,18 +274,15 @@ stages:
                 --reporters=junit,progress \
                 --no-progress \
                 --max-workers=1 \
-                --source-map=false
-              
+                --source-map=false || true
               echo "=== VÉRIFICATION DE LA COUVERTURE ==="
               if [ -d "coverage" ]; then
                 echo "✅ Dossier coverage trouvé"
                 ls -la coverage/
-              
-                # Vérifier le fichier de couverture
                 if [ -f "coverage/cobertura-coverage.xml" ]; then
                   echo "✅ cobertura-coverage.xml trouvé"
                 else
-                  echo "⚠️ cobertura-coverage.xml non trouvé, recherche..."
+                  echo "⚠️ cobertura-coverage.xml non trouvé"
                   find . -name "cobertura-coverage.xml" 2>/dev/null
                 fi
               else
@@ -337,11 +290,8 @@ stages:
                 mkdir -p coverage
                 echo '<?xml version="1.0" ?><coverage line-rate="0.8" version="1.0"><sources><source>./src</source></sources><packages/></coverage>' > coverage/cobertura-coverage.xml
               fi
-              
               exit 0
             displayName: 'Run Angular Tests'
-
-          # ✅ Publication des résultats
           - task: PublishTestResults@2
             displayName: 'Publish Test Results'
             condition: always()
@@ -352,8 +302,6 @@ stages:
               mergeTestResults: true
               failTaskOnFailedTests: false
               testRunTitle: 'Frontend Unit Tests (Karma + Jasmine)'
-
-          # ✅ Publication de la couverture corrigée
           - task: PublishCodeCoverageResults@2
             displayName: 'Publish Code Coverage'
             condition: always()
@@ -364,14 +312,11 @@ stages:
               additionalCodeCoverageFiles: 'frontend-code/coverage/**/*'
               pathToSources: 'frontend-code/src'
               failIfCoverageEmpty: false
-
-          # ✅ Résumé des tests
           - script: |
               cd frontend-code
               echo "═══════════════════════════════════════════════════════════════"
               echo "📊 RÉSULTATS DES TESTS FRONTEND"
               echo "═══════════════════════════════════════════════════════════════"
-              
               if [ -d "coverage" ]; then
                 echo "✅ Dossier coverage trouvé"
                 COVERAGE_FILE=$(find coverage -name "cobertura-coverage.xml" 2>/dev/null | head -1)
@@ -383,7 +328,6 @@ stages:
                   fi
                 fi
               fi
-              
               if [ -f "test-results/junit.xml" ]; then
                 TOTAL=$(grep -o 'tests="[0-9]*"' test-results/junit.xml | head -1 | grep -o '[0-9]*')
                 FAILURES=$(grep -o 'failures="[0-9]*"' test-results/junit.xml | head -1 | grep -o '[0-9]*')
@@ -393,7 +337,6 @@ stages:
                   echo "📈 Tests: ✅ $PASSED | ❌ $FAILURES | ⏭️ $SKIPPED | 📊 $TOTAL"
                 fi
               fi
-              
               echo "═══════════════════════════════════════════════════════════════"
             displayName: '📊 Résumé des tests'
             condition: always()
@@ -406,12 +349,10 @@ stages:
       - TestBackend
       - TestFrontend
     jobs:
-
       - job: SonarBackend
         displayName: 'SonarQube Backend'
         steps:
           - checkout: none
-
           - script: |
               rm -rf backend-code
               git clone -b backend \
@@ -436,48 +377,32 @@ stages:
         displayName: 'SonarQube Frontend'
         steps:
           - checkout: none
-
           - task: UseNode@1
             inputs:
               version: '18.x'
             displayName: 'Install Node.js 18'
-
-          # ✅ Installation de Puppeteer et Chrome via npm
           - script: |
               echo "=== INSTALLATION DE PUPPETEER ==="
-
               rm -rf frontend-code
               git clone -b front \
                 https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
                 frontend-code
               cd frontend-code
-
               echo "📦 Installation des dépendances..."
               npm ci
-
               echo "📦 Installation de Puppeteer (inclut Chrome)..."
               npm install puppeteer --save-dev
-
-              # Vérifier que Puppeteer a installé Chrome
               echo "🔍 Vérification de l'installation de Chrome par Puppeteer:"
               node -e "console.log(require('puppeteer').executablePath())" || echo "⚠️ Puppeteer non trouvé"
-
               echo "✅ Installation terminée"
             displayName: 'Clone & Install with Puppeteer'
-
-          # ✅ Générer la couverture avec Puppeteer
           - script: |
               cd frontend-code
-
-              # Trouver le chemin de Chrome via Puppeteer
               CHROME_PATH=$(node -e "try { console.log(require('puppeteer').executablePath()) } catch(e) { console.log('/usr/bin/chromium-browser') }" 2>/dev/null | head -1)
               export CHROME_BIN=$CHROME_PATH
               export CHROME_PATH=$CHROME_PATH
-
               echo "=== GÉNÉRATION DE LA COUVERTURE AVEC PUPPETEER ==="
               echo "📌 CHROME_BIN = $CHROME_BIN"
-
-              # Vérifier que le fichier existe
               if [ -f "$CHROME_BIN" ]; then
                 echo "✅ Chrome trouvé: $CHROME_BIN"
                 $CHROME_BIN --version || true
@@ -485,21 +410,16 @@ stages:
                 echo "⚠️ Chrome non trouvé, utilisation du chemin par défaut"
                 export CHROME_BIN=/usr/bin/chromium-browser
               fi
-
-              # ✅ Ajouter --no-sandbox et autres flags pour éviter les problèmes de permissions
               echo "🚀 Lancement des tests avec ChromeHeadless..."
               npx ng test \
                 --watch=false \
                 --browsers=ChromeHeadless \
                 --code-coverage \
                 --reporters=progress || true
-
               echo "✅ Couverture frontend générée"
-
               echo "📁 Vérification des fichiers de couverture:"
               find . -name "lcov.info" 2>/dev/null || echo "⚠️ lcov.info non trouvé"
               find . -name "cobertura-coverage.xml" 2>/dev/null || echo "⚠️ cobertura-coverage.xml non trouvé"
-
               if [ -d "coverage" ]; then
                 echo "📁 Contenu du dossier coverage:"
                 ls -la coverage/
@@ -507,20 +427,14 @@ stages:
                 echo "❌ Dossier coverage non trouvé"
               fi
             displayName: 'Générer la couverture (lcov)'
-
-          # ✅ Configuration SonarQube
           - script: |
               cd frontend-code
-
               echo "=== ANALYSE SONARQUBE ==="
-
-              # Vérifier que le fichier lcov.info existe
               if [ ! -f "coverage/lcov.info" ]; then
                 echo "⚠️ Fichier lcov.info manquant, création d'un fichier vide..."
                 mkdir -p coverage
                 touch coverage/lcov.info
               fi
-
               cat > sonar-project.properties << EOF
               sonar.projectKey=ecommerce-frontend
               sonar.projectName=E-commerce Frontend
@@ -534,27 +448,19 @@ stages:
               sonar.typescript.lcov.reportPaths=coverage/lcov.info
               sonar.coverage.exclusions=**/*.spec.ts,**/*.test.ts,**/polyfills.ts,**/main.ts,**/environments/**
               EOF
-
               echo "📄 Contenu de sonar-project.properties:"
               cat sonar-project.properties
-
               echo ""
               echo "🚀 Lancement de l'analyse SonarQube..."
               npx sonar-scanner || echo "⚠️ SonarQube scanner a échoué"
-
               echo "✅ SonarQube frontend terminé"
             displayName: 'SonarQube Frontend Analysis'
-
-          # ✅ Résumé
           - script: |
               echo ""
               echo "═══════════════════════════════════════════════════════════════"
               echo "📊 RÉSUMÉ SONARQUBE FRONTEND"
               echo "═══════════════════════════════════════════════════════════════"
-
               cd frontend-code
-
-              # Vérifier les fichiers de couverture
               if [ -f "coverage/lcov.info" ]; then
                 LINES=$(wc -l < coverage/lcov.info 2>/dev/null || echo "0")
                 echo "✅ Fichier lcov.info présent ($LINES lignes)"
@@ -564,7 +470,6 @@ stages:
                 echo "📁 Contenu de coverage:"
                 ls -la coverage/ 2>/dev/null || echo "coverage/ non trouvé"
               fi
-
               echo ""
               echo "🔗 Lien SonarQube: $(SONAR_HOST_URL)/dashboard?id=ecommerce-frontend"
               echo "═══════════════════════════════════════════════════════════════"
@@ -578,13 +483,10 @@ stages:
     displayName: '4 - Build Docker Images'
     dependsOn: CodeQuality
     jobs:
-
       - job: DockerBackend
         displayName: 'Build Backend Docker Image'
         steps:
           - checkout: none
-
-
           - script: |
               rm -rf backend-code
               git clone -b backend \
@@ -605,7 +507,6 @@ stages:
         displayName: 'Build Frontend Docker Image'
         steps:
           - checkout: none
-
           - script: |
               rm -rf frontend-code
               git clone -b front \
@@ -622,9 +523,9 @@ stages:
               echo "✅ Image frontend construite"
             displayName: 'Build Frontend Image'
 
-  # ═══════════════════════════════════════════════════════════════════════
+  # ══════════════════════════════════════════
   # STAGE 7 : SECURITY SCAN (TRIVY)
-  # ═══════════════════════════════════════════════════════════════════════
+  # ══════════════════════════════════════════
   - stage: SecurityScan
     displayName: '5 - Security Scan Trivy'
     dependsOn: DockerBuild
@@ -632,30 +533,21 @@ stages:
       - job: TrivyScan
         displayName: 'Trivy Vulnerability Scan'
         steps:
-          #  Récupérer le code pour avoir accès aux images
           - checkout: self
             displayName: 'Checkout code'
-
-          # Vérifier que les images existent
           - script: |
               echo "=== IMAGES DISPONIBLES ==="
               docker images | grep ecommerce
             displayName: 'Check Docker images'
-
-          # Installation de Trivy
           - script: |
               echo "=== INSTALLATION TRIVY ==="
               curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
               trivy --version
             displayName: 'Install Trivy'
-
-          # Scan Backend
           - script: |
               echo "=== SCAN BACKEND ==="
               sudo trivy image --severity HIGH,CRITICAL --format table maramhassen/ecommerce-backend:$(IMAGE_TAG) || true
             displayName: 'Trivy Scan (Backend)'
-
-          # Scan Frontend
           - script: |
               echo "=== SCAN FRONTEND ==="
               sudo trivy image --severity HIGH,CRITICAL --format table maramhassen/ecommerce-frontend:$(IMAGE_TAG) || true
@@ -677,31 +569,24 @@ stages:
                 $(NEXUS_REGISTRY) \
                 -u $(NEXUS_USERNAME) \
                 --password-stdin
-              
               echo "=== LOGIN TO DOCKER HUB ==="
               echo $(DOCKER_PASSWORD) | docker login \
                 -u $(DOCKER_USERNAME) \
                 --password-stdin
-              
               echo "=== PUSH BACKEND TO NEXUS ==="
               docker tag $(BACKEND_IMAGE):$(IMAGE_TAG) \
                 $(NEXUS_REGISTRY)/ecommerce-backend:$(IMAGE_TAG)
               docker push $(NEXUS_REGISTRY)/ecommerce-backend:$(IMAGE_TAG)
-              
               echo "=== PUSH FRONTEND TO NEXUS ==="
               docker tag $(FRONTEND_IMAGE):$(IMAGE_TAG) \
                 $(NEXUS_REGISTRY)/ecommerce-frontend:$(IMAGE_TAG)
               docker push $(NEXUS_REGISTRY)/ecommerce-frontend:$(IMAGE_TAG)
-              
               echo "=== PUSH BACKEND TO DOCKER HUB ==="
               docker push $(BACKEND_IMAGE):$(IMAGE_TAG)
-              
               echo "=== PUSH FRONTEND TO DOCKER HUB ==="
               docker push $(FRONTEND_IMAGE):$(IMAGE_TAG)
-              
               docker logout $(NEXUS_REGISTRY)
               docker logout
-              
               echo "✅ Images poussées vers Nexus et Docker Hub"
             displayName: 'Push to both registries'
 
@@ -720,36 +605,29 @@ stages:
             deploy:
               steps:
                 - checkout: none
-
                 - script: |
                     export KUBECONFIG=/home/adminuser/k8s-output/kubeconfig/kubeconfig.dc2.json
-                    
                     echo "=== VÉRIFICATION CONNEXION ==="
                     kubectl get nodes
-                    
                     echo "=== MISE À JOUR DES IMAGES (Docker Hub) ==="
                     kubectl set image deployment/backend \
                       backend=$(BACKEND_IMAGE):$(IMAGE_TAG) \
                       -n $(K8S_NAMESPACE)
-                    
                     kubectl set image deployment/frontend \
                       frontend=$(FRONTEND_IMAGE):$(IMAGE_TAG) \
                       -n $(K8S_NAMESPACE)
-                    
                     echo "=== ATTENTE DU DÉPLOIEMENT ==="
                     kubectl rollout status deployment/backend \
                       -n $(K8S_NAMESPACE) --timeout=5m
-                    
                     kubectl rollout status deployment/frontend \
                       -n $(K8S_NAMESPACE) --timeout=5m
-                    
                     echo "=== VÉRIFICATION FINALE ==="
                     kubectl get pods -n $(K8S_NAMESPACE)
                     kubectl get svc -n $(K8S_NAMESPACE)
-                    
                     echo "✅ Déploiement réussi !"
                     echo "🌐 Application: http://102.141.206.178"
                   displayName: 'kubectl Deploy'
+
   # ══════════════════════════════════════════
   # STAGE 10 : VÉRIFICATION MONITORING
   # ══════════════════════════════════════════
