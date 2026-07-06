@@ -141,9 +141,10 @@ stages:
                 https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
                 backend-code
               cd backend-code
-              mvn clean test
-              echo "✅ Tests backend exécutés"
-            displayName: 'Maven Test'
+              mvn clean verify
+              echo "✅ Tests + couverture backend exécutés"
+              ls -la target/site/jacoco/
+            displayName: 'Maven Verify (Tests + Coverage)'
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'JUnit'
@@ -152,11 +153,9 @@ stages:
               testRunTitle: 'Backend Unit Tests'
             displayName: 'Publier les résultats des tests backend'
             condition: succeededOrFailed()
-          - task: PublishCodeCoverageResults@1
+          - task: PublishCodeCoverageResults@2
             inputs:
-              codeCoverageTool: 'JaCoCo'
               summaryFileLocation: 'backend-code/target/site/jacoco/jacoco.xml'
-              reportDirectory: 'backend-code/target/site/jacoco'
             displayName: 'Publier la couverture de code backend'
             condition: succeededOrFailed()
 
@@ -520,7 +519,7 @@ stages:
                 https://$(GITHUB_TOKEN)@github.com/maramhassen/e-commerce.git \
                 backend-code
               cd backend-code
-              mvn clean test
+              mvn clean verify
               echo "✅ Tests + couverture JaCoCo générés"
               ls -la target/site/jacoco/
               mvn sonar:sonar \
