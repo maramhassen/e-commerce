@@ -601,6 +601,7 @@ stages:
               mvn sonar:sonar \
                 -Dsonar.host.url=$(SONAR_HOST_URL) \
                 -Dsonar.login=$(SONAR_TOKEN)
+                -Dsonar.projectKey=ecommerce-backend
               
               echo "✅ SonarQube backend terminé"
             displayName: 'SonarQube Backend Analysis'
@@ -693,6 +694,9 @@ stages:
               echo ""
               echo "=== ANALYSE SONARQUBE ==="
               npx sonar-scanner
+                -Dsonar.host.url=$(SONAR_HOST_URL) \
+                -Dsonar.login=$(SONAR_TOKEN) \
+                -Dsonar.token=$(SONAR_TOKEN)
               
               echo "✅ SonarQube frontend terminé"
             displayName: 'SonarQube Frontend Analysis'
