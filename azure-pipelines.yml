@@ -34,6 +34,43 @@ stages:
   # ══════════════════════════════════════════
   # STAGE 0 : VÉRIFICATION DU COMMIT
   # ══════════════════════════════════════════
+
+  #  NETTOYAGE DE L'AGENT
+
+  - stage: Cleanup
+    displayName: '0 - Nettoyage de l espace disque'
+    jobs:
+      - job: CleanAgent
+        displayName: 'Liberer de l espace sur l agent'
+        steps:
+          - checkout: none
+
+          - script: |
+              echo "=== ESPACE DISQUE AVANT NETTOYAGE ==="
+              df -h /
+
+              echo "=== NETTOYAGE DOCKER ==="
+              docker image prune -af
+              docker container prune -f
+              docker builder prune -af
+
+              echo "=== NETTOYAGE APT ==="
+              sudo apt-get clean
+              sudo apt-get autoremove -y
+
+              echo "=== NETTOYAGE FICHIERS TEMPORAIRES ==="
+              sudo rm -rf /tmp/*
+              sudo rm -rf /var/tmp/*
+
+              echo "=== NETTOYAGE CACHE NPM ==="
+              npm cache clean --force || true
+
+              echo "=== NETTOYAGE DES ANCIENS CLONES ==="
+              rm -rf backend-code frontend-code
+
+              echo "=== ESPACE DISQUE APRES NETTOYAGE ==="
+              df -h /
+            displayName: 'Nettoyer Docker, apt, npm, tmp'
   - stage: CheckCommit
     displayName: '0 - Vérification du message de commit'
     jobs:
