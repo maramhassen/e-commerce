@@ -260,7 +260,7 @@ stages:
 
           - task: UseNode@1
             inputs:
-              version: '20.x'
+              version: '20.x'  
             displayName: 'Install Node.js 20'
 
           # ✅ Installation de Chrome avec correction dpkg
@@ -649,7 +649,7 @@ stages:
 
           - task: UseNode@1
             inputs:
-              version: '20.x'  # ⭐ Passer à Node 20 pour éviter les warnings
+              version: '20.x'
             displayName: 'Install Node.js 20'
 
           - script: |
@@ -662,13 +662,21 @@ stages:
 
               echo "=== INSTALLATION DES DÉPENDANCES ==="
               npm ci
+              echo ""
+               echo "=== NETTOYAGE PROFILS CHROME ZOMBIES ==="
+               pkill -9 -f chromium-browser || true
+               pkill -9 -f chrome || true
+               rm -rf /tmp/chrome-user-data-* || true
+               rm -rf /tmp/.org.chromium.* || true
+               rm -rf /tmp/.com.google.Chrome* || true
+               export HOME=/home/adminuser
 
               echo ""
               echo "=== GÉNÉRATION DE LA COUVERTURE ==="
               export CHROME_BIN=/usr/bin/chromium-browser
               export NODE_OPTIONS="--max-old-space-size=512"
 
-              # ⭐ SUPPRIMER max-workers qui cause une erreur
+              
               npx ng test \
                 --watch=false \
                 --browsers=ChromeHeadless \
