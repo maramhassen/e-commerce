@@ -185,6 +185,7 @@ describe('ProductFormComponent', () => {
   }));
 
   it('should navigate back on cancel', () => {
+    spyOn(window, 'confirm').and.returnValue(true);
     component.onCancel();
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/products']);
   });
