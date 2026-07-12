@@ -631,7 +631,7 @@ stages:
               # ⭐ Le fichier sonar-project.properties est automatiquement détecté
               mvn sonar:sonar \
                 -Dsonar.host.url=$(SONAR_HOST_URL) \
-                -Dsonar.login=$(SONAR_TOKEN)\ 
+                -Dsonar.login=$(SONAR_TOKEN)\
                 -Dsonar.projectKey=ecommerce-backend\
                 -Dsonar.projectName="E-commerce Backend" \
                 -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
