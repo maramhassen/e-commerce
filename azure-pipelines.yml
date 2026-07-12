@@ -638,6 +638,7 @@ stages:
                 -Dsonar.java.binaries=target/classes
               
               
+              
               echo "✅ SonarQube backend terminé"
             displayName: 'SonarQube Backend Analysis'
             env:
