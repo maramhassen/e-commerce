@@ -637,6 +637,7 @@ stages:
                 -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
                 -Dsonar.java.binaries=target/classes
               
+              
               echo "✅ SonarQube backend terminé"
             displayName: 'SonarQube Backend Analysis'
             env:
